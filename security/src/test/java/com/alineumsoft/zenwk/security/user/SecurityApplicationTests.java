@@ -1,4 +1,4 @@
-package com.zenWkZen.security.user;
+package com.alineumsoft.zenwk.security.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

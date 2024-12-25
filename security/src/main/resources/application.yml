@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: SecurityUser
+  jpa:
+    #hibernate.ddl-auto: "create-drop"
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+app:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/zenwk
+    username: calegria
+    password: calegria123
+    configuration:
+      maximum-pool-size: 30
