@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.user.entity.User;
+import com.alineumsoft.zenwk.security.user.model.User;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 
 @RestController

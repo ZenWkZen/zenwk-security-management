@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.entity;
+package com.alineumsoft.zenwk.security.user.model;
 
 import java.time.LocalDateTime;
 
@@ -41,7 +41,7 @@ public class User {
 	private String username;
 
 	@Column(name = "estado")
-	private Boolean estado;
+	private String estado;
 
 	@JsonIgnore
 	@Column(name = "password")

@@ -5,7 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import com.alineumsoft.zenwk.security.user.entity.User;
+import com.alineumsoft.zenwk.security.user.model.User;
 
 public interface UserRepository extends CrudRepository<User, Long>, PagingAndSortingRepository<User, Long> {
 	/**

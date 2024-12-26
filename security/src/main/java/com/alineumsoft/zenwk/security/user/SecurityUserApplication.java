@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 
 @SpringBootApplication
 @Configuration
-public class SecurityApplication {
+public class SecurityUserApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SecurityApplication.class, args);
+		SpringApplication.run(SecurityUserApplication.class, args);
 	}
 
 	@Bean

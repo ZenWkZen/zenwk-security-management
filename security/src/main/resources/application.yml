@@ -9,6 +9,7 @@ spring:
 app:
   datasource:
     jdbc-url: jdbc:postgresql://localhost:5432/zenwk
+		driver-class-name: org.postgresql.Driver
     username: calegria
     password: calegria123
     configuration:
