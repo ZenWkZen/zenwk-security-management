@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.alineumsoft.zenwk.security.user.dto.UserInDTO;
 import com.alineumsoft.zenwk.security.user.model.User;
-import com.alineumsoft.zenwk.security.user.repository.UserRepository;
+import com.alineumsoft.zenwk.security.user.service.UserService;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
-	private final UserRepository userRepository;
+	private final UserService userService;
 
 	/**
 	 * <p>
@@ -26,8 +27,8 @@ public class UserController {
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userRepository
 	 */
-	public UserController(UserRepository userRepository) {
-		this.userRepository = userRepository;
+	public UserController(UserService userService) {
+		this.userService = userService;
 	}
 
 	/**
@@ -36,17 +37,16 @@ public class UserController {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userRequest
+	 * @param userInDTO
 	 * @param uriCB
 	 * @param principal
 	 * @return
 	 */
 	@PostMapping
-	public ResponseEntity<Void> createUser(@RequestBody User userRequest, UriComponentsBuilder uriCB,
+	public ResponseEntity<Void> createUser(@RequestBody UserInDTO userInDTO, UriComponentsBuilder uriCB,
 			Principal principal) {
-		// Crear metodo validacion
-		User savedUser = userRepository.save(userRequest);
-		URI location = uriCB.path("user/{idUser}").buildAndExpand(savedUser.getIdUsuario()).toUri();
+		Long idUser = userService.createNewUser(userInDTO);
+		URI location = uriCB.path("user/{idUser}").buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
 	}
 

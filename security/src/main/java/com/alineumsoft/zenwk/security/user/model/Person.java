@@ -17,45 +17,42 @@ import lombok.Data;
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
+ * @class UserState
  */
 @Entity
-@Table(name = "seg_user")
+@Table(name = "per_person")
 @Data
-public class User {
+public class Person {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "seguseiduser")
-	private Long idUsuario;
+	@Column(name = "perperidperson")
+	private Long idPerson;
 
-	@Column(name = "seguseusername")
-	private String username;
+	@Column(name = "perperusuname")
+	private String name;
 
-	@Column(name = "segusepassword")
-	private String password;
+	@Column(name = "perperfirstsurname")
+	private String firstSurname;
 
-	@Column(name = "segusecreationdate")
+	@Column(name = "perperemail")
+	private String email;
+
+	@Column(name = "perpercreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "segusemodificationdate")
+	@Column(name = "perpermodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "seguseusercreation")
+	@Column(name = "perperusercreation")
 	private String UserCreation;
 
-	@Column(name = "seguseusermodification")
+	@Column(name = "perperusermodification")
 	private String UserModification;
-
-	@ManyToOne
-	@JoinColumn(name = "perperstateid")
-	private UserState userEstate;
-
-	@ManyToOne
-	@JoinColumn(name = "perperidperson")
-	private Person person;
 
 	/**
 	 * <p>
 	 * <b> Util </b> Asigna la fecha actual
+	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 */
@@ -77,18 +74,4 @@ public class User {
 		this.modificationDate = LocalDateTime.now();
 	}
 
-	/**
-	 * <p>
-	 * <b> CU0001_Seguridad_Creación_Usuario </b> Encriptacion de la constraeña a
-	 * ser persistida
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param rawPassword
-	 * @return
-	 */
-//	public String encryptPassword(String rawPassword) {
-//		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//		return passwordEncoder.encode(rawPassword);
-//	}
 }
