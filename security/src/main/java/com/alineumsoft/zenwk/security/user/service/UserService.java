@@ -1,9 +1,7 @@
 package com.alineumsoft.zenwk.security.user.service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +14,14 @@ import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
 
+/**
+ * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+ * @project SecurityUser
+ * @class UserService
+ */
 @Service
 public class UserService {
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+//	private JdbcTemplate jdbcTemplate;
 
 	private final UserRepository userRepository;
 
@@ -42,6 +44,7 @@ public class UserService {
 		this.userRepository = userRepository;
 		this.personRepository = personRepository;
 		this.UserStateRepository = UserStateRepository;
+//		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	/**
@@ -90,9 +93,6 @@ public class UserService {
 	 */
 	private User createUser(UserInDTO userInDTO, Person person) {
 		User user = new User();
-
-		System.out.print("jafñjfa0000000000========" + UserStateEnum.ENABLE.getDescription());
-
 		// Crear enun con los estados
 		UserState userState = UserStateRepository.findAll().stream()
 				.filter(state -> UserStateEnum.ENABLE.equals(state.getNameState())).collect(Collectors.toList()).get(0);
@@ -113,14 +113,14 @@ public class UserService {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param jdbcTemplate
 	 */
-	public void printTableNames() {
-		String sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
-		List<String> tableNames = jdbcTemplate.queryForList(sql, String.class);
-
-		System.out.println("Tablas en la base de datos:");
-		for (String tableName : tableNames) {
-			System.out.println(tableName);
-		}
-	}
+//	public void printTableNames() {
+//		String sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
+//		List<String> tableNames = jdbcTemplate.queryForList(sql, String.class);
+//
+//		System.out.println("Tablas en la base de datos:");
+//		for (String tableName : tableNames) {
+//			System.out.println(tableName);
+//		}
+//	}
 
 }

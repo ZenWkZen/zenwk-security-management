@@ -9,16 +9,18 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
+import com.alineumsoft.zenwk.security.user.constants.ConfigConstants;
+
 @Configuration
 public class MessageSourceConfig {
-	
+
 	@Value("${app.default.locale:es}")
 	private String dafaultLocale;
-	
+
 	@Bean
 	public ReloadableResourceBundleMessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-		messageSource.setBasename("classpath:i18n/messages");
+		messageSource.setBasename(ConfigConstants.CLASSPATH_LANG);
 		messageSource.setDefaultEncoding("UTF-8");
 		messageSource.setCacheSeconds(3600);
 		return messageSource;
