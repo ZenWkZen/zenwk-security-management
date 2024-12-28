@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.alineumsoft.zenwk.security.user.dto.UserInDTO;
+import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.user.model.Person;
 import com.alineumsoft.zenwk.security.user.model.User;
 import com.alineumsoft.zenwk.security.user.model.UserState;
@@ -89,10 +90,12 @@ public class UserService {
 	 */
 	private User createUser(UserInDTO userInDTO, Person person) {
 		User user = new User();
-		
+
+		System.out.print("jafñjfa0000000000========" + UserStateEnum.ENABLE.getDescription());
+
 		// Crear enun con los estados
 		UserState userState = UserStateRepository.findAll().stream()
-				.filter(state -> state.getNameState().equals("ENABLE")).collect(Collectors.toList()).get(0);
+				.filter(state -> UserStateEnum.ENABLE.equals(state.getNameState())).collect(Collectors.toList()).get(0);
 
 		user.setUsername(userInDTO.getUsername());
 		user.setPassword(userInDTO.getPassword());

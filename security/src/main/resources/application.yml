@@ -6,6 +6,9 @@ logging:
 spring:
   application:
     name: SecurityUser
+  messages:
+    basename: i18n/
+    fallback-to-system-locale: false
   jpa:
     #hibernate.ddl-auto: "create-drop"
     hibernate:
@@ -21,6 +24,8 @@ spring:
             format_sql: true
             show_sql: true
 app:
+  default:
+    locale: es
   datasource:
     hikari:
       jdbc-url: jdbc:postgresql://localhost:5432/zenwk

@@ -2,8 +2,12 @@ package com.alineumsoft.zenwk.security.user.model;
 
 import java.time.LocalDateTime;
 
+import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,18 +22,19 @@ import lombok.Data;
 @Entity
 @Table(name = "seg_user_state")
 @Data
-public class UserState  {
+public class UserState {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "segusustateid")
 	private Long stateId;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "segusunamestate")
-	private String nameState;
+	private UserStateEnum nameState;
 
 	@Column(name = "segusudescriptionstate")
 	private String descriptionState;
-	
+
 	@Column(name = "segusucreationDate")
 	private LocalDateTime creationDate;
 
