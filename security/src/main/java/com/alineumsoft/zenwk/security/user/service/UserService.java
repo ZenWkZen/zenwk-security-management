@@ -1,11 +1,12 @@
 package com.alineumsoft.zenwk.security.user.service;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.alineumsoft.zenwk.security.user.dto.UserInDTO;
+import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
 import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.user.model.Person;
 import com.alineumsoft.zenwk.security.user.model.User;
@@ -60,7 +61,22 @@ public class UserService {
 	public Long createNewUser(UserInDTO userInDTO) {
 		Person person = createPerson(userInDTO);
 		User user = createUser(userInDTO, person);
-		return user.getIdUsuario();
+		return user.getIdUser();
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_XX </b> Recuperacion de usuario sin seguridad
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @return
+	 */
+	public UserOutDTO finByIdUser(Long idUser) {
+		User user = userRepository.findById(idUser).orElse(null);
+		return user.getUserOutDTO();
+
 	}
 
 	/**
@@ -75,7 +91,7 @@ public class UserService {
 	private Person createPerson(UserInDTO userInDTO) {
 		Person person = new Person();
 		person.setName(userInDTO.getPersonDTO().getName());
-		person.setFirstSurname(userInDTO.getPersonDTO().getFirstSurname());
+		person.setFirstUsurname(userInDTO.getPersonDTO().getFirstUsurname());
 		person.setEmail(userInDTO.getPersonDTO().getEmail());
 		person.setUserCreation(userInDTO.getUsername());
 		return personRepository.save(person);
@@ -100,7 +116,7 @@ public class UserService {
 		user.setUsername(userInDTO.getUsername());
 		user.setPassword(userInDTO.getPassword());
 		user.setUserCreation(userInDTO.getUsername());
-		user.setUserEstate(userState);
+		user.setUserState(userState);
 		user.setPerson(person);
 		return userRepository.save(user);
 	}

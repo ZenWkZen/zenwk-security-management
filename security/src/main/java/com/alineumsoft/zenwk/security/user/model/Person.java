@@ -32,7 +32,7 @@ public class Person {
 	private String name;
 
 	@Column(name = "perperfirstsurname")
-	private String firstSurname;
+	private String firstUsurname;
 
 	@Column(name = "perperemail")
 	private String email;

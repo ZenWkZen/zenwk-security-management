@@ -18,7 +18,7 @@ public class PersonDTO implements Serializable {
 
 	private String name;
 
-	private String firstSurname;
+	private String firstUsurname;
 
 	private String email;
 }

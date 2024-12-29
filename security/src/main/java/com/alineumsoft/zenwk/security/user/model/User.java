@@ -2,6 +2,9 @@ package com.alineumsoft.zenwk.security.user.model;
 
 import java.time.LocalDateTime;
 
+import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
+import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,7 +28,7 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "seguseiduser")
-	private Long idUsuario;
+	private Long idUser;
 
 	@Column(name = "seguseusername")
 	private String username;
@@ -47,11 +50,31 @@ public class User {
 
 	@ManyToOne
 	@JoinColumn(name = "perperstateid")
-	private UserState userEstate;
+	private UserState userState;
 
 	@ManyToOne
 	@JoinColumn(name = "perperidperson")
 	private Person person;
+
+	/**
+	 * <p>
+	 * <b> CU001_XX </b> Genera el DTO de salida
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @return
+	 */
+	public UserOutDTO getUserOutDTO() {
+		UserOutDTO userOutDTO = new UserOutDTO();
+		PersonDTO personDTO = new PersonDTO();
+		personDTO.setEmail(person.getEmail());
+		personDTO.setFirstUsurname(person.getFirstUsurname());
+		personDTO.setName(person.getName());
+		userOutDTO.setUsername(username);
+		userOutDTO.setState(userState.getNameState().name());
+		userOutDTO.setPersonDTO(personDTO);
+		return userOutDTO;
+	}
 
 	/**
 	 * <p>

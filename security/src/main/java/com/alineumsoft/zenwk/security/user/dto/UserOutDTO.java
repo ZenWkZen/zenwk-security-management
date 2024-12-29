@@ -12,12 +12,12 @@ import lombok.Data;
  * @class userOutDTO
  */
 @Data
-public class userOutDTO implements Serializable{
+public class UserOutDTO implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private String username;
 	
-	private PersonDTO personDTO;
+	private String state;
 	
-	private UserState userState;
+	private PersonDTO personDTO;
 }

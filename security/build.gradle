@@ -44,6 +44,9 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs += "-parameters" // Para habilitar la inclusión de parámetros de método en la compilación
+}
 
 test {
  testLogging {
