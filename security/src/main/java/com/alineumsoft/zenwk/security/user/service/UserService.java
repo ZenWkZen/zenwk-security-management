@@ -22,7 +22,7 @@ import com.alineumsoft.zenwk.security.user.model.UserState;
 import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
-import com.alineumsoft.zenwk.security.user.service.util.ObjectUpdater;
+import com.alineumsoft.zenwk.security.user.util.service.ObjectUpdater;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>

@@ -1,11 +1,11 @@
-package com.alineumsoft.zenwk.security.user.service.util;
+package com.alineumsoft.zenwk.security.user.util.service;
 
 import java.lang.reflect.Field;
 
 import org.springframework.stereotype.Service;
 
 import com.alineumsoft.zenwk.security.user.messages.enums.MessageKeyEnum;
-import com.alineumsoft.zenwk.security.user.service.messages.MessageService;
+import com.alineumsoft.zenwk.security.user.messages.service.MessageService;
 
 import lombok.Data;
 

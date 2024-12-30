@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.service.messages;
+package com.alineumsoft.zenwk.security.user.messages.service;
 
 import java.util.Locale;
 
@@ -19,7 +19,7 @@ public class MessageService {
 
 	/**
 	 * <p>
-	 * <b> CU001_XX </b> XXX
+	 * <b> CU001_Seguridad_Creación_Usuario </b> XXX
 	 * </p>
 	 * 
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -31,7 +31,7 @@ public class MessageService {
 
 	/**
 	 * <p>
-	 * <b> CU001_XX </b> Obtiene un mensaje formateado basado en una clave de
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene un mensaje formateado basado en una clave de
 	 * mensaje y parámetros opcionales.
 	 * </p>
 	 * 
@@ -47,7 +47,7 @@ public class MessageService {
 
 	/**
 	 * <p>
-	 * <b> CU001_XX </b> Obtiene un mensaje formateado basado en una clave de
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene un mensaje formateado basado en una clave de
 	 * mensaje (sin param).
 	 * </p>
 	 * 
