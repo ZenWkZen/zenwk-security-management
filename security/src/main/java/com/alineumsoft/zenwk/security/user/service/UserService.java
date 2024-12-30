@@ -1,12 +1,20 @@
 package com.alineumsoft.zenwk.security.user.service;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.alineumsoft.zenwk.security.user.dto.UserInDTO;
+import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
+import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
+import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
+import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
+import com.alineumsoft.zenwk.security.user.enums.UserEnum;
 import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.user.model.Person;
 import com.alineumsoft.zenwk.security.user.model.User;
@@ -14,6 +22,7 @@ import com.alineumsoft.zenwk.security.user.model.UserState;
 import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
+import com.alineumsoft.zenwk.security.user.service.util.ObjectUpdater;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -22,13 +31,13 @@ import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
  */
 @Service
 public class UserService {
-//	private JdbcTemplate jdbcTemplate;
-
 	private final UserRepository userRepository;
 
 	private final PersonRepository personRepository;
 
 	private final UserStateRepository UserStateRepository;
+
+	private final ObjectUpdater objectUpdater;
 
 	/**
 	 * <p>
@@ -41,24 +50,24 @@ public class UserService {
 	 * @param UserStateRepository
 	 */
 	public UserService(UserRepository userRepository, PersonRepository personRepository,
-			UserStateRepository UserStateRepository) {
+			UserStateRepository UserStateRepository, ObjectUpdater objectUpdater) {
 		this.userRepository = userRepository;
 		this.personRepository = personRepository;
 		this.UserStateRepository = UserStateRepository;
-//		this.jdbcTemplate = jdbcTemplate;
+		this.objectUpdater = objectUpdater;
 	}
 
 	/**
 	 * 
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> XXX
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Cracion/modificacion nuevo usuario
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userInDTO
 	 * @return
 	 */
-	public Long createNewUser(UserInDTO userInDTO) {
+	public Long createNewUser(CreateUserInDTO userInDTO) {
 		Person person = createPerson(userInDTO);
 		User user = createUser(userInDTO, person);
 		return user.getIdUser();
@@ -66,17 +75,107 @@ public class UserService {
 
 	/**
 	 * <p>
-	 * <b> CU001_XX </b> Recuperacion de usuario sin seguridad
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Actualizacion general de usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param userInDTO
+	 * @param userOutDTO
+	 */
+	public boolean updateUser(Long idUser, ModUserInDTO modUserInDTO) {
+		User user = userRepository.findById(idUser).orElse(null);
+		if (user == null) {
+			return false;
+		}
+
+		updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
+
+		Person person = user.getPerson();
+		objectUpdater.updateDataObject(getPerson(modUserInDTO.getPerson()), person);
+		user.setPerson(person);
+		user.setUserModification(user.getUsername());
+		userRepository.save(user);
+
+		return true;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Actualizacion de credenciales de
+	 * acceso
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param user
+	 * @param username
+	 * @param password
+	 */
+	private void updateLoguin(User user, String username, String password) {
+		if (username != null && !username.equals(user.getUsername())) {
+			user.setUsername(username);
+		}
+		if (password != null && !password.equals(user.getPassword())) {
+			user.setPassword(password);
+		}
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Se realiza un borrado fisico del
+	 * usuario
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @return
 	 */
-	public UserOutDTO finByIdUser(Long idUser) {
+	public boolean deleteUser(Long idUser) {
+		if (userRepository.existsById(idUser)) {
+			userRepository.deleteById(idUser);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Recuperacion de usuario sin
+	 * seguridad
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @return
+	 */
+	public UserOutDTO findByIdUser(Long idUser) {
 		User user = userRepository.findById(idUser).orElse(null);
 		return user.getUserOutDTO();
 
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Recuperación de todos los usuarios
+	 * paginados, esto solo debe ser accedido por rol admin
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param pageable
+	 * @return
+	 */
+	public PageUserDTO findAll(Pageable pageable) {
+		// Conteo paginacion en 1
+		int pageNumber = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
+		// Consulta paginada
+		Page<User> pageUser = userRepository.findAll(PageRequest.of(pageNumber, pageable.getPageSize(),
+				pageable.getSortOr(Sort.by(Sort.Direction.ASC, UserEnum.PERSON_FIRST_NAME.getMessageKey())
+						.and(Sort.by(Sort.Direction.ASC, UserEnum.PERSON_NAME.getMessageKey())))));
+		// Lista de usuario
+		List<UserOutDTO> listUser = pageUser.stream().map(User::getUserOutDTO).collect(Collectors.toList());
+
+		return new PageUserDTO(listUser, pageUser.getTotalElements(), pageUser.getTotalPages(),
+				pageUser.getNumber() + 1);
 	}
 
 	/**
@@ -88,13 +187,28 @@ public class UserService {
 	 * @param userInDTO
 	 * @return
 	 */
-	private Person createPerson(UserInDTO userInDTO) {
-		Person person = new Person();
-		person.setName(userInDTO.getPersonDTO().getName());
-		person.setFirstUsurname(userInDTO.getPersonDTO().getFirstUsurname());
-		person.setEmail(userInDTO.getPersonDTO().getEmail());
+	private Person createPerson(CreateUserInDTO userInDTO) {
+		Person person = getPerson(userInDTO.getPerson());
 		person.setUserCreation(userInDTO.getUsername());
-		return personRepository.save(person);
+		personRepository.save(person);
+		return person;
+	}
+
+	/**
+	 * <p>
+	 * <b> Util </b> genera una nueva instancia de persona
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param userInDTO
+	 * @return
+	 */
+	private Person getPerson(PersonDTO personDTO) {
+		Person person = new Person();
+		person.setName(personDTO.getName());
+		person.setFirstUsurname(personDTO.getFirstUsurname());
+		person.setEmail(personDTO.getEmail());
+		return person;
 	}
 
 	/**
@@ -107,7 +221,7 @@ public class UserService {
 	 * @param person
 	 * @return
 	 */
-	private User createUser(UserInDTO userInDTO, Person person) {
+	private User createUser(CreateUserInDTO userInDTO, Person person) {
 		User user = new User();
 		// Crear enun con los estados
 		UserState userState = UserStateRepository.findAll().stream()
@@ -120,23 +234,5 @@ public class UserService {
 		user.setPerson(person);
 		return userRepository.save(user);
 	}
-
-	/**
-	 * <p>
-	 * <b> Util </b> imprime las tabals del esquema
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param jdbcTemplate
-	 */
-//	public void printTableNames() {
-//		String sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
-//		List<String> tableNames = jdbcTemplate.queryForList(sql, String.class);
-//
-//		System.out.println("Tablas en la base de datos:");
-//		for (String tableName : tableNames) {
-//			System.out.println(tableName);
-//		}
-//	}
 
 }

@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.messages.service;
+package com.alineumsoft.zenwk.security.user.service.messages;
 
 import java.util.Locale;
 

@@ -1,25 +1,29 @@
 package com.alineumsoft.zenwk.security.user.dto;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
- * @class userOutDTO
+ * @class ResponseUser
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class UserOutDTO implements Serializable{
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class PageUserDTO implements Serializable{
 	private static final long serialVersionUID = 1L;
+
+	private List<UserOutDTO> users;
 	
-	private String username;
-	
-	private String state;
-	
-	private PersonDTO person;
+	private long totalElements;
+
+	private int totalPages;
+
+	private int currentPage;
 }

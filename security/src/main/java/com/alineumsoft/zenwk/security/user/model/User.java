@@ -72,7 +72,7 @@ public class User {
 		personDTO.setName(person.getName());
 		userOutDTO.setUsername(username);
 		userOutDTO.setState(userState.getNameState().name());
-		userOutDTO.setPersonDTO(personDTO);
+		userOutDTO.setPerson(personDTO);
 		return userOutDTO;
 	}
 

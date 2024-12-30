@@ -13,16 +13,14 @@ import lombok.Data;
  */
 
 @Data
-public class UserInDTO implements Serializable {
+public class CreateUserInDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String username;
 
 	private String password;
 	
-	private PersonDTO personDTO;
+	private PersonDTO person;
 	
-	private UserState userState;
-
-
+	private UserState state;
 }

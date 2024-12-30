@@ -28,10 +28,10 @@ public class Person {
 	@Column(name = "perperidperson")
 	private Long idPerson;
 
-	@Column(name = "perperusuname")
+	@Column(name = "perpername")
 	private String name;
 
-	@Column(name = "perperfirstsurname")
+	@Column(name = "perperfirstusurname")
 	private String firstUsurname;
 
 	@Column(name = "perperemail")

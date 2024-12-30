@@ -8,8 +8,8 @@ import com.alineumsoft.zenwk.security.user.config.MessageSourceAccessor;
  * @class UserStateEnum
  */
 public enum UserStateEnum {
-	ENABLE("userState.enable"), 
-	DISABLE("userState.disabled");
+	ENABLE("user.state.enable"), 
+	DISABLE("user.state.disabled");
 
 	private final String messageKey;
 

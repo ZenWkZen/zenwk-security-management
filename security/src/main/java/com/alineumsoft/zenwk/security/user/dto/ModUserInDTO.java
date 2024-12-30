@@ -2,9 +2,7 @@ package com.alineumsoft.zenwk.security.user.dto;
 
 import java.io.Serializable;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -12,14 +10,12 @@ import lombok.NoArgsConstructor;
  * @class userOutDTO
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserOutDTO implements Serializable{
+public class ModUserInDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	private String username;
-	
-	private String state;
-	
+
+	private String password;
+
 	private PersonDTO person;
 }

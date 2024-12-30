@@ -7,7 +7,9 @@ package com.alineumsoft.zenwk.security.user.messages.enums;
  */
 public enum MessageKeyEnum {
 	USER_CREATION_EXIT("user.creation.exit"),
-	USER_CREATION_ERROR("user.creation.error");
+	USER_CREATION_ERROR("user.creation.error"),
+	DATA_UPDATE_NULL("util.data.error.update.null"),
+	DATA_UPDATE_FAILED("util.data.error.udpate.failed");
 
 	private final String key;
 
