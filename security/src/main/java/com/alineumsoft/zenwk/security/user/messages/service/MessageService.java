@@ -19,7 +19,7 @@ public class MessageService {
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> XXX
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Constructor
 	 * </p>
 	 * 
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -31,8 +31,8 @@ public class MessageService {
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene un mensaje formateado basado en una clave de
-	 * mensaje y parámetros opcionales.
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene un mensaje formateado
+	 * basado en una clave de mensaje y parámetros opcionales.
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -47,8 +47,8 @@ public class MessageService {
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene un mensaje formateado basado en una clave de
-	 * mensaje (sin param).
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene un mensaje formateado
+	 * basado en una clave de mensaje (sin param).
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
