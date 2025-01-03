@@ -2,7 +2,7 @@ package com.alineumsoft.zenwk.security.user.entity;
 
 import java.time.LocalDateTime;
 
-import com.alineumsoft.zenwk.security.user.hist.enums.HistoricalEnum;
+import com.alineumsoft.zenwk.security.user.util.hist.enums.HistoricalEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

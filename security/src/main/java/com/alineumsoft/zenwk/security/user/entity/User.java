@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 
 import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
-import com.alineumsoft.zenwk.security.user.hist.enums.HistoricalEnum;
 import com.alineumsoft.zenwk.security.user.service.UserHistService;
 import com.alineumsoft.zenwk.security.user.util.component.AppContextHolderComponent;
+import com.alineumsoft.zenwk.security.user.util.hist.enums.HistoricalEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostUpdate;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -83,9 +84,13 @@ public class User {
 		return userOutDTO;
 	}
 
-	@PostPersist
+	@PrePersist
 	private void create() {
 		this.creationDate = LocalDateTime.now();
+	}
+	
+	@PostPersist
+	private void PosCreate() {
 		registerHistorical(HistoricalEnum.INSERT);
 	}
 

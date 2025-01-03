@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.user.constants.ConfigConstants;
+import com.alineumsoft.zenwk.security.user.constants.ConfigUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
@@ -57,7 +57,7 @@ public class UserController {
 	public ResponseEntity<Void> createUser(@RequestBody CreateUserInDTO userInDTO, UriComponentsBuilder uriCB,
 			Principal principal) {
 		Long idUser = userService.createNewUser(userInDTO);
-		URI location = uriCB.path(ConfigConstants.HEADER_LOCATION).buildAndExpand(idUser).toUri();
+		URI location = uriCB.path(ConfigUserConstants.HEADER_LOCATION).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
 	}
 

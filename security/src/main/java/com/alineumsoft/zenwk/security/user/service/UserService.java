@@ -22,7 +22,7 @@ import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
-import com.alineumsoft.zenwk.security.user.util.service.ObjectUpdaterService;
+import com.alineumsoft.zenwk.security.user.util.ObjectUpdaterUtil;
 
 import jakarta.transaction.Transactional;
 
@@ -39,8 +39,6 @@ public class UserService {
 
 	private final UserStateRepository UserStateRepository;
 
-	private final ObjectUpdaterService objectUpdater;
-
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creación_Usuario </b> Constructor
@@ -52,11 +50,10 @@ public class UserService {
 	 * @param UserStateRepository
 	 */
 	public UserService(UserRepository userRepository, PersonRepository personRepository,
-			UserStateRepository UserStateRepository, ObjectUpdaterService objectUpdater) {
+			UserStateRepository UserStateRepository) {
 		this.userRepository = userRepository;
 		this.personRepository = personRepository;
 		this.UserStateRepository = UserStateRepository;
-		this.objectUpdater = objectUpdater;
 	}
 
 	/**
@@ -94,7 +91,7 @@ public class UserService {
 		updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
 
 		Person person = user.getPerson();
-		objectUpdater.updateDataObject(getPerson(modUserInDTO.getPerson()), person);
+		ObjectUpdaterUtil.updateDataObject(getPerson(modUserInDTO.getPerson()), person);
 		user.setPerson(person);
 		user.setUserModification(user.getUsername());
 		userRepository.save(user);
