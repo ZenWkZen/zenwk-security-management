@@ -1,6 +1,6 @@
 package com.alineumsoft.zenwk.security.user.enums;
 
-import com.alineumsoft.zenwk.security.user.config.MessageSourceAccessor;
+import com.alineumsoft.zenwk.security.user.message.component.MessageSourceAccessorComponent;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -26,7 +26,7 @@ public enum UserEnum {
 	 * @return
 	 */
 	public String getDescription() {
-		return MessageSourceAccessor.getMessage(messageKey);
+		return MessageSourceAccessorComponent.getMessage(messageKey);
 	}
 
 	/**

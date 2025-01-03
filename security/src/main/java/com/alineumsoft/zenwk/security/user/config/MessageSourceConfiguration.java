@@ -12,7 +12,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import com.alineumsoft.zenwk.security.user.constants.ConfigConstants;
 
 @Configuration
-public class MessageSourceConfig {
+public class MessageSourceConfiguration {
 
 	@Value("${app.default.locale:es}")
 	private String dafaultLocale;

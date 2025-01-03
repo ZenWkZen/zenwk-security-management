@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.config;
+package com.alineumsoft.zenwk.security.user.message.component;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
  * @class MessageSourceAccessor
  */
 @Component
-public class MessageSourceAccessor {
+public class MessageSourceAccessorComponent {
 
 	private static MessageSource messageSource;
 
-	public MessageSourceAccessor(MessageSource messageSource) {
-		MessageSourceAccessor.messageSource = messageSource;
+	public MessageSourceAccessorComponent(MessageSource messageSource) {
+		MessageSourceAccessorComponent.messageSource = messageSource;
 	}
 
 	public static String getMessage(String key) {

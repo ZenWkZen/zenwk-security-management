@@ -2,8 +2,8 @@ package com.alineumsoft.zenwk.security.user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.alineumsoft.zenwk.security.user.model.Person;
-import com.alineumsoft.zenwk.security.user.model.User;
+import com.alineumsoft.zenwk.security.user.entity.Person;
+import com.alineumsoft.zenwk.security.user.entity.User;
 
 public interface PersonRepository  extends JpaRepository<Person, Long>{
 	/**

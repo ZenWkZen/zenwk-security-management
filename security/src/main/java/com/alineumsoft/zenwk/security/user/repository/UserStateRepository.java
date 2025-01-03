@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.alineumsoft.zenwk.security.user.model.UserState;
+import com.alineumsoft.zenwk.security.user.entity.UserState;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>

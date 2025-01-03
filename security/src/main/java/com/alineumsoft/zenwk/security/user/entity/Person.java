@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.model;
+package com.alineumsoft.zenwk.security.user.entity;
 
 import java.time.LocalDateTime;
 

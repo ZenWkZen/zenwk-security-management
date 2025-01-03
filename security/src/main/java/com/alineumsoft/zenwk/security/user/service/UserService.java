@@ -14,15 +14,17 @@ import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
+import com.alineumsoft.zenwk.security.user.entity.Person;
+import com.alineumsoft.zenwk.security.user.entity.User;
+import com.alineumsoft.zenwk.security.user.entity.UserState;
 import com.alineumsoft.zenwk.security.user.enums.UserEnum;
 import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
-import com.alineumsoft.zenwk.security.user.model.Person;
-import com.alineumsoft.zenwk.security.user.model.User;
-import com.alineumsoft.zenwk.security.user.model.UserState;
 import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
-import com.alineumsoft.zenwk.security.user.util.service.ObjectUpdater;
+import com.alineumsoft.zenwk.security.user.util.service.ObjectUpdaterService;
+
+import jakarta.transaction.Transactional;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -37,11 +39,11 @@ public class UserService {
 
 	private final UserStateRepository UserStateRepository;
 
-	private final ObjectUpdater objectUpdater;
+	private final ObjectUpdaterService objectUpdater;
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> XXX
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Constructor
 	 * </p>
 	 * 
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -50,7 +52,7 @@ public class UserService {
 	 * @param UserStateRepository
 	 */
 	public UserService(UserRepository userRepository, PersonRepository personRepository,
-			UserStateRepository UserStateRepository, ObjectUpdater objectUpdater) {
+			UserStateRepository UserStateRepository, ObjectUpdaterService objectUpdater) {
 		this.userRepository = userRepository;
 		this.personRepository = personRepository;
 		this.UserStateRepository = UserStateRepository;
@@ -82,6 +84,7 @@ public class UserService {
 	 * @param userInDTO
 	 * @param userOutDTO
 	 */
+	@Transactional
 	public boolean updateUser(Long idUser, ModUserInDTO modUserInDTO) {
 		User user = userRepository.findById(idUser).orElse(null);
 		if (user == null) {

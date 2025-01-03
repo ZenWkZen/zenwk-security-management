@@ -16,14 +16,14 @@ import lombok.Data;
  */
 @Data
 @Service
-public class ObjectUpdater {
+public class ObjectUpdaterService {
 	private final MessageService messageService;
 
 	/**
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param messageService
 	 */
-	public ObjectUpdater(MessageService messageService) {
+	public ObjectUpdaterService(MessageService messageService) {
 		this.messageService = messageService;
 	}
 

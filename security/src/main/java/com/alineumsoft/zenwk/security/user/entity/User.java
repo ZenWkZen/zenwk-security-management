@@ -1,9 +1,12 @@
-package com.alineumsoft.zenwk.security.user.model;
+package com.alineumsoft.zenwk.security.user.entity;
 
 import java.time.LocalDateTime;
 
 import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
+import com.alineumsoft.zenwk.security.user.hist.enums.HistoricalEnum;
+import com.alineumsoft.zenwk.security.user.service.UserHistService;
+import com.alineumsoft.zenwk.security.user.util.component.AppContextHolderComponent;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,18 +15,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  */
+
 @Entity
 @Table(name = "seg_user")
 @Data
+@NoArgsConstructor
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,23 +49,23 @@ public class User {
 	@Column(name = "segusemodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "seguseusercreation")
-	private String UserCreation;
+	@Column(name = "seguseusecreation")
+	private String userCreation;
 
-	@Column(name = "seguseusermodification")
-	private String UserModification;
+	@Column(name = "seguseusemodification")
+	private String userModification;
 
 	@ManyToOne
-	@JoinColumn(name = "perperstateid")
+	@JoinColumn(name = "segusestateid")
 	private UserState userState;
 
 	@ManyToOne
-	@JoinColumn(name = "perperidperson")
+	@JoinColumn(name = "seguseidperson")
 	private Person person;
 
 	/**
 	 * <p>
-	 * <b> CU001_XX </b> Genera el DTO de salida
+	 * <b> CU001_Seguridad_Creación_Usuario </b> DTO de salida
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -76,28 +83,38 @@ public class User {
 		return userOutDTO;
 	}
 
-	/**
-	 * <p>
-	 * <b> Util </b> Asigna la fecha actual
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 */
-	@PrePersist
-	protected void onCreate() {
-		if (this.creationDate == null) {
-			this.creationDate = LocalDateTime.now();
-		}
+	@PostPersist
+	private void create() {
+		this.creationDate = LocalDateTime.now();
+		registerHistorical(HistoricalEnum.INSERT);
+	}
+
+	@PostUpdate
+	private void update() {
+		this.modificationDate = LocalDateTime.now();
+		registerHistorical(HistoricalEnum.UPDATE);
+
+	}
+
+	@PreRemove
+	private void delete() {
+		registerHistorical(HistoricalEnum.DELETE);
 	}
 
 	/**
 	 * <p>
-	 * <b>Actualiza la fecha de modificación</b> cada vez que la entidad se
-	 * modifica.
+	 * <b> Util </b> proceso registro historico
 	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param operation
 	 */
-	@PreUpdate
-	protected void onUpdate() {
-		this.modificationDate = LocalDateTime.now();
+	private void registerHistorical(HistoricalEnum operation) {
+		// Usa un contexto estático de Spring para obtener el servicio
+		UserHistService userHistService = AppContextHolderComponent.getBean(UserHistService.class);
+		if (userHistService != null) {
+			userHistService.saveUserHist(this, operation);
+		}
 	}
 
 	/**
