@@ -22,6 +22,11 @@ import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
 import com.alineumsoft.zenwk.security.user.service.UserService;
 
+/**
+ * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+ * @project SecurityUser
+ * @class UserController
+ */
 @RestController
 @RequestMapping("/user")
 public class UserController {
