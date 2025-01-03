@@ -9,9 +9,16 @@ import org.springframework.context.annotation.Primary;
 
 import com.zaxxer.hikari.HikariDataSource;
 
-
 @Configuration(proxyBeanMethods = false)
 public class DataSourceConfiguration {
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Clase configuracion de datasource
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @return
+	 */
 	@Bean
 	@Primary
 	@ConfigurationProperties("app.datasource")
@@ -19,11 +26,18 @@ public class DataSourceConfiguration {
 		return new DataSourceProperties();
 	}
 
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Configuracion pool de conexiones
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @return
+	 */
 	@Bean
 	@ConfigurationProperties("app.datasource.hikari")
 	public HikariDataSource dataSource() {
 		return DataSourceBuilder.create().type(HikariDataSource.class).build();
 	}
-
 
 }
