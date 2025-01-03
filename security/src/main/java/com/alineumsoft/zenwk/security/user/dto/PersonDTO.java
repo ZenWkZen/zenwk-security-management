@@ -1,9 +1,6 @@
 package com.alineumsoft.zenwk.security.user.dto;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
