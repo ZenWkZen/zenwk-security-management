@@ -2,10 +2,10 @@
 logging:
   level:
 # Log de datasource-hikari
-    com.zaxxer.hikari: DEBUG
-    org.springframework.jdbc.datasource: DEBUG
+    com.zaxxer.hikari: INFO #DEBUG
+    org.springframework.jdbc.datasource: INFO #DEBUG
 # Log de aplicacion
-    root: INFO
+    root: INFO #TRACE
     com.alineumsoft: DEBUG
   file:
     name: logs/application.log

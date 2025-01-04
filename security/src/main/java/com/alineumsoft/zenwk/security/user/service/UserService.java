@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.alineumsoft.zenwk.security.user.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
@@ -22,7 +23,6 @@ import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
-import com.alineumsoft.zenwk.security.user.util.ObjectUpdaterUtil;
 
 import jakarta.transaction.Transactional;
 

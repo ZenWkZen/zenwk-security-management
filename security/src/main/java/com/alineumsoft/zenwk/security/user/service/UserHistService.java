@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.alineumsoft.zenwk.security.user.common.hist.enums.HistoricalEnum;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.entity.UserHist;
 import com.alineumsoft.zenwk.security.user.repository.UserHistRepository;
-import com.alineumsoft.zenwk.security.user.util.hist.enums.HistoricalEnum;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>

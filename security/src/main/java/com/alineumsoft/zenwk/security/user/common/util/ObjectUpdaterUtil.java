@@ -1,9 +1,10 @@
-package com.alineumsoft.zenwk.security.user.util;
+package com.alineumsoft.zenwk.security.user.common.util;
 
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 
-import com.alineumsoft.zenwk.security.user.util.message.component.MessageSourceAccessorComponent;
-import com.alineumsoft.zenwk.security.user.util.messages.enums.MessageKeyUtilEnum;
+import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.user.common.message.component.MessageSourceAccessorComponent;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -26,7 +27,7 @@ public final class ObjectUpdaterUtil {
 	static public <T> void updateDataObject(T source, T target) {
 		if (source == null || target == null) {
 			throw new IllegalArgumentException(
-					MessageSourceAccessorComponent.getMessage(MessageKeyUtilEnum.DATA_UPDATE_NULL.getKey()));
+					MessageSourceAccessorComponent.getMessage(CommonMessageConstants.OBJECT_UPDATE_NULL));
 		}
 
 		// Campos de la clase del objeto
@@ -42,8 +43,8 @@ public final class ObjectUpdaterUtil {
 					field.set(target, value);
 				}
 			} catch (IllegalAccessException e) {
-				throw new RuntimeException(MessageSourceAccessorComponent
-						.getMessage(MessageKeyUtilEnum.DATA_UPDATE_FAILED.getKey(), field.getName(), e.getMessage()));
+				throw new RuntimeException(MessageFormat.format(CommonMessageConstants.OBJECT_UPDATE_FAILED,
+						field.getName(), e.getMessage()));
 			}
 		}
 	}

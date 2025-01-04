@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.util.hist.enums;
+package com.alineumsoft.zenwk.security.user.common.hist.enums;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>

@@ -2,11 +2,11 @@ package com.alineumsoft.zenwk.security.user.entity;
 
 import java.time.LocalDateTime;
 
+import com.alineumsoft.zenwk.security.user.common.component.AppContextHolderComponent;
+import com.alineumsoft.zenwk.security.user.common.hist.enums.HistoricalEnum;
 import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
 import com.alineumsoft.zenwk.security.user.service.UserHistService;
-import com.alineumsoft.zenwk.security.user.util.component.AppContextHolderComponent;
-import com.alineumsoft.zenwk.security.user.util.hist.enums.HistoricalEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

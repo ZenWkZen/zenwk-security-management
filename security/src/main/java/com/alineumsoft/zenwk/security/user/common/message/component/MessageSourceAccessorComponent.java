@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.util.message.component;
+package com.alineumsoft.zenwk.security.user.common.message.component;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;

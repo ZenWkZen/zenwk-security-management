@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.util.messages.config;
+package com.alineumsoft.zenwk.security.user.common.messages.config;
 
 import java.util.Locale;
 
@@ -9,7 +9,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
-import com.alineumsoft.zenwk.security.user.util.constants.ConfigUtilConstants;
+import com.alineumsoft.zenwk.security.user.common.constants.ConfigUtilConstants;
 
 @Configuration
 public class MessageSourceConfiguration {

@@ -1,5 +1,6 @@
 package com.alineumsoft.zenwk.security.user.controller;
 
+import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 
@@ -15,12 +16,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
 import com.alineumsoft.zenwk.security.user.constants.ConfigUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
 import com.alineumsoft.zenwk.security.user.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -29,7 +35,8 @@ import com.alineumsoft.zenwk.security.user.service.UserService;
  */
 @RestController
 @RequestMapping("/user")
-public class UserController {
+@Slf4j
+public class UserController extends ApiRestHelper {
 
 	private final UserService userService;
 
@@ -51,11 +58,14 @@ public class UserController {
 	 * @param userInDTO
 	 * @param uriCB
 	 * @param principal
+	 * @param request
 	 * @return
+	 * @throws JsonProcessingException
 	 */
 	@PostMapping
 	public ResponseEntity<Void> createUser(@RequestBody CreateUserInDTO userInDTO, UriComponentsBuilder uriCB,
-			Principal principal) {
+			Principal principal, HttpServletRequest request) throws JsonProcessingException {
+		logRequest(userInDTO, request);
 		Long idUser = userService.createNewUser(userInDTO);
 		URI location = uriCB.path(ConfigUserConstants.HEADER_LOCATION).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
@@ -69,9 +79,12 @@ public class UserController {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @return
+	 * @throws JsonProcessingException
 	 */
 	@GetMapping("/{idUser}")
-	public ResponseEntity<UserOutDTO> findById(@PathVariable Long idUser) {
+	public ResponseEntity<UserOutDTO> findById(@PathVariable Long idUser, HttpServletRequest request)
+			throws JsonProcessingException {
+		logRequest(request);
 		UserOutDTO userOutDTO = userService.findByIdUser(idUser);
 		if (userOutDTO != null) {
 			return ResponseEntity.ok(userOutDTO);
@@ -86,10 +99,14 @@ public class UserController {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param pageable
+	 * @param request
 	 * @return
+	 * @throws JsonProcessingException
 	 */
 	@GetMapping
-	public ResponseEntity<PageUserDTO> findAll(Pageable pageable) {
+	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request)
+			throws JsonProcessingException {
+		logRequest(request);
 		PageUserDTO response = userService.findAll(pageable);
 		if (!response.getUsers().isEmpty()) {
 			return ResponseEntity.ok(response);
@@ -106,9 +123,12 @@ public class UserController {
 	 * @param idUser
 	 * @param modUserInDTO
 	 * @return
+	 * @throws IOException
 	 */
 	@PutMapping("{idUser}")
-	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody ModUserInDTO modUserInDTO) {
+	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody ModUserInDTO modUserInDTO,
+			HttpServletRequest request) throws IOException {
+		logRequest(modUserInDTO, request);
 		if (userService.updateUser(idUser, modUserInDTO)) {
 			return ResponseEntity.noContent().build();
 		}
@@ -122,10 +142,14 @@ public class UserController {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
+	 * @param request
 	 * @return
+	 * @throws JsonProcessingException
 	 */
 	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser) {
+	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request)
+			throws JsonProcessingException {
+		logRequest(request);
 		if (userService.deleteUser(idUser)) {
 			return ResponseEntity.noContent().build();
 		}

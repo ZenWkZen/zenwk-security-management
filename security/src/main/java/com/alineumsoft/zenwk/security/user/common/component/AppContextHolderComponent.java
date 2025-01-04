@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.util.component;
+package com.alineumsoft.zenwk.security.user.common.component;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
