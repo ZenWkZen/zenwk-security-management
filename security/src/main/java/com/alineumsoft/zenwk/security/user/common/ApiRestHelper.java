@@ -25,9 +25,25 @@ public class ApiRestHelper {
 	 * @throws JsonProcessingException
 	 */
 	public void logRequest(Object modUserInDTO, HttpServletRequest request) throws JsonProcessingException {
-		ObjectMapper objectMapper = new ObjectMapper();
+		
 		writeLogRequest(request);
-		log.info(objectMapper.writeValueAsString(modUserInDTO));
+		log.info(getJson(modUserInDTO));
+	}
+	
+	/**
+	 * <p>
+	 * <b>General</b> Obtener Json
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param inDTO
+	 * @param objectMapper
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	public String getJson(Object inDTO) throws JsonProcessingException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		return objectMapper.writeValueAsString(inDTO);
 	}
 
 	/**
@@ -42,7 +58,7 @@ public class ApiRestHelper {
 	 */
 	public static void logRequest(HttpServletRequest request) throws JsonProcessingException {
 		writeLogRequest(request);
-		log.info(CommonMessageConstants.LOG_NO_BODY);
+		log.info(CommonMessageConstants.NOT_APPLICABLE_BODY);
 	}
 
 	/**

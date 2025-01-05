@@ -1,5 +1,7 @@
 package com.alineumsoft.zenwk.security.user.service;
 
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -7,23 +9,34 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
+import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
+import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
+import com.alineumsoft.zenwk.security.user.common.message.component.MessageSourceAccessorComponent;
 import com.alineumsoft.zenwk.security.user.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
+import com.alineumsoft.zenwk.security.user.entity.LogSecurityUser;
 import com.alineumsoft.zenwk.security.user.entity.Person;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.entity.UserState;
+import com.alineumsoft.zenwk.security.user.enums.UserCoreException;
 import com.alineumsoft.zenwk.security.user.enums.UserEnum;
 import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
+import com.alineumsoft.zenwk.security.user.repository.LogSecurityUserRespository;
 import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 /**
@@ -32,12 +45,14 @@ import jakarta.transaction.Transactional;
  * @class UserService
  */
 @Service
-public class UserService {
+public class UserService extends ApiRestHelper {
 	private final UserRepository userRepository;
 
 	private final PersonRepository personRepository;
 
 	private final UserStateRepository UserStateRepository;
+
+	private final LogSecurityUserRespository logRepository;
 
 	/**
 	 * <p>
@@ -48,12 +63,14 @@ public class UserService {
 	 * @param userRepository
 	 * @param personRepository
 	 * @param UserStateRepository
+	 * @param logRepository
 	 */
 	public UserService(UserRepository userRepository, PersonRepository personRepository,
-			UserStateRepository UserStateRepository) {
+			UserStateRepository UserStateRepository, LogSecurityUserRespository logRepository) {
 		this.userRepository = userRepository;
 		this.personRepository = personRepository;
 		this.UserStateRepository = UserStateRepository;
+		this.logRepository = logRepository;
 	}
 
 	/**
@@ -127,15 +144,30 @@ public class UserService {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
+	 * @param principal
+	 * @param request
 	 * @return
+	 * @throws JsonProcessingException
 	 */
-	public boolean deleteUser(Long idUser) {
+	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal)
+			throws JsonProcessingException {
+		LogSecurityUser log = getLogSecurityUser(request, principal);
+		log.setReponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		log.setRequest(CommonMessageConstants.NOT_APPLICABLE_BODY);
+
 		if (userRepository.existsById(idUser)) {
 			userRepository.deleteById(idUser);
+			log.setStatusCode(HttpStatus.NO_CONTENT.value());
+			log.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+			logRepository.save(log);
 			return true;
 		}
+		UserCoreException error = UserCoreException.FUNC_USER_CREATE_NO_FOUND;
 
-		return false;
+		log.setStatusCode(HttpStatus.NOT_FOUND.value());
+		log.setErroMessage(error.getCodeMessage());
+
+		throw new TechnicalException(error.getMessage(), error.getCode(), null, logRepository, log);
 	}
 
 	/**
@@ -233,6 +265,25 @@ public class UserService {
 		user.setUserState(userState);
 		user.setPerson(person);
 		return userRepository.save(user);
+	}
+
+	/**
+	 * <p>
+	 * <b> General </b> Generar informacion de log a persitir
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param request
+	 * @param principal
+	 * @throws JsonProcessingException
+	 */
+	private LogSecurityUser getLogSecurityUser(HttpServletRequest request, Principal principal)
+			throws JsonProcessingException {
+		LogSecurityUser regLog = new LogSecurityUser();
+		regLog.setCreationDate(LocalDateTime.now());
+		regLog.setUserCreation(null);
+		regLog.setUrl(request.getRequestURL().toString());
+		return regLog;
 	}
 
 }

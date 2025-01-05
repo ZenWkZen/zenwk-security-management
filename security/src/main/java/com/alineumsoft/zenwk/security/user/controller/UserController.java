@@ -5,6 +5,7 @@ import java.net.URI;
 import java.security.Principal;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -128,7 +129,6 @@ public class UserController extends ApiRestHelper {
 	@PutMapping("{idUser}")
 	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody ModUserInDTO modUserInDTO,
 			HttpServletRequest request) throws IOException {
-		logRequest(modUserInDTO, request);
 		if (userService.updateUser(idUser, modUserInDTO)) {
 			return ResponseEntity.noContent().build();
 		}
@@ -147,10 +147,9 @@ public class UserController extends ApiRestHelper {
 	 * @throws JsonProcessingException
 	 */
 	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request)
+	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal)
 			throws JsonProcessingException {
-		logRequest(request);
-		if (userService.deleteUser(idUser)) {
+		if (userService.deleteUser(idUser, request, principal)) {
 			return ResponseEntity.noContent().build();
 		}
 		return ResponseEntity.notFound().build();

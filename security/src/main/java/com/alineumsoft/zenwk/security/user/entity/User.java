@@ -27,7 +27,6 @@ import lombok.NoArgsConstructor;
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  */
-
 @Entity
 @Table(name = "seg_user")
 @Data
