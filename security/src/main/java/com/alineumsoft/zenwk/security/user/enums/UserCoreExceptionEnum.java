@@ -8,10 +8,11 @@ import com.alineumsoft.zenwk.security.user.common.message.component.MessageSourc
  * @project SecurityUser
  * @class ErrorCodeException
  */
-public enum UserCoreException {
+public enum UserCoreExceptionEnum {
 	// fun/tec_entidad_operacion_campo/proceso_descripcion
-	FUNC_USER_CREATE_EMAIL_UNIQUE("F01", "functional.user.create.email.unique"),
-	FUNC_USER_CREATE_NO_FOUND("F01", "functional.user.create.nofound");
+	FUNC_USER_CREATE_EMAIL_UNIQUE("FUN_SEGUSE_001", "functional.user.create.email.unique"),
+	FUNC_USER_NOT_FOUND("FUN_SEGUSE_002", "functional.user.notfound");
+	
 
 	private String code;
 	private String key;
@@ -21,7 +22,7 @@ public enum UserCoreException {
 	 * @param codeException
 	 * @param keyMessage
 	 */
-	private UserCoreException(String codeException, String keyMessage) {
+	private UserCoreExceptionEnum(String codeException, String keyMessage) {
 		this.code = codeException;
 		this.key = keyMessage;
 
@@ -45,7 +46,7 @@ public enum UserCoreException {
 
 	/**
 	 * <p>
-	 * <b> Genreal Exception </b> Recupera el mensaje incluyendo el codigo
+	 * <b> General Exception. </b> Recupera el mensaje incluyendo el codigo
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>

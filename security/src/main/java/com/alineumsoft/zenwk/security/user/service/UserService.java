@@ -1,6 +1,7 @@
 package com.alineumsoft.zenwk.security.user.service;
 
 import java.security.Principal;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,9 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
 import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
-import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
-import com.alineumsoft.zenwk.security.user.common.message.component.MessageSourceAccessorComponent;
 import com.alineumsoft.zenwk.security.user.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
@@ -27,7 +26,7 @@ import com.alineumsoft.zenwk.security.user.entity.LogSecurityUser;
 import com.alineumsoft.zenwk.security.user.entity.Person;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.entity.UserState;
-import com.alineumsoft.zenwk.security.user.enums.UserCoreException;
+import com.alineumsoft.zenwk.security.user.enums.UserCoreExceptionEnum;
 import com.alineumsoft.zenwk.security.user.enums.UserEnum;
 import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.user.repository.LogSecurityUserRespository;
@@ -36,8 +35,9 @@ import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -45,6 +45,7 @@ import jakarta.transaction.Transactional;
  * @class UserService
  */
 @Service
+@Slf4j
 public class UserService extends ApiRestHelper {
 	private final UserRepository userRepository;
 
@@ -82,11 +83,21 @@ public class UserService extends ApiRestHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userInDTO
 	 * @return
+	 * @throws JsonProcessingException
 	 */
-	public Long createNewUser(CreateUserInDTO userInDTO) {
-		Person person = createPerson(userInDTO);
-		User user = createUser(userInDTO, person);
-		return user.getIdUser();
+	public Long createNewUser(CreateUserInDTO userInDTO, HttpServletRequest request) throws JsonProcessingException {
+		LogSecurityUser logSecUser = getLogSecurityUser(request, null);
+		logSecUser.setStatusCode(HttpStatus.CREATED.value());
+		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		logSecUser.setRequest(getJson(userInDTO));
+		try {
+			Person person = createPerson(userInDTO);
+			User user = createUser(userInDTO, person);
+			return user.getIdUser();
+		} catch (RuntimeException e) {
+			log.error(e.getMessage());
+			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecUser);
+		}
 	}
 
 	/**
@@ -97,23 +108,55 @@ public class UserService extends ApiRestHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userInDTO
 	 * @param userOutDTO
+	 * @throws JsonProcessingException
 	 */
-	@Transactional
-	public boolean updateUser(Long idUser, ModUserInDTO modUserInDTO) {
-		User user = userRepository.findById(idUser).orElse(null);
-		if (user == null) {
-			return false;
+	public boolean updateUser(HttpServletRequest request, Long idUser, ModUserInDTO modUserInDTO)
+			throws JsonProcessingException {
+		LogSecurityUser logSecurityUser = getLogSecurityUser(request, null);
+		// Respuesta por defecto
+		logSecurityUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		logSecurityUser.setStatusCode(HttpStatus.NOT_FOUND.value());
+		logSecurityUser.setRequest(getJson(modUserInDTO));
+		try {
+			updateUserEntity(idUser, modUserInDTO);
+			logSecurityUser.setStatusCode(HttpStatus.NO_CONTENT.value());
+			logSecurityUser.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+			logRepository.save(logSecurityUser);
+			return true;
+		} catch (IllegalArgumentException | SQLException e) {
+			logSecurityUser.setErroMessage(e.getMessage());
+			// En TechnicalException se persiste en el log de errores
+			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecurityUser);
+		} catch (EntityNotFoundException ex) {
+			UserCoreExceptionEnum errorEnum = UserCoreExceptionEnum.FUNC_USER_NOT_FOUND;
+			logSecurityUser.setErroMessage(errorEnum.getCodeMessage());
+			throw new TechnicalException(errorEnum.getMessage(), errorEnum.getCode(), ex.getCause(), logRepository,
+					logSecurityUser);
 		}
+	}
 
-		updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
-
-		Person person = user.getPerson();
-		ObjectUpdaterUtil.updateDataObject(getPerson(modUserInDTO.getPerson()), person);
-		user.setPerson(person);
-		user.setUserModification(user.getUsername());
-		userRepository.save(user);
-
-		return true;
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Persiste la actualizacion del
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @param modUserInDTO
+	 * @throws SQLException
+	 */
+	private void updateUserEntity(Long idUser, ModUserInDTO modUserInDTO) throws SQLException {
+		try {
+			User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException());
+			Person person = user.getPerson();
+			ObjectUpdaterUtil.updateDataEqualObject(getPerson(modUserInDTO.getPerson()), person);
+			updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
+			user.setPerson(person);
+			user.setUserModification(user.getUsername());
+			userRepository.save(user);
+		} catch (RuntimeException e) {
+			throw new SQLException(e);
+		}
 	}
 
 	/**
@@ -152,7 +195,7 @@ public class UserService extends ApiRestHelper {
 	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal)
 			throws JsonProcessingException {
 		LogSecurityUser log = getLogSecurityUser(request, principal);
-		log.setReponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		log.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
 		log.setRequest(CommonMessageConstants.NOT_APPLICABLE_BODY);
 
 		if (userRepository.existsById(idUser)) {
@@ -162,12 +205,10 @@ public class UserService extends ApiRestHelper {
 			logRepository.save(log);
 			return true;
 		}
-		UserCoreException error = UserCoreException.FUNC_USER_CREATE_NO_FOUND;
-
+		UserCoreExceptionEnum errorEnum = UserCoreExceptionEnum.FUNC_USER_NOT_FOUND;
 		log.setStatusCode(HttpStatus.NOT_FOUND.value());
-		log.setErroMessage(error.getCodeMessage());
-
-		throw new TechnicalException(error.getMessage(), error.getCode(), null, logRepository, log);
+		log.setErroMessage(errorEnum.getCodeMessage());
+		throw new TechnicalException(errorEnum.getMessage(), errorEnum.getCode(), null, logRepository, log);
 	}
 
 	/**
@@ -269,7 +310,8 @@ public class UserService extends ApiRestHelper {
 
 	/**
 	 * <p>
-	 * <b> General </b> Generar informacion de log a persitir
+	 * <b> General </b> Fija el valor para los atributos: creationDate, userCreation
+	 * y url
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -277,8 +319,7 @@ public class UserService extends ApiRestHelper {
 	 * @param principal
 	 * @throws JsonProcessingException
 	 */
-	private LogSecurityUser getLogSecurityUser(HttpServletRequest request, Principal principal)
-			throws JsonProcessingException {
+	private LogSecurityUser getLogSecurityUser(HttpServletRequest request, Principal principal) {
 		LogSecurityUser regLog = new LogSecurityUser();
 		regLog.setCreationDate(LocalDateTime.now());
 		regLog.setUserCreation(null);
