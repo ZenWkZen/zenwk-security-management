@@ -42,9 +42,9 @@ public class UserState {
 	private LocalDateTime modificationDate;
 
 	@Column(name = "segusuusercreation")
-	private String UserCreation;
+	private String userCreation;
 
 	@Column(name = "segusuusermodification")
-	private String UserModification;
+	private String userModification;
 
 }

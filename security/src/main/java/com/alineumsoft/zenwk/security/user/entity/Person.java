@@ -42,10 +42,10 @@ public class Person {
 	private LocalDateTime modificationDate;
 
 	@Column(name = "perperusercreation")
-	private String UserCreation;
+	private String userCreation;
 
 	@Column(name = "perperusermodification")
-	private String UserModification;
+	private String userModification;
 
 	/**
 	 * <p>

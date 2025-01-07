@@ -112,26 +112,26 @@ public class UserService extends ApiRestHelper {
 	 */
 	public boolean updateUser(HttpServletRequest request, Long idUser, ModUserInDTO modUserInDTO)
 			throws JsonProcessingException {
-		LogSecurityUser logSecurityUser = getLogSecurityUser(request, null);
+		LogSecurityUser logSecUser = getLogSecurityUser(request, null);
 		// Respuesta por defecto
-		logSecurityUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
-		logSecurityUser.setStatusCode(HttpStatus.NOT_FOUND.value());
-		logSecurityUser.setRequest(getJson(modUserInDTO));
+		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
+		logSecUser.setRequest(getJson(modUserInDTO));
 		try {
 			updateUserEntity(idUser, modUserInDTO);
-			logSecurityUser.setStatusCode(HttpStatus.NO_CONTENT.value());
-			logSecurityUser.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
-			logRepository.save(logSecurityUser);
+			logSecUser.setStatusCode(HttpStatus.NO_CONTENT.value());
+			logSecUser.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+			logRepository.save(logSecUser);
 			return true;
 		} catch (IllegalArgumentException | SQLException e) {
-			logSecurityUser.setErroMessage(e.getMessage());
+			logSecUser.setErroMessage(e.getMessage());
 			// En TechnicalException se persiste en el log de errores
-			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecurityUser);
+			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecUser);
 		} catch (EntityNotFoundException ex) {
 			UserCoreExceptionEnum errorEnum = UserCoreExceptionEnum.FUNC_USER_NOT_FOUND;
-			logSecurityUser.setErroMessage(errorEnum.getCodeMessage());
+			logSecUser.setErroMessage(errorEnum.getCodeMessage());
 			throw new TechnicalException(errorEnum.getMessage(), errorEnum.getCode(), ex.getCause(), logRepository,
-					logSecurityUser);
+					logSecUser);
 		}
 	}
 
@@ -194,21 +194,21 @@ public class UserService extends ApiRestHelper {
 	 */
 	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal)
 			throws JsonProcessingException {
-		LogSecurityUser log = getLogSecurityUser(request, principal);
-		log.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
-		log.setRequest(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		LogSecurityUser logSecUser = getLogSecurityUser(request, principal);
+		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		logSecUser.setRequest(CommonMessageConstants.NOT_APPLICABLE_BODY);
 
 		if (userRepository.existsById(idUser)) {
 			userRepository.deleteById(idUser);
-			log.setStatusCode(HttpStatus.NO_CONTENT.value());
-			log.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
-			logRepository.save(log);
+			logSecUser.setStatusCode(HttpStatus.NO_CONTENT.value());
+			logSecUser.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+			logRepository.save(logSecUser);
 			return true;
 		}
 		UserCoreExceptionEnum errorEnum = UserCoreExceptionEnum.FUNC_USER_NOT_FOUND;
-		log.setStatusCode(HttpStatus.NOT_FOUND.value());
-		log.setErroMessage(errorEnum.getCodeMessage());
-		throw new TechnicalException(errorEnum.getMessage(), errorEnum.getCode(), null, logRepository, log);
+		logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
+		logSecUser.setErroMessage(errorEnum.getCodeMessage());
+		throw new TechnicalException(errorEnum.getMessage(), errorEnum.getCode(), null, logRepository, logSecUser);
 	}
 
 	/**
