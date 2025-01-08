@@ -11,10 +11,16 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import com.alineumsoft.zenwk.security.user.common.constants.ConfigUtilConstants;
 
+/**
+ * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+ * @project SecurityUser
+ * @class MessageSourceConfiguration
+ */
 @Configuration
 public class MessageSourceConfiguration {
+	private final static String DEFAULT_LANG_PROPERTY = "${app.default.locale:es}";
 
-	@Value("${app.default.locale:es}")
+	@Value(DEFAULT_LANG_PROPERTY)
 	private String dafaultLocale;
 
 	/**

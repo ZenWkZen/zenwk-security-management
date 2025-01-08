@@ -1,6 +1,7 @@
 # Niveles de log
 logging:
   level:
+    org.springframework.security: DEBUG
 # Log de datasource-hikari
     #com.zaxxer.hikari: INFO #DEBUG
     #org.springframework.jdbc.datasource: INFO #DEBUG
@@ -35,6 +36,10 @@ spring:
             dialect: org.hibernate.dialect.PostgreSQLDialect
             format_sql: true
             show_sql: true
+  security:
+    user:
+      name: user
+      password: 12345
 
 # Congiguracion aplicacion personalizada
 app:
@@ -53,3 +58,19 @@ app:
       idle-timeout: 30000
       max-lifetime: 1800000
       connection-timeout: 30000
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, loggers
+  endpoint:
+    health:
+      show-details: never
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+  metrics:
+    enabled: true

@@ -93,7 +93,7 @@ public class UserService extends ApiRestHelper {
 		try {
 			Person person = createPerson(userInDTO);
 			User user = createUser(userInDTO, person);
-			return user.getIdUser();
+			return user.getId();
 		} catch (RuntimeException e) {
 			log.error(e.getMessage());
 			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecUser);

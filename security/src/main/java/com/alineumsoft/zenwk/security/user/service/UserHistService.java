@@ -41,7 +41,7 @@ public class UserHistService {
 	 */
 	public void saveUserHist(User user, HistoricalEnum OperationType) {
 		UserHist userHist = new UserHist();
-		userHist.setIdUser(user.getIdUser());
+		userHist.setIdUser(user.getId());
 		userHist.setUsername(user.getUsername());
 		userHist.setPassword(user.getPassword());
 		userHist.setUserCreation(user.getUserCreation());
