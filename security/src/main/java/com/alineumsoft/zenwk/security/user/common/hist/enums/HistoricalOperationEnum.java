@@ -5,7 +5,7 @@ package com.alineumsoft.zenwk.security.user.common.hist.enums;
  * @project SecurityUser
  * @class HistoricalEnum
  */
-public enum HistoricalEnum {
+public enum HistoricalOperationEnum {
 	INSERT, 
 	UPDATE, 
 	DELETE;

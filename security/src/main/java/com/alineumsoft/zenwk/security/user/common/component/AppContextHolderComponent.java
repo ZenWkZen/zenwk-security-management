@@ -5,14 +5,18 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
+ * <b> Clase que proporciona acceso estatico al ApplicationContext de Spring en
+ * cualquier parte de la aplicacion</b>
+ * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  * @class AppContextHolderComponent
  */
 @Component
 public class AppContextHolderComponent implements ApplicationContextAware {
-
 	private static ApplicationContext context;
 
 	/**
@@ -28,15 +32,15 @@ public class AppContextHolderComponent implements ApplicationContextAware {
 
 	/**
 	 * <p>
-	 * <b> General </b> Recupera un bean a partir de un contexto
+	 * <b> Historical: </b> Obtiene el bean si esta en el contexto
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param <T>
-	 * @param beanClass
+	 * @param clazz
 	 * @return
 	 */
-	public static <T> T getBean(Class<T> beanClass) {
-		return context.getBean(beanClass);
+	public static <T> T getBean(Class<T> clazz) {
+		return context.getBean(clazz);
 	}
 }

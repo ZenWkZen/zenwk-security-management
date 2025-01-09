@@ -2,8 +2,9 @@ package com.alineumsoft.zenwk.security.user.entity;
 
 import java.time.LocalDateTime;
 
-import com.alineumsoft.zenwk.security.user.common.component.AppContextHolderComponent;
-import com.alineumsoft.zenwk.security.user.common.hist.enums.HistoricalEnum;
+import com.alineumsoft.zenwk.security.user.common.hist.enums.HistoricalOperationEnum;
+import com.alineumsoft.zenwk.security.user.common.util.CryptoUtil;
+import com.alineumsoft.zenwk.security.user.common.util.HistoricalUtil;
 import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
 import com.alineumsoft.zenwk.security.user.service.UserHistService;
@@ -86,53 +87,25 @@ public class User {
 	@PrePersist
 	private void create() {
 		this.creationDate = LocalDateTime.now();
+		this.password = CryptoUtil.encryptPassword(this.password);
 	}
-	
+
 	@PostPersist
 	private void PosCreate() {
-		registerHistorical(HistoricalEnum.INSERT);
+		HistoricalUtil.registerHistorical(this, HistoricalOperationEnum.INSERT, UserHistService.class);
 	}
 
 	@PostUpdate
 	private void update() {
 		this.modificationDate = LocalDateTime.now();
-		registerHistorical(HistoricalEnum.UPDATE);
+		HistoricalUtil.registerHistorical(this, HistoricalOperationEnum.UPDATE, UserHistService.class);
 
 	}
 
 	@PreRemove
 	private void delete() {
-		registerHistorical(HistoricalEnum.DELETE);
+		HistoricalUtil.registerHistorical(this, HistoricalOperationEnum.DELETE, UserHistService.class);
+
 	}
 
-	/**
-	 * <p>
-	 * <b> Util </b> proceso registro historico
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param operation
-	 */
-	private void registerHistorical(HistoricalEnum operation) {
-		// Usa un contexto estático de Spring para obtener el servicio
-		UserHistService userHistService = AppContextHolderComponent.getBean(UserHistService.class);
-		if (userHistService != null) {
-			userHistService.saveUserHist(this, operation);
-		}
-	}
-
-	/**
-	 * <p>
-	 * <b> CU0001_Seguridad_Creación_Usuario </b> Encriptacion de la constraeña a
-	 * ser persistida
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param rawPassword
-	 * @return
-	 */
-//	public String encryptPassword(String rawPassword) {
-//		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//		return passwordEncoder.encode(rawPassword);
-//	}
 }

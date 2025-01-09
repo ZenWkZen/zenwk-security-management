@@ -96,6 +96,7 @@ public class UserService extends ApiRestHelper {
 			return user.getId();
 		} catch (RuntimeException e) {
 			log.error(e.getMessage());
+			logSecUser.setErroMessage(e.getMessage());
 			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecUser);
 		}
 	}

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.user.common.constants.UtilConstants;
 import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.user.common.exception.dto.ErrorResponse;
@@ -33,8 +34,9 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<ErrorResponse> HandleGeneralException(RuntimeException e) {
-		log.error(CommonMessageConstants.MSG_EXCEPTION, e.getMessage(), e);
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, null));
+		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e.getMessage(), e);
+		String code = extractCode(e.getMessage());
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, code));
 	}
 
 	/**
@@ -48,7 +50,7 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(TechnicalException.class)
 	public ResponseEntity<ErrorResponse> HandleTechnicalException(TechnicalException e) {
-		log.warn(CommonMessageConstants.MSG_EXCEPTION_TECHNICAL, e.getMessage(), e);
+		log.warn(CommonMessageConstants.LOG_MSG_EXCEPTION_TECHNICAL, e.getMessage(), e);
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, e.getCode()));
 	}
 
@@ -63,7 +65,7 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(FunctionalException.class)
 	public ResponseEntity<ErrorResponse> HandleFunctionalException(FunctionalException e) {
-		log.warn(CommonMessageConstants.MSG_EXCEPTION_FUNCTIONAL, e.getMessage(), e);
+		log.warn(CommonMessageConstants.LOG_MSG_EXCEPTION_FUNCTIONAL, e.getMessage(), e);
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createNewError(e, e.getCode()));
 	}
 
@@ -76,9 +78,37 @@ public class GlobalHandlerException {
 	 * @param e
 	 * @return
 	 */
-	private ErrorResponse createNewError(RuntimeException e, String code) {
+	private static ErrorResponse createNewError(RuntimeException e, String code) {
+		// Se realiza una ultima comprobacion del codigo de error
+		if (code == null) {
+			code = extractCode(e.getMessage());
+		}
+
 		return new ErrorResponse(CommonMessageConstants.MSG_EXEPTION_GENERAL,
 				code == null ? CommonMessageConstants.CODE_MSG_GENERAL : code, LocalDateTime.now());
+	}
+
+	/**
+	 * <p>
+	 * <b> Util: </b> Obtiene código de la excepcion si existe
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param formattedString
+	 * @return
+	 */
+	private static String extractCode(String formattedString) {
+		int start = formattedString.indexOf(UtilConstants.LEFT_BRACKET);
+		int end = formattedString.indexOf(UtilConstants.RIGHT_BRACKET);
+
+		if (start < 0 || end < 0 || start >= end) {
+			return null;
+		}
+
+		String code = formattedString.substring(start + 1, end);
+
+		return (code.startsWith(CommonMessageConstants.FUNCTIONAL_EXCEPTION_PREFIX)
+				|| code.startsWith(CommonMessageConstants.TECHNICAL_EXCEPTION_PREFIX)) ? code : null;
 	}
 
 }

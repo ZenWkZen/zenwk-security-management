@@ -68,28 +68,6 @@ public class UserController extends ApiRestHelper {
 	public ResponseEntity<Void> createUser(@RequestBody CreateUserInDTO userInDTO, UriComponentsBuilder uriCB,
 			Principal principal, HttpServletRequest request) throws JsonProcessingException {
 		logRequest(userInDTO, request);
-		
-		
-		 String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION); // Encabezado 'Authorization'
-
-		    if (authHeader != null && authHeader.startsWith("Basic ")) {
-		        // Decodificar las credenciales en Base64
-		        String base64Credentials = authHeader.substring("Basic ".length());
-		        byte[] decodedBytes = Base64.getDecoder().decode(base64Credentials);
-		        String credentials = new String(decodedBytes);		        
-		        // Separar usuario y contraseña
-		        String[] values = credentials.split(":", 2);
-		        String username = values[0];
-		        String password = values.length > 1 ? values[1] : "";
-
-		        // Mostrar usuario y contraseña
-		        System.out.println("Usuario: " + username);
-		        System.out.println("Contraseña: " + password);
-		    } else {
-		        System.out.println("No se enviaron credenciales de Basic Auth.");
-		    }
-		    
-		
 		Long idUser = userService.createNewUser(userInDTO, request);
 		URI location = uriCB.path(ConfigUserConstants.HEADER_LOCATION).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
