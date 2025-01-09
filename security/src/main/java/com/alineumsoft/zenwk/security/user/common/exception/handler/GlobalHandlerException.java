@@ -50,8 +50,9 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(TechnicalException.class)
 	public ResponseEntity<ErrorResponse> HandleTechnicalException(TechnicalException e) {
-		log.warn(CommonMessageConstants.LOG_MSG_EXCEPTION_TECHNICAL, e.getMessage(), e);
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, e.getCode()));
+		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_TECHNICAL, e.getMessage(), e);
+		String code = extractCode(e.getMessage());
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, code));
 	}
 
 	/**
@@ -65,8 +66,9 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(FunctionalException.class)
 	public ResponseEntity<ErrorResponse> HandleFunctionalException(FunctionalException e) {
-		log.warn(CommonMessageConstants.LOG_MSG_EXCEPTION_FUNCTIONAL, e.getMessage(), e);
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createNewError(e, e.getCode()));
+		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_FUNCTIONAL, e.getMessage(), e);
+		String code = extractCode(e.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createNewError(e, code));
 	}
 
 	/**
@@ -90,7 +92,7 @@ public class GlobalHandlerException {
 
 	/**
 	 * <p>
-	 * <b> Util: </b> Obtiene código de la excepcion si existe
+	 * <b> Util: </b> Obtiene codigo de la excepcion si existe
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>

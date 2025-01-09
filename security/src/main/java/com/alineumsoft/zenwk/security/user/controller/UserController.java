@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
-import com.alineumsoft.zenwk.security.user.constants.ConfigUserConstants;
+import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
@@ -69,7 +69,7 @@ public class UserController extends ApiRestHelper {
 			Principal principal, HttpServletRequest request) throws JsonProcessingException {
 		logRequest(userInDTO, request);
 		Long idUser = userService.createNewUser(userInDTO, request);
-		URI location = uriCB.path(ConfigUserConstants.HEADER_LOCATION).buildAndExpand(idUser).toUri();
+		URI location = uriCB.path(GeneralUserConstants.HEADER_LOCATION).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
 	}
 

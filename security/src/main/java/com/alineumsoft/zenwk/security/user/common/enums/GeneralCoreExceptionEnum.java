@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.user.common.enums;
 
 import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
-import com.alineumsoft.zenwk.security.user.common.constants.UtilConstants;
 import com.alineumsoft.zenwk.security.user.common.message.component.MessageSourceAccessorComponent;
 
 /**

@@ -17,6 +17,7 @@ import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
 import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.user.common.util.ObjectUpdaterUtil;
+import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
@@ -87,17 +88,19 @@ public class UserService extends ApiRestHelper {
 	 */
 	public Long createNewUser(CreateUserInDTO userInDTO, HttpServletRequest request) throws JsonProcessingException {
 		LogSecurityUser logSecUser = getLogSecurityUser(request, null);
+		logSecUser.setRequest(getJson(userInDTO));
 		logSecUser.setStatusCode(HttpStatus.CREATED.value());
 		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
-		logSecUser.setRequest(getJson(userInDTO));
+		logSecUser.setMethod(request.getMethod());
+		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+
 		try {
 			Person person = createPerson(userInDTO);
 			User user = createUser(userInDTO, person);
+			logRepository.save(logSecUser);
 			return user.getId();
 		} catch (RuntimeException e) {
-			log.error(e.getMessage());
-			logSecUser.setErroMessage(e.getMessage());
-			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecUser);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logRepository, logSecUser);
 		}
 	}
 
@@ -121,18 +124,14 @@ public class UserService extends ApiRestHelper {
 		try {
 			updateUserEntity(idUser, modUserInDTO);
 			logSecUser.setStatusCode(HttpStatus.NO_CONTENT.value());
-			logSecUser.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+			logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
 			logRepository.save(logSecUser);
 			return true;
 		} catch (IllegalArgumentException | SQLException e) {
-			logSecUser.setErroMessage(e.getMessage());
-			// En TechnicalException se persiste en el log de errores
-			throw new TechnicalException(e.getMessage(), null, e.getCause(), logRepository, logSecUser);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logRepository, logSecUser);
 		} catch (EntityNotFoundException ex) {
-			UserCoreExceptionEnum errorEnum = UserCoreExceptionEnum.FUNC_USER_NOT_FOUND;
-			logSecUser.setErroMessage(errorEnum.getCodeMessage());
-			throw new TechnicalException(errorEnum.getMessage(), errorEnum.getCode(), ex.getCause(), logRepository,
-					logSecUser);
+			throw new TechnicalException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(), ex.getCause(),
+					logRepository, logSecUser);
 		}
 	}
 
@@ -198,18 +197,17 @@ public class UserService extends ApiRestHelper {
 		LogSecurityUser logSecUser = getLogSecurityUser(request, principal);
 		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
 		logSecUser.setRequest(CommonMessageConstants.NOT_APPLICABLE_BODY);
+		logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
+		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
 
 		if (userRepository.existsById(idUser)) {
 			userRepository.deleteById(idUser);
 			logSecUser.setStatusCode(HttpStatus.NO_CONTENT.value());
-			logSecUser.setErroMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
 			logRepository.save(logSecUser);
 			return true;
 		}
-		UserCoreExceptionEnum errorEnum = UserCoreExceptionEnum.FUNC_USER_NOT_FOUND;
-		logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
-		logSecUser.setErroMessage(errorEnum.getCodeMessage());
-		throw new TechnicalException(errorEnum.getMessage(), errorEnum.getCode(), null, logRepository, logSecUser);
+		throw new TechnicalException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(), null, logRepository,
+				logSecUser);
 	}
 
 	/**
@@ -260,12 +258,36 @@ public class UserService extends ApiRestHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userInDTO
 	 * @return
+	 * @throws SQLException
 	 */
 	private Person createPerson(CreateUserInDTO userInDTO) {
-		Person person = getPerson(userInDTO.getPerson());
-		person.setUserCreation(userInDTO.getUsername());
-		personRepository.save(person);
-		return person;
+		try {
+			Person person = getPerson(userInDTO.getPerson());
+			person.setUserCreation(userInDTO.getUsername());
+			personRepository.save(person);
+			return person;
+		} catch (Exception e) {
+			throw new RuntimeException(getMessageSQLException(e));
+		}
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Recupera el mensaje predefinido
+	 * para para el error datos a nivel de BD
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param e
+	 * @return
+	 */
+	private String getMessageSQLException(Exception e) {
+		if (e.getMessage().contains(GeneralUserConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
+			return UserCoreExceptionEnum.FUNC_USER_MAIL_EXISTS.getCodeMessage();
+
+		}
+
+		return e.getMessage();
 	}
 
 	/**

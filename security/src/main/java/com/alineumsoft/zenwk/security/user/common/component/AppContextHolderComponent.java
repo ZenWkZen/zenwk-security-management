@@ -5,8 +5,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * <b> Clase que proporciona acceso estatico al ApplicationContext de Spring en
  * cualquier parte de la aplicacion</b>

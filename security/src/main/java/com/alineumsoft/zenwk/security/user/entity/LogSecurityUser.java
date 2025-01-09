@@ -21,6 +21,9 @@ public class LogSecurityUser {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "logseguseid")
 	private Long idLogUser;
+	
+	@Column(name="logsegusemethod")
+	private String method;
 
 	@Column(name = "logsegusestatuscode")
 	private Integer statusCode;
@@ -35,7 +38,7 @@ public class LogSecurityUser {
 	private String response;
 
 	@Column(columnDefinition = "TEXT", name = "logseguseerrormessage")
-	private String erroMessage;
+	private String errorMessage;
 
 	@Column(name = "logsegusecreationdate")
 	private LocalDateTime creationDate;

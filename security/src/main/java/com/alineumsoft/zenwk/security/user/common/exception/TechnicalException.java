@@ -23,9 +23,9 @@ public class TechnicalException extends CoreException {
 	 * @param repository
 	 * @param entity
 	 */
-	public <T> TechnicalException(String message, String code, Throwable cause,
+	public <T> TechnicalException(String message, Throwable cause,
 			JpaRepository<T, ?> repository, T entity) {
-		super(message, code, cause, repository, entity);
+		super(message, cause, repository, entity);
 	}
 
 }

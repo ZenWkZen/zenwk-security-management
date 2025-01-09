@@ -1,7 +1,12 @@
 package com.alineumsoft.zenwk.security.user.common;
 
+import java.util.Map;
+
 import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.user.common.constants.UtilConstants;
+import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,14 +30,14 @@ public class ApiRestHelper {
 	 * @throws JsonProcessingException
 	 */
 	public void logRequest(Object modUserInDTO, HttpServletRequest request) throws JsonProcessingException {
-		
+
 		writeLogRequest(request);
 		log.info(getJson(modUserInDTO));
 	}
-	
+
 	/**
 	 * <p>
-	 * <b>General</b> Obtener Json
+	 * <b>General</b> Obtener Json, oculta datos sensibles con el password
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -43,7 +48,19 @@ public class ApiRestHelper {
 	 */
 	public String getJson(Object inDTO) throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
-		return objectMapper.writeValueAsString(inDTO);
+		String json = objectMapper.writeValueAsString(inDTO);
+
+		if (json != null) {
+			Map<String, Object> jsonMap = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
+			});
+			if (jsonMap.containsKey(GeneralUserConstants.FIELD_PASSWORD)) {
+				jsonMap.put(GeneralUserConstants.FIELD_PASSWORD, UtilConstants.VALUE_SENSITY_MASK);
+
+			}
+			json = objectMapper.writeValueAsString(jsonMap);
+		}
+
+		return json;
 	}
 
 	/**

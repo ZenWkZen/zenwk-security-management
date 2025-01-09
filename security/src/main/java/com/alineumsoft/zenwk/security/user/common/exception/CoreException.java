@@ -2,15 +2,18 @@ package com.alineumsoft.zenwk.security.user.common.exception;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 /*
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  * @class BaseException
  */
+@Slf4j
 public abstract class CoreException extends RuntimeException {
 	static final long serialVersionUID = 1L;
-
-	private final String code;
+	// Metodo comun por convencion en cualquier tabla de logs 
+	private static final String METHOD_MESSAGE_ERROR = "setErrorMessage";
 
 	/**
 	 * <p>
@@ -25,10 +28,9 @@ public abstract class CoreException extends RuntimeException {
 	 * @param repository
 	 * @param entity
 	 */
-	public <T> CoreException(String message, String code, Throwable cause, JpaRepository<T, ?> repository, T entity) {
+	public <T> CoreException(String message, Throwable cause, JpaRepository<T, ?> repository, T entity) {
 		super(message, cause);
-		this.code = code;
-		saveLog(repository, entity);
+		saveLog(repository, entity, message);
 	}
 
 	/**
@@ -41,19 +43,17 @@ public abstract class CoreException extends RuntimeException {
 	 * @param repository
 	 * @param entity
 	 */
-	private <T> void saveLog(JpaRepository<T, ?> repository, T entity) {
+	private <T> void saveLog(JpaRepository<T, ?> repository, T entity, String message) {
 		if (repository != null && entity != null) {
+			try {
+				entity.getClass().getMethod(METHOD_MESSAGE_ERROR, String.class).invoke(entity, message);
+			} catch (Exception e) {
+				log.error(e.getMessage());
+				throw new RuntimeException(e);
+			}
 			repository.save(entity);
 
 		}
-	}
-
-	/**
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	public String getCode() {
-		return this.code;
 	}
 
 }
