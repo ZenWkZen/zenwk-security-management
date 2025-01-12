@@ -34,7 +34,7 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<ErrorResponse> HandleGeneralException(RuntimeException e) {
-		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e.getMessage(), e);
+		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e.getMessage());
 		String code = extractCode(e.getMessage());
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, code));
 	}
@@ -50,7 +50,7 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(TechnicalException.class)
 	public ResponseEntity<ErrorResponse> HandleTechnicalException(TechnicalException e) {
-		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_TECHNICAL, e.getMessage(), e);
+		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_TECHNICAL, e.getMessage());
 		String code = extractCode(e.getMessage());
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, code));
 	}
@@ -66,7 +66,7 @@ public class GlobalHandlerException {
 	 */
 	@ExceptionHandler(FunctionalException.class)
 	public ResponseEntity<ErrorResponse> HandleFunctionalException(FunctionalException e) {
-		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_FUNCTIONAL, e.getMessage(), e);
+		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_FUNCTIONAL, e.getMessage());
 		String code = extractCode(e.getMessage());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createNewError(e, code));
 	}

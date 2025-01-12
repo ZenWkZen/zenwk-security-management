@@ -12,10 +12,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
 import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
+import com.alineumsoft.zenwk.security.user.common.hist.enums.HistoricalOperationEnum;
+import com.alineumsoft.zenwk.security.user.common.util.CryptoUtil;
+import com.alineumsoft.zenwk.security.user.common.util.HistoricalUtil;
 import com.alineumsoft.zenwk.security.user.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
@@ -54,11 +59,13 @@ public class UserService extends ApiRestHelper {
 
 	private final UserStateRepository UserStateRepository;
 
-	private final LogSecurityUserRespository logRepository;
+	private final LogSecurityUserRespository logSecurityUserRespository;
+
+	private final TransactionTemplate transationTemplate;
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> Constructor
+	 * <b> Constructor</b> Constructor
 	 * </p>
 	 * 
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -68,39 +75,37 @@ public class UserService extends ApiRestHelper {
 	 * @param logRepository
 	 */
 	public UserService(UserRepository userRepository, PersonRepository personRepository,
-			UserStateRepository UserStateRepository, LogSecurityUserRespository logRepository) {
+			UserStateRepository UserStateRepository, LogSecurityUserRespository logRepository,
+			TransactionTemplate transationTemplate) {
 		this.userRepository = userRepository;
 		this.personRepository = personRepository;
 		this.UserStateRepository = UserStateRepository;
-		this.logRepository = logRepository;
+		this.logSecurityUserRespository = logRepository;
+		this.transationTemplate = transationTemplate;
 	}
 
 	/**
 	 * 
 	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Cracion/modificacion nuevo usuario
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Metodo de servicio que crea un
+	 * nuevo usuario si cumple con las validaciones
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userInDTO
+	 * @param principal
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public Long createNewUser(CreateUserInDTO userInDTO, HttpServletRequest request) throws JsonProcessingException {
-		LogSecurityUser logSecUser = getLogSecurityUser(request, null);
-		logSecUser.setRequest(getJson(userInDTO));
-		logSecUser.setStatusCode(HttpStatus.CREATED.value());
-		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
-		logSecUser.setMethod(request.getMethod());
-		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
-
+	public Long createUser(CreateUserInDTO userInDTO, HttpServletRequest request, Principal principal) {
+		// inicializacion log transaccional
+		LogSecurityUser logSecUser = initializeLog(request, principal.getName(), getJson(userInDTO),
+				CommonMessageConstants.NOT_APPLICABLE_BODY);
 		try {
-			Person person = createPerson(userInDTO);
-			User user = createUser(userInDTO, person);
-			logRepository.save(logSecUser);
-			return user.getId();
+			return transactionCreateUser(userInDTO, logSecUser);
 		} catch (RuntimeException e) {
-			throw new TechnicalException(e.getMessage(), e.getCause(), logRepository, logSecUser);
+			setLogSecurityError(e, logSecUser);
+			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
 		}
 	}
 
@@ -110,59 +115,174 @@ public class UserService extends ApiRestHelper {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param principal
 	 * @param userInDTO
 	 * @param userOutDTO
 	 * @throws JsonProcessingException
 	 */
-	public boolean updateUser(HttpServletRequest request, Long idUser, ModUserInDTO modUserInDTO)
+	public boolean updateUser(HttpServletRequest request, Long idUser, ModUserInDTO modUserInDTO, Principal principal)
 			throws JsonProcessingException {
-		LogSecurityUser logSecUser = getLogSecurityUser(request, null);
-		// Respuesta por defecto
-		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
-		logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
-		logSecUser.setRequest(getJson(modUserInDTO));
+		// Inicializacion log transaccional
+		LogSecurityUser logSecUser = initializeLog(request, principal.getName(), getJson(modUserInDTO),
+				CommonMessageConstants.NOT_APPLICABLE_BODY);
 		try {
-			updateUserEntity(idUser, modUserInDTO);
-			logSecUser.setStatusCode(HttpStatus.NO_CONTENT.value());
-			logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
-			logRepository.save(logSecUser);
-			return true;
-		} catch (IllegalArgumentException | SQLException e) {
-			throw new TechnicalException(e.getMessage(), e.getCause(), logRepository, logSecUser);
-		} catch (EntityNotFoundException ex) {
-			throw new TechnicalException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(), ex.getCause(),
-					logRepository, logSecUser);
+			return transactionUpdateUser(idUser, modUserInDTO, logSecUser);
+		} catch (RuntimeException e) {
+			setLogSecurityError(e, logSecUser);
+			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
 		}
 	}
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Persiste la actualizacion del
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Se realiza un borrado fisico del
+	 * usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @param principal
+	 * @param request
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal) {
+		LogSecurityUser logSecUser = initializeLog(request, principal.getName(),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY);
+		try {
+			return transactionDeleteUser(idUser, logSecUser);
+		} catch (RuntimeException e) {
+			setLogSecurityError(e, logSecUser);
+			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+		}
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Realiza la transaccion para la
+	 * eliminacion de un usuario en caso de error hace rollback y actualiza el log
+	 * del modulo de seguridad
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @param logSecUser
+	 * @return
+	 */
+	private boolean transactionDeleteUser(Long idUser, LogSecurityUser logSecUser) {
+		return transationTemplate.execute(transaction -> {
+			try {
+				return deleteUserRecord(idUser, logSecUser);
+			} catch (RuntimeException e) {
+				transaction.setRollbackOnly();
+				throw new RuntimeException(getMessageSQLException(e));
+			}
+		});
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Elimina el registro del usuario en
+	 * cascada en la BD
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @param logSecUser
+	 * @return
+	 */
+	private Boolean deleteUserRecord(Long idUser, LogSecurityUser logSecUser) {
+		User user = userRepository.findById(idUser).orElseThrow(
+				() -> new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
+		userRepository.deleteById(idUser);
+		setLogSecuritySuccesful(HttpStatus.NOT_FOUND.value(), logSecUser);
+		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.DELETE, UserHistService.class);
+		return true;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Realiza la transaccion para la
+	 * creacion de un usuario en caso de error hace rollback y actualiza el log del
+	 * modulo de seguridad
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param userInDTO
+	 * @param logSecUser
+	 * @return
+	 */
+	private Long transactionCreateUser(CreateUserInDTO userInDTO, LogSecurityUser logSecUser) {
+		return transationTemplate.execute(transaction -> {
+			try {
+				Person person = savePerson(userInDTO);
+				return createUserRecord(userInDTO, person, logSecUser).getId();
+			} catch (RuntimeException e) {
+				transaction.setRollbackOnly();
+				throw new IllegalArgumentException(getMessageSQLException(e));
+			}
+		});
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Realiza la transaccion para la
+	 * actualizacion de un usuario en caso de error hace rollback y actualiza el log
+	 * del modulo de seguridad
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @param modUserInDTO
+	 * @param logSecUser
 	 * @throws SQLException
 	 */
-	private void updateUserEntity(Long idUser, ModUserInDTO modUserInDTO) throws SQLException {
-		try {
-			User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException());
-			Person person = user.getPerson();
-			ObjectUpdaterUtil.updateDataEqualObject(getPerson(modUserInDTO.getPerson()), person);
-			updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
-			user.setPerson(person);
-			user.setUserModification(user.getUsername());
-			userRepository.save(user);
-		} catch (RuntimeException e) {
-			throw new SQLException(e);
-		}
+	private boolean transactionUpdateUser(Long idUser, ModUserInDTO modUserInDTO, LogSecurityUser logSecUser) {
+		User user = userRepository.findById(idUser).orElseThrow(
+				() -> new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
+		// Se da inicio a la transccion de actualizacion
+		return transationTemplate.execute(transaction -> {
+			try {
+				updateUserRecord(user, idUser, modUserInDTO, logSecUser);
+				return true;
+			} catch (RuntimeException e) {
+				transaction.setRollbackOnly();
+				throw new RuntimeException(e);
+			}
+		});
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_XX </b> CU001_Seguridad_Creación_Usuario </b> Realiza la
+	 * actualizacion de la persona y el usuario en la BD
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param user
+	 * @param idUser
+	 * @param modUserInDTO
+	 * @param logSecUser
+	 */
+	private void updateUserRecord(User user, Long idUser, ModUserInDTO modUserInDTO, LogSecurityUser logSecUser) {
+		Person person = user.getPerson();
+		updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
+		user.setPerson(person);
+		ObjectUpdaterUtil.updateDataEqualObject(getPerson(modUserInDTO.getPerson()), person);
+		updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
+		user.setPerson(person);
+		user.setUserModification(logSecUser.getUserCreation());
+		user.setModificationDate(LocalDateTime.now());
+		userRepository.save(user);
+		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.UPDATE, UserHistService.class);
+		setLogSecuritySuccesful(HttpStatus.NO_CONTENT.value(), logSecUser);
+		logSecurityUserRespository.save(logSecUser);
 	}
 
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Actualizacion de credenciales de
-	 * acceso
+	 * acceso el usuario
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -181,48 +301,28 @@ public class UserService extends ApiRestHelper {
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Se realiza un borrado fisico del
-	 * usuario
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Recuperacion del usuario
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
-	 * @param principal
 	 * @param request
+	 * @param principal
 	 * @return
-	 * @throws JsonProcessingException
 	 */
-	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal)
-			throws JsonProcessingException {
-		LogSecurityUser logSecUser = getLogSecurityUser(request, principal);
-		logSecUser.setResponse(CommonMessageConstants.NOT_APPLICABLE_BODY);
-		logSecUser.setRequest(CommonMessageConstants.NOT_APPLICABLE_BODY);
-		logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
-		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
-
-		if (userRepository.existsById(idUser)) {
-			userRepository.deleteById(idUser);
-			logSecUser.setStatusCode(HttpStatus.NO_CONTENT.value());
-			logRepository.save(logSecUser);
-			return true;
+	public UserOutDTO findByIdUser(Long idUser, HttpServletRequest request, Principal principal) {
+		LogSecurityUser logSecUser = initializeLog(request, principal.getName(),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY);
+		try {
+			User user = userRepository.findById(idUser).orElseThrow(
+					() -> new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
+			setLogSecuritySuccesful(HttpStatus.OK.value(), logSecUser);
+			logSecurityUserRespository.save(logSecUser);
+			return getUserOutDTO(user);
+		} catch (EntityNotFoundException e) {
+			setLogSecurityError(e, logSecUser);
+			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
 		}
-		throw new TechnicalException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(), null, logRepository,
-				logSecUser);
-	}
-
-	/**
-	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Recuperacion de usuario sin
-	 * seguridad
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param idUser
-	 * @return
-	 */
-	public UserOutDTO findByIdUser(Long idUser) {
-		User user = userRepository.findById(idUser).orElse(null);
-		return user.getUserOutDTO();
 
 	}
 
@@ -236,23 +336,49 @@ public class UserService extends ApiRestHelper {
 	 * @param pageable
 	 * @return
 	 */
-	public PageUserDTO findAll(Pageable pageable) {
-		// Conteo paginacion en 1
-		int pageNumber = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
-		// Consulta paginada
-		Page<User> pageUser = userRepository.findAll(PageRequest.of(pageNumber, pageable.getPageSize(),
-				pageable.getSortOr(Sort.by(Sort.Direction.ASC, UserEnum.PERSON_FIRST_NAME.getMessageKey())
-						.and(Sort.by(Sort.Direction.ASC, UserEnum.PERSON_NAME.getMessageKey())))));
-		// Lista de usuario
-		List<UserOutDTO> listUser = pageUser.stream().map(User::getUserOutDTO).collect(Collectors.toList());
+	public PageUserDTO findAll(Pageable pageable, HttpServletRequest request, Principal principal) {
+		LogSecurityUser logSecUser = initializeLog(request, principal.getName(),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY);
+		try {
+			// Conteo paginacion en 1
+			int pageNumber = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
+			// Consulta paginada
+			Page<User> pageUser = userRepository.findAll(PageRequest.of(pageNumber, pageable.getPageSize(),
+					pageable.getSortOr(Sort.by(Sort.Direction.ASC, UserEnum.USER_PERSON_FIRST_NAME.getMessageKey())
+							.and(Sort.by(Sort.Direction.ASC, UserEnum.USER_PERSON_NAME.getMessageKey())))));
+			return getFindAll(pageUser, logSecUser);
+		} catch (RuntimeException e) {
+			setLogSecurityError(e, logSecUser);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+		}
+	}
 
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Obtiene la lista de usuarios en
+	 * caso de ser vacia excepciona
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param pagePerson
+	 * @return
+	 */
+	private PageUserDTO getFindAll(Page<User> pageUser, LogSecurityUser logSecUser) {
+		List<UserOutDTO> listUser = pageUser.stream().map(user -> getUserOutDTO(user)).collect(Collectors.toList());
+
+		if (listUser.isEmpty()) {
+			throw new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage());
+		}
+		setLogSecuritySuccesful(HttpStatus.OK.value(), logSecUser);
+		logSecurityUserRespository.save(logSecUser);
 		return new PageUserDTO(listUser, pageUser.getTotalElements(), pageUser.getTotalPages(),
 				pageUser.getNumber() + 1);
 	}
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> Creación persona
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Realiza la creacioo del usuario en
+	 * la BD
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -260,15 +386,10 @@ public class UserService extends ApiRestHelper {
 	 * @return
 	 * @throws SQLException
 	 */
-	private Person createPerson(CreateUserInDTO userInDTO) {
-		try {
-			Person person = getPerson(userInDTO.getPerson());
-			person.setUserCreation(userInDTO.getUsername());
-			personRepository.save(person);
-			return person;
-		} catch (Exception e) {
-			throw new RuntimeException(getMessageSQLException(e));
-		}
+	private Person savePerson(CreateUserInDTO userInDTO) {
+		Person person = getPerson(userInDTO.getPerson());
+		person.setUserCreation(userInDTO.getUsername());
+		return personRepository.save(person);
 	}
 
 	/**
@@ -284,9 +405,7 @@ public class UserService extends ApiRestHelper {
 	private String getMessageSQLException(Exception e) {
 		if (e.getMessage().contains(GeneralUserConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
 			return UserCoreExceptionEnum.FUNC_USER_MAIL_EXISTS.getCodeMessage();
-
 		}
-
 		return e.getMessage();
 	}
 
@@ -309,45 +428,52 @@ public class UserService extends ApiRestHelper {
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> Creación usuario
+	 * <b> CU001_Seguridad_Creación_Usuario </b> XXX
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userInDTO
 	 * @param person
+	 * @param logSecUser
 	 * @return
 	 */
-	private User createUser(CreateUserInDTO userInDTO, Person person) {
+	private User createUserRecord(CreateUserInDTO userInDTO, Person person, LogSecurityUser logSecUser) {
 		User user = new User();
 		// Crear enun con los estados
 		UserState userState = UserStateRepository.findAll().stream()
 				.filter(state -> UserStateEnum.ENABLE.equals(state.getNameState())).collect(Collectors.toList()).get(0);
-
 		user.setUsername(userInDTO.getUsername());
-		user.setPassword(userInDTO.getPassword());
-		user.setUserCreation(userInDTO.getUsername());
+		user.setPassword(CryptoUtil.encryptPassword(userInDTO.getPassword()));
+		user.setUserCreation(logSecUser.getUserCreation());
 		user.setUserState(userState);
 		user.setPerson(person);
-		return userRepository.save(user);
+		user.setCreationDate(LocalDateTime.now());
+		user = userRepository.save(user);
+		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.INSERT, UserHistService.class);
+		setLogSecuritySuccesful(HttpStatus.CREATED.value(), logSecUser);
+		logSecurityUserRespository.save(logSecUser);
+		return user;
 	}
 
 	/**
 	 * <p>
-	 * <b> General </b> Fija el valor para los atributos: creationDate, userCreation
-	 * y url
+	 * <b> CU001_Seguridad_Creación_Usuario </b> DTO de salida para las solicitudes
+	 * de busqueda
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param request
-	 * @param principal
-	 * @throws JsonProcessingException
+	 * @return
 	 */
-	private LogSecurityUser getLogSecurityUser(HttpServletRequest request, Principal principal) {
-		LogSecurityUser regLog = new LogSecurityUser();
-		regLog.setCreationDate(LocalDateTime.now());
-		regLog.setUserCreation(null);
-		regLog.setUrl(request.getRequestURL().toString());
-		return regLog;
+	public UserOutDTO getUserOutDTO(User user) {
+		UserOutDTO userOutDTO = new UserOutDTO();
+		PersonDTO personDTO = new PersonDTO();
+		personDTO.setEmail(user.getPerson().getEmail());
+		personDTO.setFirstUsurname(user.getPerson().getFirstUsurname());
+		personDTO.setName(user.getPerson().getName());
+		userOutDTO.setUsername(user.getUsername());
+		userOutDTO.setState(user.getUserState().getNameState().name());
+		userOutDTO.setPerson(personDTO);
+		return userOutDTO;
 	}
 
 }

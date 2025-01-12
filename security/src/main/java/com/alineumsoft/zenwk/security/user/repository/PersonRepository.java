@@ -1,29 +1,19 @@
 package com.alineumsoft.zenwk.security.user.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 import com.alineumsoft.zenwk.security.user.entity.Person;
-import com.alineumsoft.zenwk.security.user.entity.User;
 
-public interface PersonRepository  extends JpaRepository<Person, Long>{
+public interface PersonRepository extends JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long> {
 	/**
-	 * <p> <b> CU001_XX </b> XXX  </p> 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a> 
-	 * @param idPerson
-	 * @return
-	 */
-	public Person findByIdPerson(Long idPerson);
-	
-	/**
-	 * 
-	 * <p>
-	 * <b> CU0001_Seguridad_Creación_Usuario </b> Busqueda por email
-	 * </p>
-	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param email
+	 * @param id
 	 * @return
+	 * @see org.springframework.data.repository.CrudRepository#findById(java.lang.Object)
 	 */
-	public User findByEmail(String email);
+	public Optional<Person> findById(Long id);
 
 }

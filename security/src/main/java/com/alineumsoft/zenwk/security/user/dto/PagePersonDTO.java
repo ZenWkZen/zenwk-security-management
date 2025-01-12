@@ -16,10 +16,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PageUserDTO implements Serializable {
+public class PagePersonDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private List<UserOutDTO> users;
+	private List<PersonDTO> people;
 
 	private long totalElements;
 

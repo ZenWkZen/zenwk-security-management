@@ -17,7 +17,7 @@ public final class ObjectUpdaterUtil {
 	/**
 	 * <p>
 	 * <b>Util </b> Metodo para actualizar un objecto del mismo tipo descriminando
-	 * por datos nulos e iguales.
+	 * por datos nulos o iguales.
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>

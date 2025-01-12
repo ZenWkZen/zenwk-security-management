@@ -8,8 +8,10 @@ import com.alineumsoft.zenwk.security.user.common.message.component.MessageSourc
  * @class UserEnum
  */
 public enum UserEnum {
-	PERSON_NAME("person.firstUsurname"), 
-	PERSON_FIRST_NAME("person.name");
+	USER_PERSON_NAME("person.name"), 
+	USER_PERSON_FIRST_NAME("person.firstUsurname"),
+	PERSON_NAME("name"), 
+	PERSON_FIRST_NAME("firstUsurname");
 
 	private final String messageKey;
 

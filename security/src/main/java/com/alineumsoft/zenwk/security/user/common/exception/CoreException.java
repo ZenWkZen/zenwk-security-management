@@ -1,6 +1,9 @@
 package com.alineumsoft.zenwk.security.user.common.exception;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,9 +13,10 @@ import lombok.extern.slf4j.Slf4j;
  * @class BaseException
  */
 @Slf4j
+@Service
 public abstract class CoreException extends RuntimeException {
 	static final long serialVersionUID = 1L;
-	// Metodo comun por convencion en cualquier tabla de logs 
+	// Metodo comun por convencion en cualquier tabla de logs
 	private static final String METHOD_MESSAGE_ERROR = "setErrorMessage";
 
 	/**
@@ -43,6 +47,7 @@ public abstract class CoreException extends RuntimeException {
 	 * @param repository
 	 * @param entity
 	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	private <T> void saveLog(JpaRepository<T, ?> repository, T entity, String message) {
 		if (repository != null && entity != null) {
 			try {

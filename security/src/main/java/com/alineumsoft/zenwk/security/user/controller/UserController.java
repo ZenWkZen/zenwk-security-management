@@ -3,10 +3,8 @@ package com.alineumsoft.zenwk.security.user.controller;
 import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
-import java.util.Base64;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
+import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
+import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
@@ -53,7 +53,7 @@ public class UserController extends ApiRestHelper {
 
 	/**
 	 * <p>
-	 * <b> U001_Seguridad_Creacion_Usuario </b> Creacion usuario
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Creacion usuario
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -67,9 +67,8 @@ public class UserController extends ApiRestHelper {
 	@PostMapping
 	public ResponseEntity<Void> createUser(@RequestBody CreateUserInDTO userInDTO, UriComponentsBuilder uriCB,
 			Principal principal, HttpServletRequest request) throws JsonProcessingException {
-		logRequest(userInDTO, request);
-		Long idUser = userService.createNewUser(userInDTO, request);
-		URI location = uriCB.path(GeneralUserConstants.HEADER_LOCATION).buildAndExpand(idUser).toUri();
+		Long idUser = userService.createUser(userInDTO, request, principal);
+		URI location = uriCB.path(GeneralUserConstants.HEADER_USER_LOCATION).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
 	}
 
@@ -80,40 +79,34 @@ public class UserController extends ApiRestHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
+	 * @param request
+	 * @param principal
 	 * @return
-	 * @throws JsonProcessingException
 	 */
 	@GetMapping("/{idUser}")
-	public ResponseEntity<UserOutDTO> findById(@PathVariable Long idUser, HttpServletRequest request)
-			throws JsonProcessingException {
-		logRequest(request);
-		UserOutDTO userOutDTO = userService.findByIdUser(idUser);
-		if (userOutDTO != null) {
-			return ResponseEntity.ok(userOutDTO);
+	public ResponseEntity<UserOutDTO> findById(@PathVariable Long idUser, HttpServletRequest request,
+			Principal principal) {
+		try {
+			return ResponseEntity.ok(userService.findByIdUser(idUser, request, principal));
+		} catch (FunctionalException | TechnicalException e) {
+			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.notFound().build();
 	}
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Busqueda total
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Busqueda de todos los usuarios en
+	 * el sistema en caso de error excepciona
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param pageable
 	 * @param request
 	 * @return
-	 * @throws JsonProcessingException
 	 */
 	@GetMapping
-	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request)
-			throws JsonProcessingException {
-		logRequest(request);
-		PageUserDTO response = userService.findAll(pageable);
-		if (!response.getUsers().isEmpty()) {
-			return ResponseEntity.ok(response);
-		}
-		return ResponseEntity.notFound().build();
+	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request, Principal principal) {
+		return ResponseEntity.ok(userService.findAll(pageable, request, principal));
 	}
 
 	/**
@@ -129,8 +122,8 @@ public class UserController extends ApiRestHelper {
 	 */
 	@PutMapping("{idUser}")
 	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody ModUserInDTO modUserInDTO,
-			HttpServletRequest request) throws IOException {
-		if (userService.updateUser(request, idUser, modUserInDTO)) {
+			HttpServletRequest request, Principal principal) throws IOException {
+		if (userService.updateUser(request, idUser, modUserInDTO, principal)) {
 			return ResponseEntity.noContent().build();
 		}
 		return ResponseEntity.notFound().build();
@@ -148,8 +141,7 @@ public class UserController extends ApiRestHelper {
 	 * @throws JsonProcessingException
 	 */
 	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal)
-			throws JsonProcessingException {
+	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal) {
 		if (userService.deleteUser(idUser, request, principal)) {
 			return ResponseEntity.noContent().build();
 		}

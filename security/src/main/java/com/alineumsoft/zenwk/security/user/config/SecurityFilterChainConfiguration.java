@@ -16,6 +16,7 @@ import com.alineumsoft.zenwk.security.user.enums.RoleEnum;
 @Configuration
 public class SecurityFilterChainConfiguration {
 	private final static String USER_URL_PATTERN = "/user/**";
+	private final static String PERSON_URL_PATTERN = "/person/**";
 
 	/**
 	 * <p>
@@ -30,7 +31,8 @@ public class SecurityFilterChainConfiguration {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(
-				request -> request.requestMatchers(USER_URL_PATTERN).hasAuthority(RoleEnum.USER.name()))
+				request -> request.requestMatchers(USER_URL_PATTERN).hasAuthority(RoleEnum.USER.name())
+						.requestMatchers(PERSON_URL_PATTERN).hasAuthority(RoleEnum.USER.name()))
 				.httpBasic(Customizer.withDefaults()).csrf(csrf -> csrf.disable());
 		return http.build();
 	}

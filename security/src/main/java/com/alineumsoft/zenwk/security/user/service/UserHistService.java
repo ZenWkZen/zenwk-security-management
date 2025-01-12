@@ -47,7 +47,7 @@ public class UserHistService {
 		userHist.setUserCreation(user.getUserCreation());
 		userHist.setUserModification(user.getUserModification());
 		userHist.setUserState(user.getUserState().getStateId());
-		userHist.setPerson(user.getPerson().getIdPerson());
+		userHist.setPerson(user.getPerson().getId());
 		userHist.setModificationDate(LocalDateTime.now());
 		userHist.setOperation(OperationType);
 		userHist.setCreationDate(user.getCreationDate());

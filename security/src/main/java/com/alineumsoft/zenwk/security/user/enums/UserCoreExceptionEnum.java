@@ -13,7 +13,8 @@ public enum UserCoreExceptionEnum {
 	// fun/tec_entidad_operacion_campo/proceso_descripcion
 	FUNC_USER_CREATE_EMAIL_UNIQUE("FUNC_SEGUSE_001", "functional.user.create.email.unique"),
 	FUNC_USER_NOT_FOUND("FUNC_SEGUSE_002", "functional.user.notfound"),
-	FUNC_USER_MAIL_EXISTS("FUNC_SEGUSE_003", "functional.user.email.exists");
+	FUNC_USER_MAIL_EXISTS("FUNC_SEGUSE_003", "functional.user.email.exists"),
+	FUNC_PERSON_NOT_FOUND("FUNC_SEGUSE_004", "functional.person.notfound");
 
 	private String code;
 	private String key;
