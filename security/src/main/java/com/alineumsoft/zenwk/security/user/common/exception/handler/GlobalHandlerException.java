@@ -68,7 +68,7 @@ public class GlobalHandlerException {
 	public ResponseEntity<ErrorResponse> HandleFunctionalException(FunctionalException e) {
 		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_FUNCTIONAL, e.getMessage());
 		String code = extractCode(e.getMessage());
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createNewError(e, code));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createNewError(e, code));
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class GlobalHandlerException {
 	 * @param formattedString
 	 * @return
 	 */
-	private static String extractCode(String formattedString) {
+	public static String extractCode(String formattedString) {
 		int start = formattedString.indexOf(UtilConstants.LEFT_BRACKET);
 		int end = formattedString.indexOf(UtilConstants.RIGHT_BRACKET);
 

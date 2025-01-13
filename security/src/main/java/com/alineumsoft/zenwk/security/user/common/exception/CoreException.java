@@ -18,7 +18,7 @@ public abstract class CoreException extends RuntimeException {
 	static final long serialVersionUID = 1L;
 	// Metodo comun por convencion en cualquier tabla de logs
 	private static final String METHOD_MESSAGE_ERROR = "setErrorMessage";
-
+	
 	/**
 	 * <p>
 	 * <b> General </b> CoreException

@@ -2,11 +2,13 @@ package com.alineumsoft.zenwk.security.user.common;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 
 import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.user.common.constants.UtilConstants;
+import com.alineumsoft.zenwk.security.user.common.exception.handler.GlobalHandlerException;
 import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.alineumsoft.zenwk.security.user.entity.LogSecurityUser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -115,12 +117,16 @@ public class ApiRestHelper {
 	 */
 	public LogSecurityUser initializeLog(HttpServletRequest httRequest, String userName, String request,
 			String response) {
+		Optional<String> urlOptional = Optional.ofNullable(httRequest).map(req -> req.getRequestURL().toString());
+		Optional<String> methodOptional = Optional.ofNullable(httRequest).map(HttpServletRequest::getMethod);
+
 		LogSecurityUser regLog = new LogSecurityUser();
+
 		regLog.setCreationDate(LocalDateTime.now());
 		regLog.setUserCreation(null);
-		regLog.setUrl(httRequest.getRequestURL().toString());
+		regLog.setUrl(urlOptional.orElse(CommonMessageConstants.NOT_APPLICABLE_URL));
 		regLog.setUserCreation(userName);
-		regLog.setMethod(httRequest.getMethod());
+		regLog.setMethod(methodOptional.orElse(CommonMessageConstants.NOT_APPLICABLE_METHOD));
 		regLog.setRequest(request);
 		regLog.setResponse(response);
 		return regLog;
@@ -157,6 +163,26 @@ public class ApiRestHelper {
 		log.info(CommonMessageConstants.REQUEST_SUCCESSFUL);
 		logSecUser.setStatusCode(httpStatusCode);
 		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creación_Usuario </b> maneja de acuerdo a una
+	 * runtimeException que que excpecion custom corresponde: tecnica o funcional
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param <T>
+	 * @param e
+	 * @param repository
+	 * @param logSecUser
+	 */
+	public boolean isFunctionalException(RuntimeException e) {
+		String code = GlobalHandlerException.extractCode(e.getMessage());
+		if (code.contains(CommonMessageConstants.FUNCTIONAL_EXCEPTION_PREFIX)) {
+			return true;
+		}
+		return false;
 	}
 
 }

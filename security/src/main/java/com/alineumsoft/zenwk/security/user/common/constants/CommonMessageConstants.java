@@ -29,6 +29,8 @@ public final class CommonMessageConstants {
 	// Formato aplicado a la excepcion
 	public static final String FORMAT_EXCEPTION= "[%s] %s";
 	public static final String TECHNICAL_EXCEPTION_PREFIX = "TECH_";
-	public static final String FUNCTIONAL_EXCEPTION_PREFIX = "FUNC_"; 
+	public static final String FUNCTIONAL_EXCEPTION_PREFIX = "FUNC_";
+	public static final String NOT_APPLICABLE_URL="NOT_APPLICABLE_URL";
+	public static final String NOT_APPLICABLE_METHOD="NOT_APPLICABLE_METHOD";
 
 }

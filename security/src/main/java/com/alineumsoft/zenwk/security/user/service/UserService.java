@@ -61,6 +61,8 @@ public class UserService extends ApiRestHelper {
 
 	private final LogSecurityUserRespository logSecurityUserRespository;
 
+	private final PersonService personService;
+
 	private final TransactionTemplate transationTemplate;
 
 	/**
@@ -76,12 +78,13 @@ public class UserService extends ApiRestHelper {
 	 */
 	public UserService(UserRepository userRepository, PersonRepository personRepository,
 			UserStateRepository UserStateRepository, LogSecurityUserRespository logRepository,
-			TransactionTemplate transationTemplate) {
+			TransactionTemplate transationTemplate, PersonService personService) {
 		this.userRepository = userRepository;
 		this.personRepository = personRepository;
 		this.UserStateRepository = UserStateRepository;
 		this.logSecurityUserRespository = logRepository;
 		this.transationTemplate = transationTemplate;
+		this.personService = personService;
 	}
 
 	/**
@@ -102,10 +105,17 @@ public class UserService extends ApiRestHelper {
 		LogSecurityUser logSecUser = initializeLog(request, principal.getName(), getJson(userInDTO),
 				CommonMessageConstants.NOT_APPLICABLE_BODY);
 		try {
-			return transactionCreateUser(userInDTO, logSecUser);
+			// Se invoa el servicio de creación de la persona
+			Long idPerson = personService.createPerson(userInDTO.getPerson(), null, principal);
+			Person person = personRepository.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
+					UserCoreExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
+			return transactionCreateUser(userInDTO, logSecUser, person);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecUser);
-			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			if (isFunctionalException(e)) {
+				throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			}
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
 		}
 	}
 
@@ -129,7 +139,10 @@ public class UserService extends ApiRestHelper {
 			return transactionUpdateUser(idUser, modUserInDTO, logSecUser);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecUser);
-			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			if (isFunctionalException(e)) {
+				throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			}
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
 		}
 	}
 
@@ -153,7 +166,10 @@ public class UserService extends ApiRestHelper {
 			return transactionDeleteUser(idUser, logSecUser);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecUser);
-			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			if (isFunctionalException(e)) {
+				throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			}
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
 		}
 	}
 
@@ -192,8 +208,8 @@ public class UserService extends ApiRestHelper {
 	 * @return
 	 */
 	private Boolean deleteUserRecord(Long idUser, LogSecurityUser logSecUser) {
-		User user = userRepository.findById(idUser).orElseThrow(
-				() -> new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
+		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
+				UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 		userRepository.deleteById(idUser);
 		setLogSecuritySuccesful(HttpStatus.NOT_FOUND.value(), logSecUser);
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.DELETE, UserHistService.class);
@@ -210,12 +226,12 @@ public class UserService extends ApiRestHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userInDTO
 	 * @param logSecUser
+	 * @param person
 	 * @return
 	 */
-	private Long transactionCreateUser(CreateUserInDTO userInDTO, LogSecurityUser logSecUser) {
+	private Long transactionCreateUser(CreateUserInDTO userInDTO, LogSecurityUser logSecUser, Person person) {
 		return transationTemplate.execute(transaction -> {
 			try {
-				Person person = savePerson(userInDTO);
 				return createUserRecord(userInDTO, person, logSecUser).getId();
 			} catch (RuntimeException e) {
 				transaction.setRollbackOnly();
@@ -238,8 +254,8 @@ public class UserService extends ApiRestHelper {
 	 * @throws SQLException
 	 */
 	private boolean transactionUpdateUser(Long idUser, ModUserInDTO modUserInDTO, LogSecurityUser logSecUser) {
-		User user = userRepository.findById(idUser).orElseThrow(
-				() -> new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
+		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
+				UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 		// Se da inicio a la transccion de actualizacion
 		return transationTemplate.execute(transaction -> {
 			try {
@@ -373,23 +389,6 @@ public class UserService extends ApiRestHelper {
 		logSecurityUserRespository.save(logSecUser);
 		return new PageUserDTO(listUser, pageUser.getTotalElements(), pageUser.getTotalPages(),
 				pageUser.getNumber() + 1);
-	}
-
-	/**
-	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> Realiza la creacioo del usuario en
-	 * la BD
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userInDTO
-	 * @return
-	 * @throws SQLException
-	 */
-	private Person savePerson(CreateUserInDTO userInDTO) {
-		Person person = getPerson(userInDTO.getPerson());
-		person.setUserCreation(userInDTO.getUsername());
-		return personRepository.save(person);
 	}
 
 	/**

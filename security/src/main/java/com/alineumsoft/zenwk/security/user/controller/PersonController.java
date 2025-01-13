@@ -1,8 +1,8 @@
 package com.alineumsoft.zenwk.security.user.controller;
 
 import java.net.URI;
+import java.security.Principal;
 
-import org.springframework.boot.actuate.web.exchanges.HttpExchange.Principal;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
-import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
-import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
@@ -78,10 +76,8 @@ public class PersonController extends ApiRestHelper {
 	@PutMapping("/{idUser}")
 	public ResponseEntity<Void> updatePerson(@PathVariable Long idUser, @RequestBody PersonDTO inDTO,
 			HttpServletRequest request, Principal princiapl) {
-		if (personService.updatePerson(idUser, inDTO, request, princiapl)) {
-			return ResponseEntity.noContent().build();
-		}
-		return ResponseEntity.notFound().build();
+		personService.updatePerson(idUser, inDTO, request, princiapl);
+		return ResponseEntity.noContent().build();
 	}
 
 	/**
@@ -93,15 +89,13 @@ public class PersonController extends ApiRestHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @param request
-	 * @param princiapl
+	 * @param principal
 	 * @return
 	 */
 	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal princiapl) {
-		if (personService.deleteUser(idUser, request, princiapl)) {
-			return ResponseEntity.noContent().build();
-		}
-		return ResponseEntity.notFound().build();
+	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal) {
+		personService.deletePerson(idUser, request, principal);
+		return ResponseEntity.noContent().build();
 	}
 
 	/**
@@ -111,19 +105,15 @@ public class PersonController extends ApiRestHelper {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param idUser
+	 * @param idPerson
 	 * @param request
 	 * @param principal
 	 * @return
 	 */
 	@GetMapping("/{idPerson}")
-	public ResponseEntity<PersonDTO> findById(@PathVariable Long idUser, HttpServletRequest request,
+	public ResponseEntity<PersonDTO> findById(@PathVariable Long idPerson, HttpServletRequest request,
 			Principal principal) {
-		try {
-			return ResponseEntity.ok(personService.findByIdPerson(idUser, request, principal));
-		} catch (FunctionalException | TechnicalException e) {
-			return ResponseEntity.notFound().build();
-		}
+		return ResponseEntity.ok(personService.findByIdPerson(idPerson, request, principal));
 	}
 
 	/**

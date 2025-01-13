@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
-import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
-import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
@@ -74,6 +72,41 @@ public class UserController extends ApiRestHelper {
 
 	/**
 	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Actualizacion de usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @param modUserInDTO
+	 * @return
+	 * @throws IOException
+	 */
+	@PutMapping("{idUser}")
+	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody ModUserInDTO modUserInDTO,
+			HttpServletRequest request, Principal principal) throws IOException {
+		userService.updateUser(request, idUser, modUserInDTO, principal);
+		return ResponseEntity.noContent().build();
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Eliminacion de usuario de la bd
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @param request
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	@DeleteMapping("/{idUser}")
+	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal) {
+		userService.deleteUser(idUser, request, principal);
+		return ResponseEntity.noContent().build();
+	}
+
+	/**
+	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Busqueda por id
 	 * </p>
 	 * 
@@ -86,11 +119,7 @@ public class UserController extends ApiRestHelper {
 	@GetMapping("/{idUser}")
 	public ResponseEntity<UserOutDTO> findById(@PathVariable Long idUser, HttpServletRequest request,
 			Principal principal) {
-		try {
-			return ResponseEntity.ok(userService.findByIdUser(idUser, request, principal));
-		} catch (FunctionalException | TechnicalException e) {
-			return ResponseEntity.notFound().build();
-		}
+		return ResponseEntity.ok(userService.findByIdUser(idUser, request, principal));
 	}
 
 	/**
@@ -107,44 +136,5 @@ public class UserController extends ApiRestHelper {
 	@GetMapping
 	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request, Principal principal) {
 		return ResponseEntity.ok(userService.findAll(pageable, request, principal));
-	}
-
-	/**
-	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Actualizacion de usuario
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param idUser
-	 * @param modUserInDTO
-	 * @return
-	 * @throws IOException
-	 */
-	@PutMapping("{idUser}")
-	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody ModUserInDTO modUserInDTO,
-			HttpServletRequest request, Principal principal) throws IOException {
-		if (userService.updateUser(request, idUser, modUserInDTO, principal)) {
-			return ResponseEntity.noContent().build();
-		}
-		return ResponseEntity.notFound().build();
-	}
-
-	/**
-	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Eliminacion de usuario de la bd
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param idUser
-	 * @param request
-	 * @return
-	 * @throws JsonProcessingException
-	 */
-	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal) {
-		if (userService.deleteUser(idUser, request, principal)) {
-			return ResponseEntity.noContent().build();
-		}
-		return ResponseEntity.notFound().build();
 	}
 }
