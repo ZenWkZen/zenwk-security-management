@@ -1,10 +1,10 @@
 package com.alineumsoft.zenwk.security.person.service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import java.security.Principal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.alineumsoft.zenwk.security.common.ApiRestHelper;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
@@ -22,6 +21,7 @@ import com.alineumsoft.zenwk.security.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
 import com.alineumsoft.zenwk.security.entity.LogSecurityUser;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
+import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.person.entity.Person;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class PersonService extends ApiRestHelper {
+public class PersonService extends ApiRestSecurityHelper {
 	private final PersonRepository personRepository;
 	private final LogSecurityUserRespository logSecurityUserRespository;
 	private final TransactionTemplate transactionTemplate;

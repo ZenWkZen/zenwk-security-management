@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.alineumsoft.zenwk.security.common.ApiRestHelper;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
@@ -25,6 +24,7 @@ import com.alineumsoft.zenwk.security.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
 import com.alineumsoft.zenwk.security.entity.LogSecurityUser;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
+import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.person.repository.PersonRepository;
@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
-public class UserService extends ApiRestHelper {
+public class UserService extends ApiRestSecurityHelper {
 	private final UserRepository userRepository;
 
 	private final PersonRepository personRepository;

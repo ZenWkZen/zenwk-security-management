@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.common.ApiRestHelper;
+import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
 import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
 import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
