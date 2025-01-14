@@ -14,29 +14,30 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.alineumsoft.zenwk.security.user.common.ApiRestHelper;
-import com.alineumsoft.zenwk.security.user.common.constants.CommonMessageConstants;
-import com.alineumsoft.zenwk.security.user.common.exception.FunctionalException;
-import com.alineumsoft.zenwk.security.user.common.exception.TechnicalException;
-import com.alineumsoft.zenwk.security.user.common.hist.enums.HistoricalOperationEnum;
-import com.alineumsoft.zenwk.security.user.common.util.CryptoUtil;
-import com.alineumsoft.zenwk.security.user.common.util.HistoricalUtil;
-import com.alineumsoft.zenwk.security.user.common.util.ObjectUpdaterUtil;
-import com.alineumsoft.zenwk.security.user.constants.GeneralUserConstants;
+import com.alineumsoft.zenwk.security.common.ApiRestHelper;
+import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
+import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
+import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
+import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
+import com.alineumsoft.zenwk.security.common.util.HistoricalUtil;
+import com.alineumsoft.zenwk.security.common.util.ObjectUpdaterUtil;
+import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
+import com.alineumsoft.zenwk.security.entity.LogSecurityUser;
+import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
+import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
+import com.alineumsoft.zenwk.security.person.entity.Person;
+import com.alineumsoft.zenwk.security.person.repository.PersonRepository;
+import com.alineumsoft.zenwk.security.person.service.PersonService;
+import com.alineumsoft.zenwk.security.repository.LogSecurityUserRespository;
 import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
-import com.alineumsoft.zenwk.security.user.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
-import com.alineumsoft.zenwk.security.user.entity.LogSecurityUser;
-import com.alineumsoft.zenwk.security.user.entity.Person;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.entity.UserState;
-import com.alineumsoft.zenwk.security.user.enums.UserCoreExceptionEnum;
 import com.alineumsoft.zenwk.security.user.enums.UserEnum;
 import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
-import com.alineumsoft.zenwk.security.user.repository.LogSecurityUserRespository;
-import com.alineumsoft.zenwk.security.user.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
 import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -108,7 +109,7 @@ public class UserService extends ApiRestHelper {
 			// Se invoa el servicio de creación de la persona
 			Long idPerson = personService.createPerson(userInDTO.getPerson(), null, principal);
 			Person person = personRepository.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
-					UserCoreExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
+					SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
 			return transactionCreateUser(userInDTO, logSecUser, person);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecUser);
@@ -209,7 +210,7 @@ public class UserService extends ApiRestHelper {
 	 */
 	private Boolean deleteUserRecord(Long idUser, LogSecurityUser logSecUser) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
-				UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 		userRepository.deleteById(idUser);
 		setLogSecuritySuccesful(HttpStatus.NOT_FOUND.value(), logSecUser);
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.DELETE, UserHistService.class);
@@ -255,7 +256,7 @@ public class UserService extends ApiRestHelper {
 	 */
 	private boolean transactionUpdateUser(Long idUser, ModUserInDTO modUserInDTO, LogSecurityUser logSecUser) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
-				UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 		// Se da inicio a la transccion de actualizacion
 		return transationTemplate.execute(transaction -> {
 			try {
@@ -331,7 +332,7 @@ public class UserService extends ApiRestHelper {
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY);
 		try {
 			User user = userRepository.findById(idUser).orElseThrow(
-					() -> new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
+					() -> new EntityNotFoundException(SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
 			setLogSecuritySuccesful(HttpStatus.OK.value(), logSecUser);
 			logSecurityUserRespository.save(logSecUser);
 			return getUserOutDTO(user);
@@ -383,7 +384,7 @@ public class UserService extends ApiRestHelper {
 		List<UserOutDTO> listUser = pageUser.stream().map(user -> getUserOutDTO(user)).collect(Collectors.toList());
 
 		if (listUser.isEmpty()) {
-			throw new EntityNotFoundException(UserCoreExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage());
+			throw new EntityNotFoundException(SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage());
 		}
 		setLogSecuritySuccesful(HttpStatus.OK.value(), logSecUser);
 		logSecurityUserRespository.save(logSecUser);
@@ -402,8 +403,8 @@ public class UserService extends ApiRestHelper {
 	 * @return
 	 */
 	private String getMessageSQLException(Exception e) {
-		if (e.getMessage().contains(GeneralUserConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
-			return UserCoreExceptionEnum.FUNC_USER_MAIL_EXISTS.getCodeMessage();
+		if (e.getMessage().contains(SecurityUserConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
+			return SecurityExceptionEnum.FUNC_USER_MAIL_EXISTS.getCodeMessage();
 		}
 		return e.getMessage();
 	}

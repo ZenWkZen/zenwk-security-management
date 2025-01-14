@@ -1,17 +1,21 @@
-package com.alineumsoft.zenwk.security.user.enums;
+package com.alineumsoft.zenwk.security.enums;
 
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
- * @class UserEnum
+ * @class PermissionEnum
  */
-public enum UserEnum {
-	USER_PERSON_NAME("person.name"), 
-	USER_PERSON_FIRST_NAME("person.firstUsurname"),
-	PERSON_NAME("name"), 
-	PERSON_FIRST_NAME("firstUsurname");
+public enum PermissionEnum {
+	CREATE_ENTITY("permission.create.entity"), 
+	VIEW_ENTITY("permission.view.entity"),
+	UPDATE_ENTITY("permission.update.entity"), 
+	DELETE_ENTITY("permission.delete.entity"),
+	CREATE_USER("permission.create.user"), 
+	VIEW_USER("permission.view.user"), 
+	DELETE_USER("permission.delete.user"),
+	UPDATE_USER("permission.update.user");
 
 	private final String messageKey;
 
@@ -19,7 +23,7 @@ public enum UserEnum {
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param messageKey
 	 */
-	UserEnum(String messageKey) {
+	private PermissionEnum(String messageKey) {
 		this.messageKey = messageKey;
 	}
 
@@ -29,13 +33,14 @@ public enum UserEnum {
 	 */
 	public String getDescription() {
 		return MessageSourceAccessorComponent.getMessage(messageKey);
+
 	}
 
 	/**
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @return
 	 */
-	public String getMessageKey() {
+	public String getPermissionKey() {
 		return messageKey;
 	}
-
 }

@@ -2,6 +2,8 @@ package com.alineumsoft.zenwk.security.user.entity;
 
 import java.time.LocalDateTime;
 
+import com.alineumsoft.zenwk.security.person.entity.Person;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

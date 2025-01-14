@@ -2,6 +2,7 @@ package com.alineumsoft.zenwk.security.user.dto;
 
 import java.io.Serializable;
 
+import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.user.entity.UserState;
 
 import lombok.Data;

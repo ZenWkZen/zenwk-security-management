@@ -1,0 +1,12 @@
+package com.alineumsoft.zenwk.security.common.hist.enums;
+
+/**
+ * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+ * @project SecurityUser
+ * @class HistoricalEnum
+ */
+public enum HistoricalOperationEnum {
+	INSERT, 
+	UPDATE, 
+	DELETE;
+}

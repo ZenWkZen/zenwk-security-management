@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.entity;
+package com.alineumsoft.zenwk.security.person.entity;
 
 import java.time.LocalDateTime;
 
@@ -13,54 +13,49 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
- * @project SecurityUser
- */
-@Entity
-@Table(name = "seg_user_hist")
 @Data
-public class UserHist {
+@Entity
+@Table(name = "per_person_hist")
+@NoArgsConstructor
+public class PersonHist {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "hseguseidhist")
+	@Column(name = "hperperid")
 	private Long id;
 	
-	@Column(name="hseguseiduser")
-	private Long idUser;
+	@Column(name = "hperperidperson")
+	private Long idPerson;
 
-	@Column(name = "hseguseusername")
-	private String username;
+	@Column(name = "hperpername")
+	private String name;
 
-	@Column(name = "hsegusepassword")
-	private String password;
+	@Column(name = "hperperfirstusurname")
+	private String firstUsurname;
 
-	@Column(name = "hsegusucreationdate")
+	@Column(name = "hperperemail")
+	private String email;
+
+	@Column(name = "hperpercreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "hsegusumodificationdate")
+	@Column(name = "hperpermodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "hseguseusercreation")
+	@Column(name = "hperperusercreation")
 	private String userCreation;
 
-	@Column(name = "hseguseusermodification")
+	@Column(name = "hperperusermodification")
 	private String userModification;
 
-	@Column(name = "hsegusidestate")
-	private Long userState;
-
-	@Column(name = "hseguseidperson")
-	private Long person;
-	
 	// Campo de auditoria propio de la entidad historica
-	@Column(name = "hsegusehistcreationdate")
+	@Column(name = "hperperhistcreationdate")
 	private LocalDateTime histCreationDate;
-	
+
 	// Campo de auditoria propio de la entidad historica
+	@Column(name = "hperperoperation")
 	@Enumerated(EnumType.STRING)
-	@Column(name = "hseguseoperation")
 	private HistoricalOperationEnum operation;
 
 }

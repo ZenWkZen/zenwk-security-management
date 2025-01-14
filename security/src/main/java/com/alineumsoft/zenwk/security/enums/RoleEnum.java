@@ -1,17 +1,18 @@
-package com.alineumsoft.zenwk.security.user.enums;
+package com.alineumsoft.zenwk.security.enums;
 
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
- * @class UserEnum
+ * @class RolesEnum
  */
-public enum UserEnum {
-	USER_PERSON_NAME("person.name"), 
-	USER_PERSON_FIRST_NAME("person.firstUsurname"),
-	PERSON_NAME("name"), 
-	PERSON_FIRST_NAME("firstUsurname");
+public enum RoleEnum {
+	SYSTEM_ADMIN("role.security.systemadmin"),
+	SECURITY_ADMIN("role.security.securityadmin"),
+	APP_ADMIN("role.security.appadmin"), 
+	AUDITOR("role.security.auditor"), 
+	USER("role.security.user");
 
 	private final String messageKey;
 
@@ -19,7 +20,7 @@ public enum UserEnum {
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param messageKey
 	 */
-	UserEnum(String messageKey) {
+	private RoleEnum(String messageKey) {
 		this.messageKey = messageKey;
 	}
 
@@ -27,14 +28,15 @@ public enum UserEnum {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @return
 	 */
-	public String getDescription() {
+	public String getDesciption() {
 		return MessageSourceAccessorComponent.getMessage(messageKey);
 	}
 
 	/**
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @return
 	 */
-	public String getMessageKey() {
+	public String getMessagekey() {
 		return messageKey;
 	}
 
