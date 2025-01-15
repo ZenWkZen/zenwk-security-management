@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
 import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
 import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
@@ -31,7 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RestController
 @RequestMapping("/person")
-public class PersonController extends ApiRestHelper {
+public class PersonController {
 	private final PersonService personService;
 
 	public PersonController(PersonService personService) {

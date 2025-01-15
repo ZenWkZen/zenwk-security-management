@@ -2,18 +2,19 @@ package com.alineumsoft.zenwk.security.user.repository;
 
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alineumsoft.zenwk.security.user.entity.User;
 
+/**
+ * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+ * @project security-zenwk
+ * @class UserRepository
+ */
 public interface UserRepository extends CrudRepository<User, Long>, PagingAndSortingRepository<User, Long> {
-	public final static String DELETE_PERSON = "DELETE FROM Person "
-			+ "p WHERE id = (SELECT u.person.id FROM User u WHERE u.id = :idUser)";
+	public final static String JPQL_FIND_USER_BY_PERSON_ID = "SELECT u FROM User u WHERE u.person.id = :idPerson";
 
 	/**
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -31,8 +32,16 @@ public interface UserRepository extends CrudRepository<User, Long>, PagingAndSor
 	 */
 	public boolean existsById(Long idUser);
 
-	@Modifying
-	@Transactional
-	@Query(DELETE_PERSON)
-	void deletePersonByUserId(@Param("idUser") Long idUser);
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> JPQL para la busqueda de un usuario
+	 * a partir del id de la persona
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idPerson
+	 * @return
+	 */
+	@Query(JPQL_FIND_USER_BY_PERSON_ID)
+	public User finByIdPerson(Long idPerson);
 }

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.alineumsoft.zenwk.security.person.entity.Person;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -53,7 +52,7 @@ public class User {
 	@JoinColumn(name = "segusestateid")
 	private UserState userState;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "seguseidperson")
 	private Person person;
 

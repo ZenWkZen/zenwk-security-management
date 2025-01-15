@@ -1,16 +1,10 @@
 package com.alineumsoft.zenwk.security.common.helper;
 
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Optional;
-
-import org.springframework.http.HttpStatus;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.UtilConstants;
 import com.alineumsoft.zenwk.security.common.exception.handler.GlobalHandlerException;
-import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
-import com.alineumsoft.zenwk.security.entity.LogSecurityUser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,8 +53,8 @@ public class ApiRestHelper {
 			if (json != null) {
 				Map<String, Object> jsonMap = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
 				});
-				if (jsonMap.containsKey(SecurityUserConstants.FIELD_PASSWORD)) {
-					jsonMap.put(SecurityUserConstants.FIELD_PASSWORD, UtilConstants.VALUE_SENSITY_MASK);
+				if (jsonMap.containsKey(UtilConstants.FIELD_PASSWORD)) {
+					jsonMap.put(UtilConstants.FIELD_PASSWORD, UtilConstants.VALUE_SENSITY_MASK);
 
 				}
 				json = objectMapper.writeValueAsString(jsonMap);
@@ -100,7 +94,6 @@ public class ApiRestHelper {
 		log.info(request.getMethod());
 		log.info(request.getRequestURL().toString());
 	}
-
 
 	/**
 	 * <p>

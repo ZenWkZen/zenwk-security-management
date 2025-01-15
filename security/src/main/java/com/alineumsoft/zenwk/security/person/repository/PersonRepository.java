@@ -7,6 +7,11 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import com.alineumsoft.zenwk.security.person.entity.Person;
 
+/**
+ * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+ * @project security-zenwk
+ * @class PersonRepository
+ */
 public interface PersonRepository extends JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long> {
 	/**
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>

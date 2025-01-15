@@ -12,6 +12,7 @@ public final class UtilConstants {
 	public static final String LEFT_BRACKET = "[";
     public static final String RIGHT_BRACKET = "]";
     public final static String VALUE_SENSITY_MASK = "************";
+    public final static String FIELD_PASSWORD = "password";
  
 	private UtilConstants() {
 
