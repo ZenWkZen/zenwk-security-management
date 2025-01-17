@@ -2,6 +2,8 @@ package com.alineumsoft.zenwk.security.common.exception.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -13,7 +15,14 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ErrorResponse {
-	private String message;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String field;
+
+	private String error;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String code;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private LocalDateTime timestamp;
 }

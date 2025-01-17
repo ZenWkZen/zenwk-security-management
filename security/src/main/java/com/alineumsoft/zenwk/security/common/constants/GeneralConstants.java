@@ -5,7 +5,7 @@ package com.alineumsoft.zenwk.security.common.constants;
  * @project SecurityUser
  * @class UtilConstants
  */
-public final class UtilConstants {
+public final class GeneralConstants {
 	public static final String CLASSPATH_LANG = "classpath:i18n/messages";
 	// Constante para identificar el metodo que guarda en el historico
 	public static final String METHOD_SAVE_HISTORICAL = "saveHistorical";
@@ -13,9 +13,6 @@ public final class UtilConstants {
     public static final String RIGHT_BRACKET = "]";
     public final static String VALUE_SENSITY_MASK = "************";
     public final static String FIELD_PASSWORD = "password";
- 
-	private UtilConstants() {
-
-	}
-
+    // Rerencia la anotacion personalizada @EntityExists
+    public final static String ANOTATION_ENTITY_EXISTS = "existsById";    
 }

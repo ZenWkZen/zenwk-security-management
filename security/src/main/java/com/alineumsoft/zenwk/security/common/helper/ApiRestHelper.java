@@ -3,7 +3,7 @@ package com.alineumsoft.zenwk.security.common.helper;
 import java.util.Map;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
-import com.alineumsoft.zenwk.security.common.constants.UtilConstants;
+import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.handler.GlobalHandlerException;
 import com.alineumsoft.zenwk.security.constants.SecurityConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,8 +54,8 @@ public class ApiRestHelper {
 			if (json != null) {
 				Map<String, Object> jsonMap = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
 				});
-				if (jsonMap.containsKey(UtilConstants.FIELD_PASSWORD)) {
-					jsonMap.put(UtilConstants.FIELD_PASSWORD, UtilConstants.VALUE_SENSITY_MASK);
+				if (jsonMap.containsKey(GeneralConstants.FIELD_PASSWORD)) {
+					jsonMap.put(GeneralConstants.FIELD_PASSWORD, GeneralConstants.VALUE_SENSITY_MASK);
 
 				}
 				json = objectMapper.writeValueAsString(jsonMap);
@@ -129,6 +129,9 @@ public class ApiRestHelper {
 	 * @return
 	 */
 	public String getClientIp(HttpServletRequest request) {
+		if (request == null) {
+			return CommonMessageConstants.AUTO_GENERATED_EVENT;
+		}
 		String ipAddress = request.getHeader(SecurityConstants.HEADER_X_FORWARDED_FOR);
 		if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
 			ipAddress = request.getRemoteAddr();
@@ -147,7 +150,8 @@ public class ApiRestHelper {
 	 * @return
 	 */
 	public String getUserAgent(HttpServletRequest request) {
-		return request.getHeader(SecurityConstants.HEADER_USER_AGENT);
+		return request != null ? request.getHeader(SecurityConstants.HEADER_USER_AGENT)
+				: CommonMessageConstants.AUTO_GENERATED_EVENT;
 	}
 
 	/**
@@ -160,7 +164,10 @@ public class ApiRestHelper {
 	 * @param startTime
 	 * @return
 	 */
-	public String getExecutionTime(long startTime) {
+	public String getExecutionTime(Long startTime) {
+		if (startTime == null) {
+			return CommonMessageConstants.AUTO_GENERATED_EVENT;
+		}
 		long timeMillis = System.currentTimeMillis() - startTime;
 		double timeSeconds = timeMillis / 1000.0;
 		return String.format(SecurityConstants.TIME_FORMAT_SECONDS, timeSeconds);

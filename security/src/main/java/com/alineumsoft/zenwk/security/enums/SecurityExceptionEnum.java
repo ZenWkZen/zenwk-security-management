@@ -1,7 +1,7 @@
 package com.alineumsoft.zenwk.security.enums;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
-import com.alineumsoft.zenwk.security.common.enums.CoreExceptionEnum;
+import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
 /**
@@ -46,7 +46,7 @@ public enum SecurityExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(key);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_MESSAGE_NOT_FOUND.getCodeDescription());
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription());
 		}
 	}
 
@@ -58,7 +58,7 @@ public enum SecurityExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(key, params);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_MESSAGE_NOT_FOUND.getCodeDescription());
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription());
 		}
 	}
 

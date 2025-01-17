@@ -9,7 +9,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
-import com.alineumsoft.zenwk.security.common.constants.UtilConstants;
+import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -35,7 +35,7 @@ public class MessageSourceConfiguration {
 	@Bean
 	public ReloadableResourceBundleMessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-		messageSource.setBasename(UtilConstants.CLASSPATH_LANG);
+		messageSource.setBasename(GeneralConstants.CLASSPATH_LANG);
 		messageSource.setDefaultEncoding("UTF-8");
 		messageSource.setCacheSeconds(3600);
 		return messageSource;

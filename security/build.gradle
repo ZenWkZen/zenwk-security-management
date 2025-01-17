@@ -36,6 +36,9 @@ dependencies {
 	//testImplementation 'org.springframework.security:spring-security-test'
     //runtimeOnly 'org.hsqldb:hsqldb'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Para las validaciones a nivel de bean:
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+	implementation 'org.hibernate.validator:hibernate-validator'
 }
 
 tasks.named('test') {

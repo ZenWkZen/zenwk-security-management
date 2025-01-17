@@ -5,6 +5,7 @@ import java.security.Principal;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +46,7 @@ public class PersonController {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param inDTO
+	 * @param dto
 	 * @param request
 	 * @param uri
 	 * @param principal
@@ -53,10 +54,10 @@ public class PersonController {
 	 * @throws JsonProcessingException
 	 */
 	@PostMapping
-	public ResponseEntity<Void> createPerson(@RequestBody PersonDTO inDTO, HttpServletRequest request,
+	public ResponseEntity<Void> createPerson(@Validated @RequestBody PersonDTO dto, HttpServletRequest request,
 			UriComponentsBuilder uriCB, Principal principal) {
 		startTime.set(System.currentTimeMillis());
-		Long idPerson = personService.createPerson(inDTO, request, principal, startTime.get());
+		Long idPerson = personService.createPerson(dto, request, principal, startTime.get());
 		URI location = uriCB.path(SecurityConstants.HEADER_PERSON_LOCATION).buildAndExpand(idPerson).toUri();
 		return ResponseEntity.created(location).build();
 	}

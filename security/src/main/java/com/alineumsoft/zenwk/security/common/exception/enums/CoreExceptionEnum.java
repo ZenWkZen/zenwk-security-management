@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.common.enums;
+package com.alineumsoft.zenwk.security.common.exception.enums;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
@@ -12,8 +12,10 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
  * @class GeneralCoreExceptionEnum
  */
 public enum CoreExceptionEnum {
-	TECH_HISTORICAL_ENTITY_NOT_FOUND("TECH_GEN_001", "error.historical.entity.notfound"),
-	TECH_MESSAGE_NOT_FOUND("TECH_GEN_002", "error.enum.message.notfound");
+	TECH_COMMON_HISTORICAL_ENTITY_NOT_FOUND("TECH_GEN_001", "common.exception.error.historical.entity.notfound"),
+	TECH_COMMON_MESSAGE_NOT_FOUND("TECH_GEN_002", "common.exception.error.enum.message.notfound"),
+	TECH_COMMON_ANOTATION_ENTITY_NOT_EXISTS("TECH_GEN_003", "common.exception.entity.noexists");
+	
 
 	private String code;
 	private String messageKey;
@@ -41,7 +43,7 @@ public enum CoreExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(messageKey);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_MESSAGE_NOT_FOUND.getCodeDescription());
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription());
 		}
 	}
 
@@ -59,7 +61,7 @@ public enum CoreExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(messageKey, params);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_MESSAGE_NOT_FOUND.getCodeDescription(messageKey));
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription(messageKey));
 		}
 	}
 

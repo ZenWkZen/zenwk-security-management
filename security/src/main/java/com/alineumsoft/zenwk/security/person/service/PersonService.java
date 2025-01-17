@@ -30,7 +30,7 @@ import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.person.repository.PersonRepository;
-import com.alineumsoft.zenwk.security.repository.LogSecurityUserRespository;
+import com.alineumsoft.zenwk.security.repository.LogSecurityRespository;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.event.DeleteUserEvent;
@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PersonService extends ApiRestSecurityHelper {
 	private final PersonRepository personRepository;
-	private final LogSecurityUserRespository logSecurityUserRespository;
+	private final LogSecurityRespository logSecurityUserRespository;
 	private final TransactionTemplate transactionTemplate;
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -59,7 +59,7 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @param logSecurityUser
 	 * @param transactionTemplate
 	 */
-	public PersonService(PersonRepository personRepository, LogSecurityUserRespository logSecurityUser,
+	public PersonService(PersonRepository personRepository, LogSecurityRespository logSecurityUser,
 			TransactionTemplate transactionTemplate, ApplicationEventPublisher eventPublisher) {
 		this.personRepository = personRepository;
 		this.logSecurityUserRespository = logSecurityUser;
@@ -254,7 +254,7 @@ public class PersonService extends ApiRestSecurityHelper {
 		person = personRepository.save(person);
 		// Persistencia de logs
 		HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.INSERT, PersonHistService.class);
-		setLogSecuritySuccesful(HttpStatus.CREATED.value(), logSecurity, starTime);
+		setLogSecuritySuccesfull(HttpStatus.CREATED.value(), logSecurity, starTime);
 		logSecurityUserRespository.save(logSecurity);
 		return person;
 
@@ -278,7 +278,7 @@ public class PersonService extends ApiRestSecurityHelper {
 		person.setModificationDate(LocalDateTime.now());
 		personRepository.save(person);
 		HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.UPDATE, PersonHistService.class);
-		setLogSecuritySuccesful(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
+		setLogSecuritySuccesfull(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
 		logSecurityUserRespository.save(logSecurity);
 	}
 
@@ -299,7 +299,7 @@ public class PersonService extends ApiRestSecurityHelper {
 				SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
 		personRepository.deleteById(idPerson);
 		HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.DELETE, PersonHistService.class);
-		setLogSecuritySuccesful(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
+		setLogSecuritySuccesfull(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
 		logSecurityUserRespository.save(logSecurity);
 		return true;
 	}
@@ -363,7 +363,7 @@ public class PersonService extends ApiRestSecurityHelper {
 		try {
 			Person person = personRepository.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
 					SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
-			setLogSecuritySuccesful(HttpStatus.OK.value(), logSecurity, starTime);
+			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity, starTime);
 			logSecurityUserRespository.save(logSecurity);
 			return new PersonDTO(person);
 		} catch (RuntimeException e) {
@@ -439,7 +439,7 @@ public class PersonService extends ApiRestSecurityHelper {
 	private PagePersonDTO getFindAll(Page<Person> pagePerson, LogSecurity logSecurity, Long starTime) {
 		List<PersonDTO> listPeople = pagePerson.stream().map(person -> new PersonDTO(person))
 				.collect(Collectors.toList());
-		setLogSecuritySuccesful(HttpStatus.OK.value(), logSecurity, starTime);
+		setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity, starTime);
 		logSecurityUserRespository.save(logSecurity);
 		return new PagePersonDTO(listPeople, pagePerson.getTotalElements(), pagePerson.getTotalPages(),
 				pagePerson.getNumber() + 1);

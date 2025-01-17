@@ -1,17 +1,21 @@
 package com.alineumsoft.zenwk.security.common.exception.handler;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
-import com.alineumsoft.zenwk.security.common.constants.UtilConstants;
+import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.common.exception.dto.ErrorResponse;
+import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,6 +77,25 @@ public class GlobalHandlerException {
 
 	/**
 	 * <p>
+	 * <b> Validate: </b> Recupera el mensaje de error en la validacion encontrado
+	 * en el dto/rquestBody de la solicitud
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param e
+	 * @return
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<List<ErrorResponse>> handleValidationException(MethodArgumentNotValidException e) {
+		List<ErrorResponse> listError = e.getBindingResult().getFieldErrors().stream()
+				.map(fieldError -> new ErrorResponse(fieldError.getField(),
+						MessageSourceAccessorComponent.getMessage(fieldError.getDefaultMessage()), null, null))
+				.collect(Collectors.toList());
+		return ResponseEntity.badRequest().body(listError);
+	}
+
+	/**
+	 * <p>
 	 * <b> Util: </b> Crea una nueva instancia para ErrorResponse
 	 * </p>
 	 * 
@@ -86,7 +109,7 @@ public class GlobalHandlerException {
 			code = extractCode(e.getMessage());
 		}
 
-		return new ErrorResponse(CommonMessageConstants.MSG_EXEPTION_GENERAL,
+		return new ErrorResponse(null, CommonMessageConstants.MSG_EXEPTION_GENERAL,
 				code == null ? CommonMessageConstants.CODE_MSG_GENERAL : code, LocalDateTime.now());
 	}
 
@@ -100,8 +123,8 @@ public class GlobalHandlerException {
 	 * @return
 	 */
 	public static String extractCode(String formattedString) {
-		int start = formattedString.indexOf(UtilConstants.LEFT_BRACKET);
-		int end = formattedString.indexOf(UtilConstants.RIGHT_BRACKET);
+		int start = formattedString.indexOf(GeneralConstants.LEFT_BRACKET);
+		int end = formattedString.indexOf(GeneralConstants.RIGHT_BRACKET);
 
 		if (start < 0 || end < 0 || start >= end) {
 			return null;

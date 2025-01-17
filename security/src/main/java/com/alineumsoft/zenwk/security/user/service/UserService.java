@@ -31,7 +31,7 @@ import com.alineumsoft.zenwk.security.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.person.event.PersonDeleteEvent;
-import com.alineumsoft.zenwk.security.repository.LogSecurityUserRespository;
+import com.alineumsoft.zenwk.security.repository.LogSecurityRespository;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.entity.User;
@@ -51,7 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserService extends ApiRestSecurityHelper {
 	private final UserRepository userRepository;
-	private final LogSecurityUserRespository logSecurityUserRespository;
+	private final LogSecurityRespository logSecurityUserRespository;
 	private final TransactionTemplate transactionTemplate;
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -66,7 +66,7 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param transationTemplate
 	 * @param eventPublisher
 	 */
-	public UserService(UserRepository userRepository, LogSecurityUserRespository logRepository,
+	public UserService(UserRepository userRepository, LogSecurityRespository logRepository,
 			TransactionTemplate transationTemplate, ApplicationEventPublisher eventPublisher) {
 		this.userRepository = userRepository;
 		this.logSecurityUserRespository = logRepository;
@@ -211,7 +211,7 @@ public class UserService extends ApiRestSecurityHelper {
 	private Boolean deleteUserRecord(Long idUser, LogSecurity logSecurity, User user, Long starTime) {
 		userRepository.deleteById(idUser);
 		// Registro de logs
-		setLogSecuritySuccesful(HttpStatus.NOT_FOUND.value(), logSecurity, starTime);
+		setLogSecuritySuccesfull(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.DELETE, UserHistService.class);
 		logSecurityUserRespository.save(logSecurity);
 		return true;
@@ -302,7 +302,7 @@ public class UserService extends ApiRestSecurityHelper {
 		userRepository.save(user);
 		// Registro en log
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.UPDATE, UserHistService.class);
-		setLogSecuritySuccesful(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
+		setLogSecuritySuccesfull(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
 		logSecurityUserRespository.save(logSecurity);
 	}
 
@@ -318,7 +318,7 @@ public class UserService extends ApiRestSecurityHelper {
 	private User getUser(UserDTO dto) {
 		User user = new User();
 		user.setUsername(dto.getUsername());
-		user.setPassword(dto.getPassword());
+		user.setPassword(CryptoUtil.encryptPassword(dto.getPassword()));
 		user.setEmail(dto.getEmail());
 		user.setState(dto.getState());
 		return user;
@@ -343,9 +343,9 @@ public class UserService extends ApiRestSecurityHelper {
 		try {
 			User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
 					SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
-			setLogSecuritySuccesful(HttpStatus.OK.value(), logSecurity, starTime);
+			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity, starTime);
 			logSecurityUserRespository.save(logSecurity);
-			return new UserDTO(user.getUsername(), null, user.getEmail(), user.getState(), null);
+			return new UserDTO(user);
 		} catch (EntityNotFoundException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
@@ -408,11 +408,8 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private PageUserDTO getFindAll(Page<User> pageUser, LogSecurity logSecurity, Long starTime) {
-		List<UserDTO> listUser = pageUser.stream()
-				.map(user -> new UserDTO(user.getUsername(), null, user.getEmail(), user.getState(), null))
-				.collect(Collectors.toList());
-
-		setLogSecuritySuccesful(HttpStatus.OK.value(), logSecurity, starTime);
+		List<UserDTO> listUser = pageUser.stream().map(user -> new UserDTO(user)).collect(Collectors.toList());
+		setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity, starTime);
 		logSecurityUserRespository.save(logSecurity);
 		return new PageUserDTO(listUser, pageUser.getTotalElements(), pageUser.getTotalPages(),
 				pageUser.getNumber() + 1);
@@ -457,7 +454,7 @@ public class UserService extends ApiRestSecurityHelper {
 		user = userRepository.save(user);
 		// Persistencia en log
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.INSERT, UserHistService.class);
-		setLogSecuritySuccesful(HttpStatus.CREATED.value(), logSecurity, startTime);
+		setLogSecuritySuccesfull(HttpStatus.CREATED.value(), logSecurity, startTime);
 		logSecurityUserRespository.save(logSecurity);
 		return user;
 	}
@@ -475,6 +472,17 @@ public class UserService extends ApiRestSecurityHelper {
 	private void deletePersonEvent(Long id, Principal principal) {
 		PersonDeleteEvent event = new PersonDeleteEvent(this, id, principal);
 		eventPublisher.publishEvent(event);
+	}
+	
+	/**
+	 * <p> <b> CU001_XX </b> XXX  </p> 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a> 
+	 * @param idUser
+	 * @return
+	 */
+	public boolean existsById(Long idUser) {
+		User user = userRepository.findById(idUser).orElse(null);
+		return user != null && user.getId() > 0; 
 	}
 
 }

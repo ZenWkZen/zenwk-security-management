@@ -1,8 +1,8 @@
 package com.alineumsoft.zenwk.security.common.util;
 
 import com.alineumsoft.zenwk.security.common.component.AppContextHolderComponent;
-import com.alineumsoft.zenwk.security.common.constants.UtilConstants;
-import com.alineumsoft.zenwk.security.common.enums.CoreExceptionEnum;
+import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
+import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
 import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
 
 import lombok.extern.slf4j.Slf4j;
@@ -37,12 +37,12 @@ public final class HistoricalUtil {
 		try {
 			Object targetService = AppContextHolderComponent.getBean(classService);
 			targetService.getClass()
-					.getMethod(UtilConstants.METHOD_SAVE_HISTORICAL, entity.getClass(), HistoricalOperationEnum.class)
+					.getMethod(GeneralConstants.METHOD_SAVE_HISTORICAL, entity.getClass(), HistoricalOperationEnum.class)
 					.invoke(targetService, entity, operation);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			throw new RuntimeException(CoreExceptionEnum.TECH_HISTORICAL_ENTITY_NOT_FOUND
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_HISTORICAL_ENTITY_NOT_FOUND
 					.getCodeDescription(entity.getClass().getSimpleName()).concat(e.getMessage()));
 		}
 	}

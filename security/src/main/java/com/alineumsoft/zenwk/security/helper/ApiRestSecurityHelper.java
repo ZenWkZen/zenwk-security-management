@@ -9,7 +9,6 @@ import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,18 +40,16 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 		Optional<String> urlOptional = Optional.ofNullable(httpRequest).map(req -> req.getRequestURL().toString());
 		Optional<String> methodOptional = Optional.ofNullable(httpRequest).map(HttpServletRequest::getMethod);
 		LogSecurity regLog = new LogSecurity();
-
 		regLog.setCreationDate(LocalDateTime.now());
 		regLog.setUserCreation(null);
-		regLog.setUrl(urlOptional.orElse(CommonMessageConstants.NOT_APPLICABLE_URL));
+		regLog.setUrl(urlOptional.orElse(CommonMessageConstants.AUTO_GENERATED_EVENT));
 		regLog.setUserCreation(userName);
-		regLog.setMethod(methodOptional.orElse(CommonMessageConstants.NOT_APPLICABLE_METHOD));
+		regLog.setMethod(methodOptional.orElse(CommonMessageConstants.AUTO_GENERATED_EVENT));
 		regLog.setRequest(request);
 		regLog.setResponse(response);
-
 		regLog.setIpAddress(getClientIp(httpRequest));
 		regLog.setUserAgent(getUserAgent(httpRequest));
-		regLog.setServiceName(response);
+		regLog.setServiceName(serviceName);
 		return regLog;
 	}
 
@@ -89,7 +86,7 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 	 * @param logSecUser
 	 * @param starTime
 	 */
-	public void setLogSecuritySuccesful(int httpStatusCode, LogSecurity logSecUser, Long startTime) {
+	public void setLogSecuritySuccesfull(int httpStatusCode, LogSecurity logSecUser, Long startTime) {
 		log.info(CommonMessageConstants.REQUEST_SUCCESSFUL);
 		logSecUser.setStatusCode(httpStatusCode);
 		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);

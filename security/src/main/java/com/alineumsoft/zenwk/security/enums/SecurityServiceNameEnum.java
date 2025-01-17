@@ -6,7 +6,7 @@ package com.alineumsoft.zenwk.security.enums;
  * @class ServiceNameEnum
  */
 public  enum SecurityServiceNameEnum {
-	USER_CREATE("user.crate"),
+	USER_CREATE("user.create"),
 	USER_UPDATE("user.update"),
 	USER_DELETE("user.delete"),
 	USER_FIND_BY_ID("user.findById"),

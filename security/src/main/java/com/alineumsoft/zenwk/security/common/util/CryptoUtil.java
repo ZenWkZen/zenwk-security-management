@@ -38,7 +38,7 @@ public final class CryptoUtil {
 	 * @return
 	 */
 	public static String encryptPassword(String rawPassword) {
-		return BCRYPT_ENCODER.encode(rawPassword);
+		return rawPassword != null ? BCRYPT_ENCODER.encode(rawPassword) : null;
 	}
 
 	/**
