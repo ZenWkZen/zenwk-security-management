@@ -17,44 +17,53 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "per_person_hist")
+@Table(name = "sec_person_hist")
 @NoArgsConstructor
 public class PersonHist {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "hperperid")
+	@Column(name = "hsecperid")
 	private Long id;
 	
-	@Column(name = "hperperidperson")
+	@Column(name = "hsecperidperson")
 	private Long idPerson;
 
-	@Column(name = "hperpername")
-	private String name;
+	@Column(name = "hsecperfirstname")
+	private String firstName;
 
-	@Column(name = "hperperfirstusurname")
-	private String firstUsurname;
+	@Column(name = "hsecpermiddlename")
+	private String middleName;
 
-	@Column(name = "hperperemail")
-	private String email;
+	@Column(name = "hsecperlastname")
+	private String lastName;
 
-	@Column(name = "hperpercreationdate")
+	@Column(name = "hsecpermiddleLastname")
+	private String middleLastName;
+
+	@Column(name = "hsecperdateofbirth")
+	private LocalDateTime dateOfBirth;
+
+	@Column(name = "hsecperaddress")
+	private String address;
+
+	@Column(name = "hsecpercreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "hperpermodificationdate")
+	@Column(name = "hsecpermodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "hperperusercreation")
+	@Column(name = "hsecperusercreation")
 	private String userCreation;
 
-	@Column(name = "hperperusermodification")
+	@Column(name = "hsecperusermodification")
 	private String userModification;
 
 	// Campo de auditoria propio de la entidad historica
-	@Column(name = "hperperhistcreationdate")
+	@Column(name = "hsecperhistcreationdate")
 	private LocalDateTime histCreationDate;
 
 	// Campo de auditoria propio de la entidad historica
-	@Column(name = "hperperoperation")
+	@Column(name = "hsecperoperation")
 	@Enumerated(EnumType.STRING)
 	private HistoricalOperationEnum operation;
 

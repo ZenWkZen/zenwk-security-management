@@ -40,17 +40,20 @@ public class PersonHistService {
 	 * @param operationType
 	 */
 	public void saveHistorical(Person person, HistoricalOperationEnum operationType) {
-		PersonHist personHist = new PersonHist();
-		personHist.setIdPerson(person.getId());
-		personHist.setName(person.getName());
-		personHist.setFirstUsurname(person.getFirstUsurname());
-		personHist.setEmail(person.getEmail());
-		personHist.setCreationDate(person.getCreationDate());
-		personHist.setModificationDate(person.getModificationDate());
-		personHist.setUserCreation(person.getUserCreation());
-		personHist.setUserModification(person.getUserModification());
-		personHist.setHistCreationDate(LocalDateTime.now());
-		personHist.setOperation(operationType);
-		personHistRepository.save(personHist);
+		PersonHist historical = new PersonHist();
+		historical.setIdPerson(person.getId());
+		historical.setFirstName(person.getFirstName());
+		historical.setMiddleName(person.getMiddleName());
+		historical.setLastName(person.getLastName());
+		historical.setMiddleLastName(person.getMiddleLastName());
+		historical.setDateOfBirth(person.getDateOfBirth());
+		historical.setAddress(person.getAddress());
+		historical.setCreationDate(person.getCreationDate());
+		historical.setModificationDate(person.getModificationDate());
+		historical.setUserCreation(person.getUserCreation());
+		historical.setUserModification(person.getUserModification());
+		historical.setHistCreationDate(LocalDateTime.now());
+		historical.setOperation(operationType);
+		personHistRepository.save(historical);
 	}
 }

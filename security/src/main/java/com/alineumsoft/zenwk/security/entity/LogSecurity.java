@@ -14,35 +14,48 @@ import lombok.Data;
  * @project SecurityUser
  * @class LogSecurityUser
  */
-@Entity(name = "log_seg_user")
+@Entity(name = "log_sec")
 @Data
-public class LogSecurityUser {
+public class LogSecurity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "logseguseid")
+	@Column(name = "logsecuseid")
 	private Long idLogUser;
 	
-	@Column(name="logsegusemethod")
+	@Column(name="logsecusemethod")
 	private String method;
 
-	@Column(name = "logsegusestatuscode")
+	@Column(name = "logsecusestatuscode")
 	private Integer statusCode;
 
-	@Column(name = "logseguseurl")
+	@Column(name = "logsecuseurl")
 	private String url;
 
-	@Column(name = "logseguserequest")
+	@Column(name = "logsecuserequest")
 	private String request;
 
-	@Column(name = "logseguseresponse")
+	@Column(name = "logsecuseresponse")
 	private String response;
 
-	@Column(columnDefinition = "TEXT", name = "logseguseerrormessage")
+	@Column(columnDefinition = "TEXT", name = "logsecuseerrormessage")
 	private String errorMessage;
 
-	@Column(name = "logsegusecreationdate")
+	@Column(name = "logsecusecreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "logseguseusercreation")
+	@Column(name = "logsecuseusercreation")
 	private String userCreation;
+	
+
+    @Column(name = "logsecuseipaddress")
+    private String ipAddress;
+
+    @Column(name = "logsecuseuseragent")
+    private String userAgent;
+
+    @Column(name = "logsecuseexecutiontime")
+    private String executionTime;
+
+    @Column(name = "logsecuseservicename")
+    private String serviceName;
 }

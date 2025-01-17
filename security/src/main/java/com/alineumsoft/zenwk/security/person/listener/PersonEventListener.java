@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.person.event.FindPersonByIdEvent;
-import com.alineumsoft.zenwk.security.person.event.PersonCreatedEvent;
+import com.alineumsoft.zenwk.security.person.event.PersonDeleteEvent;
 import com.alineumsoft.zenwk.security.person.service.PersonService;
 
 /**
@@ -39,9 +39,9 @@ public class PersonEventListener {
 	 * @param event
 	 */
 	@EventListener
-	public void handlePersonCreatedEvent(PersonCreatedEvent event) {
-		Long idPerson = personService.createPerson(event.getPersonDTO(), null, event.getPrincipal());
-		event.setIdPerson(idPerson);
+	public void handlePersonDeleteEvent(PersonDeleteEvent event) {
+		boolean isDelete = personService.deletePerson(event.getIdPerson(), null, event.getPrincipal(), null);
+		event.setDelete(isDelete);
 	}
 
 	/**
@@ -58,5 +58,6 @@ public class PersonEventListener {
 		Person person = personService.findEntityByIdPerson(event.getIdPerson());
 		event.setPerson(person);
 	}
+	
 
 }

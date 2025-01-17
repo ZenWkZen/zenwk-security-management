@@ -1,8 +1,10 @@
 package com.alineumsoft.zenwk.security.person.dto;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import com.alineumsoft.zenwk.security.person.entity.Person;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,26 +17,36 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PersonDTO implements Serializable {
-	static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Long idUser;
+	
+	private String firstName;
 
-	private String name;
+	private String middleName;
 
-	private String firstUsurname;
+	private String lastName;
 
-	private String email;
+	private String middleLastName;
+
+	private LocalDateTime dateOfBirth;
+
+	private String address;
 
 	/**
-	 * <p>
 	 * <b>Constructor </b> Genera una instancia a partir de la entidad JPA Person
-	 * </p>
 	 * 
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param person
 	 */
 	public PersonDTO(Person person) {
-		this.name = person.getName();
-		this.firstUsurname = person.getFirstUsurname();
-		this.email = person.getEmail();
+		this.firstName = person.getFirstName();
+		this.middleName = person.getMiddleName();
+		this.lastName = person.getLastName();
+		this.middleLastName = person.getMiddleLastName();
+		this.dateOfBirth = person.getDateOfBirth();
+		this.address = person.getAddress();
 	}
 
 }

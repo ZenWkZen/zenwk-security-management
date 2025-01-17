@@ -3,6 +3,7 @@ package com.alineumsoft.zenwk.security.user.entity;
 import java.time.LocalDateTime;
 
 import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
+import com.alineumsoft.zenwk.security.enums.UserStateEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,48 +20,52 @@ import lombok.Data;
  * @project SecurityUser
  */
 @Entity
-@Table(name = "seg_user_hist")
+@Table(name = "sec_user_hist")
 @Data
 public class UserHist {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "hseguseidhist")
+	@Column(name = "hsecuseidhist")
 	private Long id;
 	
-	@Column(name="hseguseiduser")
+	@Column(name="hsecuseiduser")
 	private Long idUser;
 
-	@Column(name = "hseguseusername")
+	@Column(name = "hsecuseusername")
 	private String username;
 
-	@Column(name = "hsegusepassword")
+	@Column(name = "hsecusepassword")
 	private String password;
+	
+	@Column(name = "hsecuseemail")
+	private String email;
 
-	@Column(name = "hsegusucreationdate")
+	@Column(name = "hsecusucreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "hsegusumodificationdate")
+	@Column(name = "hsecusumodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "hseguseusercreation")
+	@Column(name = "hsecuseusercreation")
 	private String userCreation;
 
-	@Column(name = "hseguseusermodification")
+	@Column(name = "hsecuseusermodification")
 	private String userModification;
 
-	@Column(name = "hsegusidestate")
-	private Long userState;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "hsecusestate")
+	private UserStateEnum state;
 
-	@Column(name = "hseguseidperson")
-	private Long person;
+	@Column(name = "hsecuseidperson")
+	private Long idPerson;
 	
 	// Campo de auditoria propio de la entidad historica
-	@Column(name = "hsegusehistcreationdate")
+	@Column(name = "hsecusehistcreationdate")
 	private LocalDateTime histCreationDate;
 	
 	// Campo de auditoria propio de la entidad historica
 	@Enumerated(EnumType.STRING)
-	@Column(name = "hseguseoperation")
+	@Column(name = "hsecuseoperation")
 	private HistoricalOperationEnum operation;
 
 }

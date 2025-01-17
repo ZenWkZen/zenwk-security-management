@@ -1,6 +1,7 @@
 package com.alineumsoft.zenwk.security.common.exception;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,7 @@ public abstract class CoreException extends RuntimeException {
 	 * @param repository
 	 * @param entity
 	 */
+	@Async
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	private <T> void saveLog(JpaRepository<T, ?> repository, T entity, String message) {
 		if (repository != null && entity != null) {
@@ -57,7 +59,6 @@ public abstract class CoreException extends RuntimeException {
 				throw new RuntimeException(e);
 			}
 			repository.save(entity);
-
 		}
 	}
 

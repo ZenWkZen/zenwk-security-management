@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
+import com.alineumsoft.zenwk.security.constants.SecurityConstants;
 import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.person.service.PersonService;
@@ -32,6 +32,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/person")
 public class PersonController {
 	private final PersonService personService;
+	private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
 	public PersonController(PersonService personService) {
 		this.personService = personService;
@@ -54,8 +55,9 @@ public class PersonController {
 	@PostMapping
 	public ResponseEntity<Void> createPerson(@RequestBody PersonDTO inDTO, HttpServletRequest request,
 			UriComponentsBuilder uriCB, Principal principal) {
-		Long idPerson = personService.createPerson(inDTO, request, principal);
-		URI location = uriCB.path(SecurityUserConstants.HEADER_PERSON_LOCATION).buildAndExpand(idPerson).toUri();
+		startTime.set(System.currentTimeMillis());
+		Long idPerson = personService.createPerson(inDTO, request, principal, startTime.get());
+		URI location = uriCB.path(SecurityConstants.HEADER_PERSON_LOCATION).buildAndExpand(idPerson).toUri();
 		return ResponseEntity.created(location).build();
 	}
 
@@ -73,9 +75,10 @@ public class PersonController {
 	 * @return
 	 */
 	@PutMapping("/{idUser}")
-	public ResponseEntity<Void> updatePerson(@PathVariable Long idUser, @RequestBody PersonDTO inDTO,
+	public ResponseEntity<Void> updatePerson(@PathVariable Long idPerson, @RequestBody PersonDTO inDTO,
 			HttpServletRequest request, Principal princiapl) {
-		personService.updatePerson(idUser, inDTO, request, princiapl);
+		startTime.set(System.currentTimeMillis());
+		personService.updatePerson(idPerson, inDTO, request, princiapl, startTime.get());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -92,8 +95,10 @@ public class PersonController {
 	 * @return
 	 */
 	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal) {
-		personService.deletePerson(idUser, request, principal);
+	public ResponseEntity<Void> deletePerson(@PathVariable Long idUser, HttpServletRequest request,
+			Principal principal) {
+		startTime.set(System.currentTimeMillis());
+		personService.deletePerson(idUser, request, principal, startTime.get());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -112,7 +117,8 @@ public class PersonController {
 	@GetMapping("/{idPerson}")
 	public ResponseEntity<PersonDTO> findById(@PathVariable Long idPerson, HttpServletRequest request,
 			Principal principal) {
-		return ResponseEntity.ok(personService.findByIdPerson(idPerson, request, principal));
+		startTime.set(System.currentTimeMillis());
+		return ResponseEntity.ok(personService.findByIdPerson(idPerson, request, principal, startTime.get()));
 	}
 
 	/**
@@ -129,7 +135,8 @@ public class PersonController {
 	 */
 	@GetMapping
 	public ResponseEntity<PagePersonDTO> findAll(HttpServletRequest request, Principal principal, Pageable pegeable) {
-		return ResponseEntity.ok(personService.findAll(pegeable, request, principal));
+		startTime.set(System.currentTimeMillis());
+		return ResponseEntity.ok(personService.findAll(pegeable, request, principal, startTime.get()));
 	}
 
 }

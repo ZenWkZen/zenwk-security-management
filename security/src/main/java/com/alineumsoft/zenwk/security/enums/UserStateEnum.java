@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.enums;
+package com.alineumsoft.zenwk.security.enums;
 
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
@@ -8,7 +8,8 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
  * @class UserStateEnum
  */
 public enum UserStateEnum {
-	ENABLE("user.state.enable"), 
+	INCOMPLETE_PERFIL("user.state.icompleteperfil"),
+	ACTIVE("user.state.active"), 
 	DISABLE("user.state.disabled");
 
 	private final String messageKey;

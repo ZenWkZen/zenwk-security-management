@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.user.enums;
+package com.alineumsoft.zenwk.security.enums;
 
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
@@ -7,11 +7,11 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
  * @project SecurityUser
  * @class UserEnum
  */
-public enum UserEnum {
-	USER_PERSON_NAME("person.name"), 
-	USER_PERSON_FIRST_NAME("person.firstUsurname"),
-	PERSON_NAME("name"), 
-	PERSON_FIRST_NAME("firstUsurname");
+public enum UserPersonEnum {
+	USER_USERNAME("username"), 
+	USER_EMAIL("email"),
+	PERSON_FIRST_NAME("firstName"), 
+	PERSON_LAST_NAME("lastName");
 
 	private final String messageKey;
 
@@ -19,7 +19,7 @@ public enum UserEnum {
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param messageKey
 	 */
-	UserEnum(String messageKey) {
+	UserPersonEnum(String messageKey) {
 		this.messageKey = messageKey;
 	}
 

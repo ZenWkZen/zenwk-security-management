@@ -5,6 +5,7 @@ import java.util.Map;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.UtilConstants;
 import com.alineumsoft.zenwk.security.common.exception.handler.GlobalHandlerException;
+import com.alineumsoft.zenwk.security.constants.SecurityConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ApiRestHelper {
 	/**
 	 * <p>
-	 * <b> Util </b> Escribe el log de la peticion cuando existe un request body
+	 * <b> General </b> Escribe el log de la peticion cuando existe un request body
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -69,7 +70,8 @@ public class ApiRestHelper {
 
 	/**
 	 * <p>
-	 * <b> Util </b> Escribe el log de la peticion cuando NO existe un request body
+	 * <b> General </b> Escribe el log de la peticion cuando NO existe un request
+	 * body
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -97,8 +99,8 @@ public class ApiRestHelper {
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> maneja de acuerdo a una
-	 * runtimeException que que excpecion custom corresponde: tecnica o funcional
+	 * <b> General </b> maneja de acuerdo a una runtimeException que que excpecion
+	 * custom corresponde: tecnica o funcional
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -113,6 +115,55 @@ public class ApiRestHelper {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * <p>
+	 * <b> General </b> Encabezado HTTP estandar no oficial utilizado para
+	 * identificar la dirección IP del cliente original que realiza una solicitud a
+	 * traves de un servidor proxy o balanceador de carga.
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param request
+	 * @return
+	 */
+	public String getClientIp(HttpServletRequest request) {
+		String ipAddress = request.getHeader(SecurityConstants.HEADER_X_FORWARDED_FOR);
+		if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+			ipAddress = request.getRemoteAddr();
+		}
+		return ipAddress;
+	}
+
+	/**
+	 * <p>
+	 * <b> General </b> Encabezado HTTP para identificar informacion sobre el agente
+	 * que envia la solicitud
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param request
+	 * @return
+	 */
+	public String getUserAgent(HttpServletRequest request) {
+		return request.getHeader(SecurityConstants.HEADER_USER_AGENT);
+	}
+
+	/**
+	 * <p>
+	 * <b> General </b> Tiempo de duración de la solicitud en segundos formateado a
+	 * dos decimales
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param startTime
+	 * @return
+	 */
+	public String getExecutionTime(long startTime) {
+		long timeMillis = System.currentTimeMillis() - startTime;
+		double timeSeconds = timeMillis / 1000.0;
+		return String.format(SecurityConstants.TIME_FORMAT_SECONDS, timeSeconds);
 	}
 
 }

@@ -15,31 +15,31 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "seg_user_rol")
+@Table(name = "sec_user_rol")
 @Data
 public class Role {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "segrolid")
+	@Column(name = "secrolid")
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "segrolname")
+	@Column(name = "secrolname")
 	private RoleEnum name;
 
-	@Column(name = "segroldescription")
+	@Column(name = "secroldescription")
 	private String description;
 
-	@Column(name = "segrolcreationdate")
+	@Column(name = "secrolcreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "segrolmodificationdate")
+	@Column(name = "secrolmodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "segrolcreationuser")
+	@Column(name = "secrolcreationuser")
 	private String creationUser;
 
-	@Column(name = "segrolmodificationuser")
+	@Column(name = "secrolmodificationuser")
 	private LocalDateTime modificationUser;
 
 }

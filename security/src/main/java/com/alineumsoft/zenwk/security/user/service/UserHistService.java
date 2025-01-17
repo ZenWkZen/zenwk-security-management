@@ -1,10 +1,12 @@
 package com.alineumsoft.zenwk.security.user.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
+import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.entity.UserHist;
 import com.alineumsoft.zenwk.security.user.repository.UserHistRepository;
@@ -40,20 +42,21 @@ public class UserHistService {
 	 * @param userHist
 	 */
 	public void saveHistorical(User user, HistoricalOperationEnum OperationType) {
-		UserHist userHist = new UserHist();
-		userHist.setIdUser(user.getId());
-		userHist.setUsername(user.getUsername());
-		userHist.setPassword(user.getPassword());
-		userHist.setUserCreation(user.getUserCreation());
-		userHist.setUserModification(user.getUserModification());
-		userHist.setUserState(user.getUserState().getStateId());
-		userHist.setPerson(user.getPerson().getId());
-		userHist.setModificationDate(LocalDateTime.now());
-		userHist.setOperation(OperationType);
-		userHist.setCreationDate(user.getCreationDate());
-		userHist.setModificationDate(user.getModificationDate());
-		userHist.setHistCreationDate(LocalDateTime.now());
-		userHistRepository.save(userHist);
+		Long idPerson = Optional.ofNullable(user.getPerson()).map(Person::getId).orElse(null);
+		UserHist historical = new UserHist();
+		historical.setIdUser(user.getId());
+		historical.setUsername(user.getUsername());
+		historical.setPassword(user.getPassword());
+		historical.setEmail(user.getEmail());
+		historical.setState(user.getState());
+		historical.setIdPerson(idPerson);
+		historical.setUserCreation(user.getUserCreation());
+		historical.setUserModification(user.getUserModification());
+		historical.setCreationDate(user.getCreationDate());
+		historical.setModificationDate(user.getModificationDate());
+		historical.setOperation(OperationType);
+		historical.setHistCreationDate(LocalDateTime.now());
+		userHistRepository.save(historical);
 	}
 
 }

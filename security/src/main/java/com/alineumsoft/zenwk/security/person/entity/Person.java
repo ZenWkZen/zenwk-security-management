@@ -7,8 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -18,58 +16,41 @@ import lombok.Data;
  * @class UserState
  */
 @Entity
-@Table(name = "per_person")
+@Table(name = "sec_person")
 @Data
 public class Person {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "perperidperson")
+	@Column(name = "secperid")
 	private Long id;
 
-	@Column(name = "perpername")
-	private String name;
+	@Column(name = "secperfirstname")
+	private String firstName;
 
-	@Column(name = "perperfirstusurname")
-	private String firstUsurname;
+	@Column(name = "secpermiddlename")
+	private String middleName;
 
-	@Column(name = "perperemail")
-	private String email;
+	@Column(name = "secperlastname")
+	private String lastName;
 
-	@Column(name = "perpercreationdate")
+	@Column(name = "secpermiddleLastname")
+	private String middleLastName;
+
+	@Column(name = "secperdateofbirth")
+	private LocalDateTime dateOfBirth;
+
+	@Column(name = "secperaddress")
+	private String address;
+
+	@Column(name = "secpercreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "perpermodificationdate")
+	@Column(name = "secpermodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "perperusercreation")
+	@Column(name = "secperusercreation")
 	private String userCreation;
 
-	@Column(name = "perperusermodification")
+	@Column(name = "secperusermodification")
 	private String userModification;
-
-	/**
-	 * <p>
-	 * <b> Util </b> Asigna la fecha actual
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 */
-	@PrePersist
-	protected void onCreate() {
-		if (this.creationDate == null) {
-			this.creationDate = LocalDateTime.now();
-		}
-	}
-
-	/**
-	 * <p>
-	 * <b>Actualiza la fecha de modificación</b> cada vez que la entidad se
-	 * modifica.
-	 * </p>
-	 */
-	@PreUpdate
-	protected void onUpdate() {
-		this.modificationDate = LocalDateTime.now();
-	}
-
 }

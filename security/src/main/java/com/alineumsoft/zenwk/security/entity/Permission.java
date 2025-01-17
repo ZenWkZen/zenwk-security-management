@@ -15,31 +15,31 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "seg_permission")
+@Table(name = "sec_permission")
 @Data
 public class Permission {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "segperidpermission")
+	@Column(name = "secperidpermission")
 	private Long id;
 
-	@Column(name = "segpername")
+	@Column(name = "secpername")
 	@Enumerated(EnumType.STRING)
 	private PermissionEnum name;
 
-	@Column(name = "segperdescription")
+	@Column(name = "secperdescription")
 	private String description;
 
-	@Column(name = "segpercreationdate")
+	@Column(name = "secpercreationdate")
 	private LocalDateTime creationDate;
 
-	@Column(name = "segpermodificationdate")
+	@Column(name = "secpermodificationdate")
 	private LocalDateTime modificationDate;
 
-	@Column(name = "segpercreationuser")
+	@Column(name = "secpercreationuser")
 	private String creationUser;
 
-	@Column(name = "segpermodificationuser")
+	@Column(name = "secpermodificationuser")
 	private String modificationUser;
 
 }

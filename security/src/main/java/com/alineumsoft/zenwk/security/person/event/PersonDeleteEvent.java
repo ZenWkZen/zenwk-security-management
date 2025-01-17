@@ -4,18 +4,16 @@ import java.security.Principal;
 
 import org.springframework.context.ApplicationEvent;
 
-import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
-
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project security-zenwk
  * @class PersonCreatedEvent
  */
-public class PersonCreatedEvent extends ApplicationEvent {
+public class PersonDeleteEvent extends ApplicationEvent {
 	private static final long serialVersionUID = 1L;
-	private final PersonDTO personDTO;
+	private final Long idPerson;
 	private final Principal principal;
-	private Long idPerson;
+	private boolean isDelete;
 
 	/**
 	 * <p>
@@ -27,10 +25,28 @@ public class PersonCreatedEvent extends ApplicationEvent {
 	 * @param personDTO
 	 * @param principal
 	 */
-	public PersonCreatedEvent(Object source, PersonDTO personDTO, Principal principal) {
+	public PersonDeleteEvent(Object source, Long personDTO, Principal principal) {
 		super(source);
-		this.personDTO = personDTO;
+		this.idPerson = personDTO;
 		this.principal = principal;
+	}
+
+	/**
+	 * Gets the value of isDelete.
+	 * 
+	 * @return the value of isDelete.
+	 */
+	public boolean isDelete() {
+		return isDelete;
+	}
+
+	/**
+	 * Sets the value of isDelete.
+	 * 
+	 * @param isDelete the new value of isDelete.
+	 */
+	public void setDelete(boolean isDelete) {
+		this.isDelete = isDelete;
 	}
 
 	/**
@@ -40,24 +56,6 @@ public class PersonCreatedEvent extends ApplicationEvent {
 	 */
 	public Long getIdPerson() {
 		return idPerson;
-	}
-
-	/**
-	 * Sets the value of idPerson.
-	 * 
-	 * @param idPerson the new value of idPerson.
-	 */
-	public void setIdPerson(Long idPerson) {
-		this.idPerson = idPerson;
-	}
-
-	/**
-	 * Gets the value of personDTO.
-	 * 
-	 * @return the value of personDTO.
-	 */
-	public PersonDTO getPersonDTO() {
-		return personDTO;
 	}
 
 	/**

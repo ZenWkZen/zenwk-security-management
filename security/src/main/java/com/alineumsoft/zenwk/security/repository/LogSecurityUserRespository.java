@@ -2,12 +2,12 @@ package com.alineumsoft.zenwk.security.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.alineumsoft.zenwk.security.entity.LogSecurityUser;
+import com.alineumsoft.zenwk.security.entity.LogSecurity;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  */
-public interface LogSecurityUserRespository extends JpaRepository<LogSecurityUser, Long> {
+public interface LogSecurityUserRespository extends JpaRepository<LogSecurity, Long> {
 
 }

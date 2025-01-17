@@ -6,10 +6,12 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
-import com.alineumsoft.zenwk.security.entity.LogSecurityUser;
+import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * @class ApiRestSecurityHelper
  */
 @Slf4j
-public class ApiRestSecurityHelper  extends ApiRestHelper{
+public class ApiRestSecurityHelper extends ApiRestHelper {
 	/**
 	 * <p>
 	 * <b> General </b> Fija el valor para los atributos: creationDate, userCreation
@@ -31,13 +33,14 @@ public class ApiRestSecurityHelper  extends ApiRestHelper{
 	 * @param response
 	 * @param request
 	 * @param principal
-	 * @throws JsonProcessingException
+	 * @param serviceName
+	 * @return
 	 */
-	public LogSecurityUser initializeLog(HttpServletRequest httRequest, String userName, String request,
-			String response) {
-		Optional<String> urlOptional = Optional.ofNullable(httRequest).map(req -> req.getRequestURL().toString());
-		Optional<String> methodOptional = Optional.ofNullable(httRequest).map(HttpServletRequest::getMethod);
-		LogSecurityUser regLog = new LogSecurityUser();
+	public LogSecurity initializeLog(HttpServletRequest httpRequest, String userName, String request, String response,
+			String serviceName) {
+		Optional<String> urlOptional = Optional.ofNullable(httpRequest).map(req -> req.getRequestURL().toString());
+		Optional<String> methodOptional = Optional.ofNullable(httpRequest).map(HttpServletRequest::getMethod);
+		LogSecurity regLog = new LogSecurity();
 
 		regLog.setCreationDate(LocalDateTime.now());
 		regLog.setUserCreation(null);
@@ -46,6 +49,10 @@ public class ApiRestSecurityHelper  extends ApiRestHelper{
 		regLog.setMethod(methodOptional.orElse(CommonMessageConstants.NOT_APPLICABLE_METHOD));
 		regLog.setRequest(request);
 		regLog.setResponse(response);
+
+		regLog.setIpAddress(getClientIp(httpRequest));
+		regLog.setUserAgent(getUserAgent(httpRequest));
+		regLog.setServiceName(response);
 		return regLog;
 	}
 
@@ -58,12 +65,17 @@ public class ApiRestSecurityHelper  extends ApiRestHelper{
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param e
 	 * @param logSecUser
+	 * @param starTime
 	 */
-	public void setLogSecurityError(RuntimeException e, LogSecurityUser logSecUser) {
+	public void setLogSecurityError(RuntimeException e, LogSecurity logSecUser, Long startTime) {
 		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e.getMessage());
-		logSecUser.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		logSecUser.setErrorMessage(e.getMessage());
-
+		logSecUser.setExecutionTime(getExecutionTime(startTime));
+		if (e instanceof FunctionalException || e instanceof EntityNotFoundException) {
+			logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
+		} else {
+			logSecUser.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		}
 	}
 
 	/**
@@ -75,10 +87,13 @@ public class ApiRestSecurityHelper  extends ApiRestHelper{
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param e
 	 * @param logSecUser
+	 * @param starTime
 	 */
-	public void setLogSecuritySuccesful(int httpStatusCode, LogSecurityUser logSecUser) {
+	public void setLogSecuritySuccesful(int httpStatusCode, LogSecurity logSecUser, Long startTime) {
 		log.info(CommonMessageConstants.REQUEST_SUCCESSFUL);
 		logSecUser.setStatusCode(httpStatusCode);
 		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
+		logSecUser.setExecutionTime(getExecutionTime(startTime));
+
 	}
 }

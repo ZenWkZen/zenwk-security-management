@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
-import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
-import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
+import com.alineumsoft.zenwk.security.constants.SecurityConstants;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
-import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
+import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -36,8 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user")
 @Slf4j
 public class UserController {
-
 	private final UserService userService;
+	private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
 	/**
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -54,7 +52,7 @@ public class UserController {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userInDTO
+	 * @param dto
 	 * @param uriCB
 	 * @param principal
 	 * @param request
@@ -62,10 +60,11 @@ public class UserController {
 	 * @throws JsonProcessingException
 	 */
 	@PostMapping
-	public ResponseEntity<Void> createUser(@RequestBody CreateUserInDTO userInDTO, UriComponentsBuilder uriCB,
-			Principal principal, HttpServletRequest request) throws JsonProcessingException {
-		Long idUser = userService.createUser(userInDTO, request, principal);
-		URI location = uriCB.path(SecurityUserConstants.HEADER_USER_LOCATION).buildAndExpand(idUser).toUri();
+	public ResponseEntity<Void> createUser(@RequestBody UserDTO dto, UriComponentsBuilder uriCB, Principal principal,
+			HttpServletRequest request) throws JsonProcessingException {
+		startTime.set(System.currentTimeMillis());
+		Long idUser = userService.createUser(dto, request, principal, startTime.get());
+		URI location = uriCB.path(SecurityConstants.HEADER_USER_LOCATION).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
 	}
 
@@ -76,14 +75,15 @@ public class UserController {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
-	 * @param modUserInDTO
+	 * @param dto
 	 * @return
 	 * @throws IOException
 	 */
 	@PutMapping("{idUser}")
-	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody ModUserInDTO modUserInDTO,
+	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody UserDTO dto,
 			HttpServletRequest request, Principal principal) throws IOException {
-		userService.updateUser(request, idUser, modUserInDTO, principal);
+		startTime.set(System.currentTimeMillis());
+		userService.updateUser(request, idUser, dto, principal, null, startTime.get());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -100,7 +100,8 @@ public class UserController {
 	 */
 	@DeleteMapping("/{idUser}")
 	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal) {
-		userService.deleteUser(idUser, request, principal);
+		startTime.set(System.currentTimeMillis());
+		userService.deleteUser(idUser, request, principal, startTime.get());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -116,9 +117,10 @@ public class UserController {
 	 * @return
 	 */
 	@GetMapping("/{idUser}")
-	public ResponseEntity<UserOutDTO> findById(@PathVariable Long idUser, HttpServletRequest request,
+	public ResponseEntity<UserDTO> findById(@PathVariable Long idUser, HttpServletRequest request,
 			Principal principal) {
-		return ResponseEntity.ok(userService.findByIdUser(idUser, request, principal));
+		startTime.set(System.currentTimeMillis());
+		return ResponseEntity.ok(userService.findByIdUser(idUser, request, principal, startTime.get()));
 	}
 
 	/**
@@ -134,6 +136,7 @@ public class UserController {
 	 */
 	@GetMapping
 	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request, Principal principal) {
-		return ResponseEntity.ok(userService.findAll(pageable, request, principal));
+		startTime.set(System.currentTimeMillis());
+		return ResponseEntity.ok(userService.findAll(pageable, request, principal, startTime.get()));
 	}
 }

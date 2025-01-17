@@ -22,25 +22,20 @@ import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
 import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
 import com.alineumsoft.zenwk.security.common.util.HistoricalUtil;
 import com.alineumsoft.zenwk.security.common.util.ObjectUpdaterUtil;
-import com.alineumsoft.zenwk.security.constants.SecurityUserConstants;
-import com.alineumsoft.zenwk.security.entity.LogSecurityUser;
+import com.alineumsoft.zenwk.security.constants.SecurityConstants;
+import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
+import com.alineumsoft.zenwk.security.enums.SecurityServiceNameEnum;
+import com.alineumsoft.zenwk.security.enums.UserPersonEnum;
+import com.alineumsoft.zenwk.security.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
-import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.person.entity.Person;
-import com.alineumsoft.zenwk.security.person.event.FindPersonByIdEvent;
-import com.alineumsoft.zenwk.security.person.event.PersonCreatedEvent;
+import com.alineumsoft.zenwk.security.person.event.PersonDeleteEvent;
 import com.alineumsoft.zenwk.security.repository.LogSecurityUserRespository;
-import com.alineumsoft.zenwk.security.user.dto.CreateUserInDTO;
-import com.alineumsoft.zenwk.security.user.dto.ModUserInDTO;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
-import com.alineumsoft.zenwk.security.user.dto.UserOutDTO;
+import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.entity.User;
-import com.alineumsoft.zenwk.security.user.entity.UserState;
-import com.alineumsoft.zenwk.security.user.enums.UserEnum;
-import com.alineumsoft.zenwk.security.user.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.user.repository.UserRepository;
-import com.alineumsoft.zenwk.security.user.repository.UserStateRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -56,7 +51,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserService extends ApiRestSecurityHelper {
 	private final UserRepository userRepository;
-	private final UserStateRepository userStateRepository;
 	private final LogSecurityUserRespository logSecurityUserRespository;
 	private final TransactionTemplate transactionTemplate;
 	private final ApplicationEventPublisher eventPublisher;
@@ -68,16 +62,13 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userRepository
-	 * @param UserStateRepository
 	 * @param logRepository
 	 * @param transationTemplate
 	 * @param eventPublisher
 	 */
-	public UserService(UserRepository userRepository, UserStateRepository UserStateRepository,
-			LogSecurityUserRespository logRepository, TransactionTemplate transationTemplate,
-			ApplicationEventPublisher eventPublisher) {
+	public UserService(UserRepository userRepository, LogSecurityUserRespository logRepository,
+			TransactionTemplate transationTemplate, ApplicationEventPublisher eventPublisher) {
 		this.userRepository = userRepository;
-		this.userStateRepository = UserStateRepository;
 		this.logSecurityUserRespository = logRepository;
 		this.transactionTemplate = transationTemplate;
 		this.eventPublisher = eventPublisher;
@@ -91,24 +82,24 @@ public class UserService extends ApiRestSecurityHelper {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userInDTO
+	 * @param dto
 	 * @param principal
+	 * @param startTime
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public Long createUser(CreateUserInDTO userInDTO, HttpServletRequest request, Principal principal) {
+	public Long createUser(UserDTO dto, HttpServletRequest request, Principal principal, Long startTime) {
 		// inicializacion log transaccional
-		LogSecurityUser logSecUser = initializeLog(request, principal.getName(), getJson(userInDTO),
-				CommonMessageConstants.NOT_APPLICABLE_BODY);
+		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_CREATE.getCode());
 		try {
-			Person person = createPersonEvent(userInDTO, principal);
-			return transactionCreateUser(userInDTO, logSecUser, person);
+			return transactionCreateUser(dto, logSecurity, startTime);
 		} catch (RuntimeException e) {
-			setLogSecurityError(e, logSecUser);
+			setLogSecurityError(e, logSecurity, startTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
 	}
 
@@ -118,23 +109,26 @@ public class UserService extends ApiRestSecurityHelper {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param request
+	 * @param idUser
+	 * @param dto
 	 * @param principal
-	 * @param userInDTO
-	 * @param userOutDTO
-	 * @throws JsonProcessingException
+	 * @param starTime
+	 * @oaram person
 	 */
-	public boolean updateUser(HttpServletRequest request, Long idUser, ModUserInDTO modUserInDTO, Principal principal) {
+	public boolean updateUser(HttpServletRequest request, Long idUser, UserDTO dto, Principal principal, Person person,
+			Long starTime) {
 		// Inicializacion log transaccional
-		LogSecurityUser logSecUser = initializeLog(request, principal.getName(), getJson(modUserInDTO),
-				CommonMessageConstants.NOT_APPLICABLE_BODY);
+		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_UPDATE.getCode());
 		try {
-			return transactionUpdateUser(idUser, modUserInDTO, logSecUser);
+			return transactionUpdateUser(idUser, dto, person, logSecurity, starTime);
 		} catch (RuntimeException e) {
-			setLogSecurityError(e, logSecUser);
+			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
 	}
 
@@ -148,20 +142,23 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param idUser
 	 * @param principal
 	 * @param request
+	 * @param starTime
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal) {
-		LogSecurityUser logSecUser = initializeLog(request, principal.getName(),
-				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY);
+	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal, Long starTime) {
+		LogSecurity logSecurity = initializeLog(request, principal.getName(),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
+				SecurityServiceNameEnum.USER_DELETE.getCode());
+
 		try {
-			return transactionDeleteUser(idUser, logSecUser);
+			return transactionDeleteUser(idUser, logSecurity, request != null, principal, starTime);
 		} catch (RuntimeException e) {
-			setLogSecurityError(e, logSecUser);
+			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
 	}
 
@@ -174,13 +171,23 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
-	 * @param logSecUser
+	 * @param logSecurity
+	 * @param principal
+	 * @param starTime
 	 * @return
 	 */
-	private boolean transactionDeleteUser(Long idUser, LogSecurityUser logSecUser) {
+	private boolean transactionDeleteUser(Long idUser, LogSecurity logSecurity, boolean isDeletePerson,
+			Principal principal, Long starTime) {
+		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
+				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+
+		if (isDeletePerson && user.getPerson() != null) {
+			deletePersonEvent(user.getPerson().getId(), principal);
+		}
+
 		return transactionTemplate.execute(transaction -> {
 			try {
-				return deleteUserRecord(idUser, logSecUser);
+				return deleteUserRecord(idUser, logSecurity, user, starTime);
 			} catch (RuntimeException e) {
 				transaction.setRollbackOnly();
 				throw new RuntimeException(getMessageSQLException(e));
@@ -196,16 +203,17 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
-	 * @param logSecUser
+	 * @param logSecurity
+	 * @param user
+	 * @param starTime
 	 * @return
 	 */
-	private Boolean deleteUserRecord(Long idUser, LogSecurityUser logSecUser) {
-		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
-				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+	private Boolean deleteUserRecord(Long idUser, LogSecurity logSecurity, User user, Long starTime) {
 		userRepository.deleteById(idUser);
-		setLogSecuritySuccesful(HttpStatus.NOT_FOUND.value(), logSecUser);
+		// Registro de logs
+		setLogSecuritySuccesful(HttpStatus.NOT_FOUND.value(), logSecurity, starTime);
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.DELETE, UserHistService.class);
-		logSecurityUserRespository.save(logSecUser);
+		logSecurityUserRespository.save(logSecurity);
 		return true;
 	}
 
@@ -217,15 +225,16 @@ public class UserService extends ApiRestSecurityHelper {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userInDTO
-	 * @param logSecUser
+	 * @param dto
+	 * @param logSecurity
+	 * @param startTime
 	 * @param person
 	 * @return
 	 */
-	private Long transactionCreateUser(CreateUserInDTO userInDTO, LogSecurityUser logSecUser, Person person) {
+	private Long transactionCreateUser(UserDTO dto, LogSecurity logSecurity, Long startTime) {
 		return transactionTemplate.execute(transaction -> {
 			try {
-				return createUserRecord(userInDTO, person, logSecUser).getId();
+				return createUserRecord(dto, logSecurity, startTime).getId();
 			} catch (RuntimeException e) {
 				transaction.setRollbackOnly();
 				throw new IllegalArgumentException(getMessageSQLException(e));
@@ -242,17 +251,21 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
-	 * @param modUserInDTO
-	 * @param logSecUser
+	 * @param dto
+	 * @param person
+	 * @param logSecurity
+	 * @param starTime
+	 * @return
 	 * @throws SQLException
 	 */
-	private boolean transactionUpdateUser(Long idUser, ModUserInDTO modUserInDTO, LogSecurityUser logSecUser) {
+	private boolean transactionUpdateUser(Long idUser, UserDTO dto, Person person, LogSecurity logSecurity,
+			Long starTime) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 		// Se da inicio a la transccion de actualizacion
 		return transactionTemplate.execute(transaction -> {
 			try {
-				updateUserRecord(user, idUser, modUserInDTO, logSecUser);
+				updateUserRecord(user, idUser, dto, person, logSecurity, starTime);
 				return true;
 			} catch (RuntimeException e) {
 				transaction.setRollbackOnly();
@@ -263,49 +276,52 @@ public class UserService extends ApiRestSecurityHelper {
 
 	/**
 	 * <p>
-	 * <b> CU001_XX </b> CU001_Seguridad_Creación_Usuario </b> Realiza la
-	 * actualizacion de la persona y el usuario en la BD
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Realiza la actualizacion de la
+	 * persona y el usuario en la BD
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param user
 	 * @param idUser
-	 * @param modUserInDTO
-	 * @param logSecUser
+	 * @param dto
+	 * @param person
+	 * @param logSecurity
+	 * @param starTime
 	 */
-	private void updateUserRecord(User user, Long idUser, ModUserInDTO modUserInDTO, LogSecurityUser logSecUser) {
-		Person person = user.getPerson();
-		updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
-		user.setPerson(person);
-		ObjectUpdaterUtil.updateDataEqualObject(getPerson(modUserInDTO.getPerson()), person);
-		updateLoguin(user, modUserInDTO.getUsername(), modUserInDTO.getPassword());
-		user.setPerson(person);
-		user.setUserModification(logSecUser.getUserCreation());
+	private void updateUserRecord(User user, Long idUser, UserDTO dto, Person person, LogSecurity logSecurity,
+			Long starTime) {
+		// actualizacion del usuario desde api creacion de persona
+		if (person != null) {
+			user.setPerson(person);
+			user.setState(UserStateEnum.ACTIVE);
+		}
+
+		ObjectUpdaterUtil.updateDataEqualObject(getUser(dto), user);
+		user.setUserModification(logSecurity.getUserCreation());
 		user.setModificationDate(LocalDateTime.now());
 		userRepository.save(user);
+		// Registro en log
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.UPDATE, UserHistService.class);
-		setLogSecuritySuccesful(HttpStatus.NO_CONTENT.value(), logSecUser);
-		logSecurityUserRespository.save(logSecUser);
+		setLogSecuritySuccesful(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
+		logSecurityUserRespository.save(logSecurity);
 	}
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Actualizacion de credenciales de
-	 * acceso el usuario
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene un User desde su dto
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param user
-	 * @param username
-	 * @param password
+	 * @param dto
+	 * @return
 	 */
-	private void updateLoguin(User user, String username, String password) {
-		if (username != null && !username.equals(user.getUsername())) {
-			user.setUsername(username);
-		}
-		if (password != null && !password.equals(user.getPassword())) {
-			user.setPassword(password);
-		}
+	private User getUser(UserDTO dto) {
+		User user = new User();
+		user.setUsername(dto.getUsername());
+		user.setPassword(dto.getPassword());
+		user.setEmail(dto.getEmail());
+		user.setState(dto.getState());
+		return user;
 	}
 
 	/**
@@ -317,20 +333,22 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param idUser
 	 * @param request
 	 * @param principal
+	 * @param long1
 	 * @return
 	 */
-	public UserOutDTO findByIdUser(Long idUser, HttpServletRequest request, Principal principal) {
-		LogSecurityUser logSecUser = initializeLog(request, principal.getName(),
-				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY);
+	public UserDTO findByIdUser(Long idUser, HttpServletRequest request, Principal principal, Long starTime) {
+		LogSecurity logSecurity = initializeLog(request, principal.getName(),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
+				SecurityServiceNameEnum.USER_FIND_BY_ID.getCode());
 		try {
-			User user = userRepository.findById(idUser).orElseThrow(
-					() -> new EntityNotFoundException(SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage()));
-			setLogSecuritySuccesful(HttpStatus.OK.value(), logSecUser);
-			logSecurityUserRespository.save(logSecUser);
-			return getUserOutDTO(user);
+			User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
+					SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+			setLogSecuritySuccesful(HttpStatus.OK.value(), logSecurity, starTime);
+			logSecurityUserRespository.save(logSecurity);
+			return new UserDTO(user.getUsername(), null, user.getEmail(), user.getState(), null);
 		} catch (EntityNotFoundException e) {
-			setLogSecurityError(e, logSecUser);
-			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			setLogSecurityError(e, logSecurity, starTime);
+			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
 
 	}
@@ -357,22 +375,24 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param pageable
+	 * @param starTime
 	 * @return
 	 */
-	public PageUserDTO findAll(Pageable pageable, HttpServletRequest request, Principal principal) {
-		LogSecurityUser logSecUser = initializeLog(request, principal.getName(),
-				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY);
+	public PageUserDTO findAll(Pageable pageable, HttpServletRequest request, Principal principal, Long starTime) {
+		LogSecurity logSecurity = initializeLog(request, principal.getName(),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
+				SecurityServiceNameEnum.USER_FIND_ALL.getCode());
 		try {
 			// Conteo paginacion en 1
 			int pageNumber = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
 			// Consulta paginada y ordenamiento
 			Page<User> pageUser = userRepository.findAll(PageRequest.of(pageNumber, pageable.getPageSize(),
-					pageable.getSortOr(Sort.by(Sort.Direction.ASC, UserEnum.USER_PERSON_FIRST_NAME.getMessageKey())
-							.and(Sort.by(Sort.Direction.ASC, UserEnum.USER_PERSON_NAME.getMessageKey())))));
-			return getFindAll(pageUser, logSecUser);
+					pageable.getSortOr(Sort.by(Sort.Direction.ASC, UserPersonEnum.USER_EMAIL.getMessageKey())
+							.and(Sort.by(Sort.Direction.ASC, UserPersonEnum.USER_USERNAME.getMessageKey())))));
+			return getFindAll(pageUser, logSecurity, starTime);
 		} catch (RuntimeException e) {
-			setLogSecurityError(e, logSecUser);
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecUser);
+			setLogSecurityError(e, logSecurity, starTime);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
 	}
 
@@ -383,17 +403,17 @@ public class UserService extends ApiRestSecurityHelper {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param starTime
 	 * @param pagePerson
 	 * @return
 	 */
-	private PageUserDTO getFindAll(Page<User> pageUser, LogSecurityUser logSecUser) {
-		List<UserOutDTO> listUser = pageUser.stream().map(user -> getUserOutDTO(user)).collect(Collectors.toList());
+	private PageUserDTO getFindAll(Page<User> pageUser, LogSecurity logSecurity, Long starTime) {
+		List<UserDTO> listUser = pageUser.stream()
+				.map(user -> new UserDTO(user.getUsername(), null, user.getEmail(), user.getState(), null))
+				.collect(Collectors.toList());
 
-		if (listUser.isEmpty()) {
-			throw new EntityNotFoundException(SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage());
-		}
-		setLogSecuritySuccesful(HttpStatus.OK.value(), logSecUser);
-		logSecurityUserRespository.save(logSecUser);
+		setLogSecuritySuccesful(HttpStatus.OK.value(), logSecurity, starTime);
+		logSecurityUserRespository.save(logSecurity);
 		return new PageUserDTO(listUser, pageUser.getTotalElements(), pageUser.getTotalPages(),
 				pageUser.getNumber() + 1);
 	}
@@ -409,7 +429,7 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private String getMessageSQLException(Exception e) {
-		if (e.getMessage().contains(SecurityUserConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
+		if (e.getMessage().contains(SecurityConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
 			return SecurityExceptionEnum.FUNC_USER_MAIL_EXISTS.getCodeMessage();
 		}
 		return e.getMessage();
@@ -417,91 +437,44 @@ public class UserService extends ApiRestSecurityHelper {
 
 	/**
 	 * <p>
-	 * <b> Util </b> genera una nueva instancia de persona
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Persistencia del registro user
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userInDTO
+	 * @param dto
+	 * @param logSecurity
+	 * @param startTime
 	 * @return
 	 */
-	private Person getPerson(PersonDTO personDTO) {
-		Person person = new Person();
-		person.setName(personDTO.getName());
-		person.setFirstUsurname(personDTO.getFirstUsurname());
-		person.setEmail(personDTO.getEmail());
-		return person;
-	}
-
-	/**
-	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> XXX
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userInDTO
-	 * @param person
-	 * @param logSecUser
-	 * @return
-	 */
-	private User createUserRecord(CreateUserInDTO userInDTO, Person person, LogSecurityUser logSecUser) {
+	private User createUserRecord(UserDTO dto, LogSecurity logSecurity, Long startTime) {
 		User user = new User();
-		// Crear enun con los estados
-		UserState userState = userStateRepository.findAll().stream()
-				.filter(state -> UserStateEnum.ENABLE.equals(state.getNameState())).collect(Collectors.toList()).get(0);
-		user.setUsername(userInDTO.getUsername());
-		user.setPassword(CryptoUtil.encryptPassword(userInDTO.getPassword()));
-		user.setUserCreation(logSecUser.getUserCreation());
-		user.setUserState(userState);
-		user.setPerson(person);
+		user.setUsername(dto.getUsername());
+		user.setPassword(CryptoUtil.encryptPassword(dto.getPassword()));
+		user.setEmail(dto.getEmail());
+		user.setUserCreation(logSecurity.getUserCreation());
+		user.setState(UserStateEnum.INCOMPLETE_PERFIL);
 		user.setCreationDate(LocalDateTime.now());
 		user = userRepository.save(user);
+		// Persistencia en log
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.INSERT, UserHistService.class);
-		setLogSecuritySuccesful(HttpStatus.CREATED.value(), logSecUser);
-		logSecurityUserRespository.save(logSecUser);
+		setLogSecuritySuccesful(HttpStatus.CREATED.value(), logSecurity, startTime);
+		logSecurityUserRespository.save(logSecurity);
 		return user;
 	}
 
 	/**
 	 * <p>
-	 * <b> CU001_Seguridad_Creación_Usuario </b> DTO de salida para las solicitudes
-	 * de busqueda
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Evento que invoca la operacion
+	 * elminar persona
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private UserOutDTO getUserOutDTO(User user) {
-		UserOutDTO userOutDTO = new UserOutDTO();
-		PersonDTO personDTO = new PersonDTO();
-		personDTO.setEmail(user.getPerson().getEmail());
-		personDTO.setFirstUsurname(user.getPerson().getFirstUsurname());
-		personDTO.setName(user.getPerson().getName());
-		userOutDTO.setUsername(user.getUsername());
-		userOutDTO.setState(user.getUserState().getNameState().name());
-		userOutDTO.setPerson(personDTO);
-		return userOutDTO;
-	}
-
-	/**
-	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Publicacion de los eventos crear y
-	 * buscar persona
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param userInDTO
+	 * @param id
 	 * @param principal
-	 * @return
 	 */
-	private Person createPersonEvent(CreateUserInDTO userInDTO, Principal principal) {
-		// Se invoca el servicio de creación de la persona
-		PersonCreatedEvent createEvent = new PersonCreatedEvent(this, userInDTO.getPerson(), principal);
-		eventPublisher.publishEvent(createEvent);
-		Long idPerson = createEvent.getIdPerson();
-		// Publicar el evento para buscar la persona creada
-		FindPersonByIdEvent findEvent = new FindPersonByIdEvent(this, idPerson);
-		eventPublisher.publishEvent(findEvent);
-		return findEvent.getPerson();
+	private void deletePersonEvent(Long id, Principal principal) {
+		PersonDeleteEvent event = new PersonDeleteEvent(this, id, principal);
+		eventPublisher.publishEvent(event);
 	}
 
 }
