@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
@@ -42,9 +43,9 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 		LogSecurity regLog = new LogSecurity();
 		regLog.setCreationDate(LocalDateTime.now());
 		regLog.setUserCreation(null);
-		regLog.setUrl(urlOptional.orElse(CommonMessageConstants.AUTO_GENERATED_EVENT));
+		regLog.setUrl(urlOptional.orElse(GeneralConstants.AUTO_GENERATED_EVENT));
 		regLog.setUserCreation(userName);
-		regLog.setMethod(methodOptional.orElse(CommonMessageConstants.AUTO_GENERATED_EVENT));
+		regLog.setMethod(methodOptional.orElse(GeneralConstants.AUTO_GENERATED_EVENT));
 		regLog.setRequest(request);
 		regLog.setResponse(response);
 		regLog.setIpAddress(getClientIp(httpRequest));
