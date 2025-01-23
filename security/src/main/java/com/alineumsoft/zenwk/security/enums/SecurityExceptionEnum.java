@@ -14,7 +14,9 @@ public enum SecurityExceptionEnum {
 	FUNC_USER_CREATE_EMAIL_UNIQUE("FUNC_SEGUSE_001", "functional.user.create.email.unique"),
 	FUNC_USER_NOT_FOUND("FUNC_SEGUSE_002", "functional.user.notfound"),
 	FUNC_USER_MAIL_EXISTS("FUNC_SEGUSE_003", "functional.user.email.exists"),
-	FUNC_PERSON_NOT_FOUND("FUNC_SEGUSE_004", "functional.person.notfound");
+	FUNC_PERSON_NOT_FOUND("FUNC_SEGUSE_004", "functional.person.notfound"),
+	FUNC_PERSON_EXIST("FUNC_SEGUSE_005", "functional.person.exist"),
+	FUNC_USER_EXIST("FUNC_SEGUSE_006", "functional.user.exist");
 
 	private String code;
 	private String key;
@@ -46,7 +48,7 @@ public enum SecurityExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(key);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription());
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription(key));
 		}
 	}
 
@@ -58,7 +60,7 @@ public enum SecurityExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(key, params);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription());
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription(key));
 		}
 	}
 

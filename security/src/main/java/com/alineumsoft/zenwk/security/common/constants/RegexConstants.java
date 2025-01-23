@@ -24,6 +24,8 @@ public class RegexConstants {
 	public static final String NUMERIC = "^\\d+$";
 	// Letras y numeros.
 	public static final String ALPHANUMERIC = "^[A-Za-z0-9]+$";
+	// Alfanumericos y guiones, longitud maxima 30
+	public static final String USERNAME = "^[a-zA-Z0-9._-]{3,30}$";
 	// Expresion regular para validar un formato de direccion colombiano.
 	public static final String COLOMBIA_ADDRESS = "^[a-zA-Z0-9\\s\\-#.,áéíóúÁÉÍÓÚñÑ]+$";
 	// Codigo postal de 5 dígitos (o formato extendido).

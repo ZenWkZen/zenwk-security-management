@@ -39,14 +39,27 @@ import com.alineumsoft.zenwk.security.user.event.UpdateUserEvent;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class PersonService extends ApiRestSecurityHelper {
+	/**
+	 * Repositorio de la persona
+	 */
 	private final PersonRepository personRepository;
+	/**
+	 * Repositorio para log persistible de modulo
+	 */
 	private final LogSecurityRespository logSecurityUserRespository;
-	private final TransactionTemplate transactionTemplate;
+	/**
+	 * Template para transaccion
+	 */
+	private final TransactionTemplate templateTx;
+	/**
+	 * Interfaz para publicacion de evento
+	 */
 	private final ApplicationEventPublisher eventPublisher;
 
 	/**
@@ -63,7 +76,7 @@ public class PersonService extends ApiRestSecurityHelper {
 			TransactionTemplate transactionTemplate, ApplicationEventPublisher eventPublisher) {
 		this.personRepository = personRepository;
 		this.logSecurityUserRespository = logSecurityUser;
-		this.transactionTemplate = transactionTemplate;
+		this.templateTx = transactionTemplate;
 		this.eventPublisher = eventPublisher;
 	}
 
@@ -84,7 +97,7 @@ public class PersonService extends ApiRestSecurityHelper {
 		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.PERSON_CREATE.getCode());
 		try {
-			Person person = transactionCreatePerson(dto, logSecurity, starTime);
+			Person person = createPersonTx(dto, logSecurity, starTime);
 			// Se asocia la persona la usuario
 			updateUserEvent(dto.getIdUser(), person, principal);
 			return person.getId();
@@ -116,7 +129,7 @@ public class PersonService extends ApiRestSecurityHelper {
 		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.PERSON_UPDATE.getCode());
 		try {
-			return transactionUpdatePerson(idPerson, dto, principal.getName(), logSecurity, starTime);
+			return updatePersonTx(idPerson, dto, principal.getName(), logSecurity, starTime);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
@@ -145,7 +158,7 @@ public class PersonService extends ApiRestSecurityHelper {
 				SecurityServiceNameEnum.PERSON_DELETE.getCode());
 		try {
 			deleteUserEvent(idPerson, principal);
-			return transactionDeletePerson(idPerson, logSecurity, starTime);
+			return deletePersonTx(idPerson, logSecurity, starTime);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
@@ -168,13 +181,12 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @param starTime
 	 * @return
 	 */
-	private Person transactionCreatePerson(PersonDTO dto, LogSecurity logSecurity, Long starTime) {
-		return transactionTemplate.execute(transaction -> {
+	private Person createPersonTx(PersonDTO dto, LogSecurity logSecurity, Long starTime) {
+		return templateTx.execute(transaction -> {
 			try {
 				return createPersonRecord(dto, logSecurity, starTime);
-			} catch (RuntimeException e) {
-				transaction.setRollbackOnly();
-				throw new IllegalArgumentException(getMessageSQLException(e));
+			} catch (ConstraintViolationException e) {
+				throw new RuntimeException(e.getMessage());
 			}
 		});
 	}
@@ -182,7 +194,7 @@ public class PersonService extends ApiRestSecurityHelper {
 	/**
 	 * 
 	 * <p>
-	 * <b> CU001_XSeguridad_Creación_UsuarioX </b> Realiza la transaccion para la
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Realiza la transaccion para la
 	 * actualizacion de la persona en caso de error hace rollback y actualiza el log
 	 * del modulo
 	 * </p>
@@ -195,11 +207,10 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @param starTime
 	 * @return
 	 */
-	private boolean transactionUpdatePerson(Long idPerson, PersonDTO dto, String name, LogSecurity logSecurity,
-			Long starTime) {
+	private boolean updatePersonTx(Long idPerson, PersonDTO dto, String name, LogSecurity logSecurity, Long starTime) {
 		Person target = personRepository.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
-		return transactionTemplate.execute(transaction -> {
+		return templateTx.execute(transaction -> {
 			try {
 				ObjectUpdaterUtil.updateDataEqualObject(getPerson(dto), target);
 				updatePersonRecord(target, name, logSecurity, starTime);
@@ -224,8 +235,8 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @param starTime
 	 * @return
 	 */
-	private boolean transactionDeletePerson(Long idPerson, LogSecurity logSecurity, Long starTime) {
-		return transactionTemplate.execute(transaction -> {
+	private boolean deletePersonTx(Long idPerson, LogSecurity logSecurity, Long starTime) {
+		return templateTx.execute(transaction -> {
 			try {
 				return deletePersonRecord(idPerson, logSecurity, starTime);
 			} catch (RuntimeException e) {
@@ -251,11 +262,14 @@ public class PersonService extends ApiRestSecurityHelper {
 		Person person = getPerson(dto);
 		person.setUserCreation(logSecurity.getUserCreation());
 		person.setCreationDate(LocalDateTime.now());
-		person = personRepository.save(person);
-		// Persistencia de logs
-		HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.INSERT, PersonHistService.class);
-		setLogSecuritySuccesfull(HttpStatus.CREATED.value(), logSecurity, starTime);
-		logSecurityUserRespository.save(logSecurity);
+		// Si la person no existe se persiste
+		if (!isExistPerson(person)) {
+			person = personRepository.save(person);
+			// Persistencia de logs
+			HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.INSERT, PersonHistService.class);
+			setLogSecuritySuccesfull(HttpStatus.CREATED.value(), logSecurity, starTime);
+			logSecurityUserRespository.save(logSecurity);
+		}
 		return person;
 
 	}
@@ -336,10 +350,10 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private String getMessageSQLException(Exception e) {
-		if (e.getMessage().contains(SecurityConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
+		if (e.getLocalizedMessage().contains(SecurityConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
 			return SecurityExceptionEnum.FUNC_USER_MAIL_EXISTS.getCodeMessage();
-
 		}
+
 		return e.getMessage();
 	}
 
@@ -481,5 +495,24 @@ public class PersonService extends ApiRestSecurityHelper {
 		dto.setPerson(person);
 		UpdateUserEvent event = new UpdateUserEvent(this, idUser, dto, principal, person);
 		eventPublisher.publishEvent(event);
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Valida si el request usado para la
+	 * creacion de la persona ya existe
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param person
+	 * @return
+	 */
+	private boolean isExistPerson(Person person) {
+		if (personRepository.existsByFirstNameAndMiddleNameAndLastNameAndMiddleLastNameAndDateOfBirth(
+				person.getFirstName(), person.getMiddleName(), person.getLastName(), person.getMiddleLastName(),
+				person.getDateOfBirth())) {
+			throw new IllegalArgumentException(SecurityExceptionEnum.FUNC_PERSON_EXIST.getCodeMessage());
+		}
+		return false;
 	}
 }

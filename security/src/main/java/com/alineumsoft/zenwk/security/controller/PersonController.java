@@ -32,9 +32,23 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/person")
 public class PersonController {
+	/**
+	 * Servicio de controlador
+	 */
 	private final PersonService personService;
+	/**
+	 * Constante para metrica de tiempo
+	 */
 	private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
+	/**
+	 * <p>
+	 * <b> Constructor </b>
+	 * </p>
+	 * 
+	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+	 * @param personService
+	 */
 	public PersonController(PersonService personService) {
 		this.personService = personService;
 	}
@@ -76,7 +90,7 @@ public class PersonController {
 	 * @return
 	 */
 	@PutMapping("/{idUser}")
-	public ResponseEntity<Void> updatePerson(@PathVariable Long idPerson, @RequestBody PersonDTO inDTO,
+	public ResponseEntity<Void> updatePerson(@PathVariable Long idPerson, @Validated @RequestBody PersonDTO inDTO,
 			HttpServletRequest request, Principal princiapl) {
 		startTime.set(System.currentTimeMillis());
 		personService.updatePerson(idPerson, inDTO, request, princiapl, startTime.get());

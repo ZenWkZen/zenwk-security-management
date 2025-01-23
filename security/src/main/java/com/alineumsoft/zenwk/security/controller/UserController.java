@@ -6,6 +6,7 @@ import java.security.Principal;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user")
 @Slf4j
 public class UserController {
+	/**
+	 * Servicio de controlador
+	 */
 	private final UserService userService;
+	/**
+	 * Constante para metrica de tiempo
+	 */
 	private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
 	/**
@@ -60,8 +67,8 @@ public class UserController {
 	 * @throws JsonProcessingException
 	 */
 	@PostMapping
-	public ResponseEntity<Void> createUser(@RequestBody UserDTO dto, UriComponentsBuilder uriCB, Principal principal,
-			HttpServletRequest request) throws JsonProcessingException {
+	public ResponseEntity<Void> createUser(@Validated @RequestBody UserDTO dto, UriComponentsBuilder uriCB,
+			Principal principal, HttpServletRequest request) throws JsonProcessingException {
 		startTime.set(System.currentTimeMillis());
 		Long idUser = userService.createUser(dto, request, principal, startTime.get());
 		URI location = uriCB.path(SecurityConstants.HEADER_USER_LOCATION).buildAndExpand(idUser).toUri();

@@ -50,9 +50,21 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class UserService extends ApiRestSecurityHelper {
+	/**
+	 * Repositorio para user
+	 */
 	private final UserRepository userRepository;
+	/**
+	 * Repositorio para log persistible de modulo
+	 */
 	private final LogSecurityRespository logSecurityUserRespository;
-	private final TransactionTemplate transactionTemplate;
+	/**
+	 * Template para transaccion
+	 */
+	private final TransactionTemplate templateTx;
+	/**
+	 * Interfaz para publicacion de evento
+	 */
 	private final ApplicationEventPublisher eventPublisher;
 
 	/**
@@ -70,22 +82,25 @@ public class UserService extends ApiRestSecurityHelper {
 			TransactionTemplate transationTemplate, ApplicationEventPublisher eventPublisher) {
 		this.userRepository = userRepository;
 		this.logSecurityUserRespository = logRepository;
-		this.transactionTemplate = transationTemplate;
+		this.templateTx = transationTemplate;
 		this.eventPublisher = eventPublisher;
 	}
 
-	/**
+	/*
 	 * 
-	 * <p>
-	 * <b> CU001_Seguridad_Creacion_Usuario </b> Metodo de servicio que crea un
-	 * nuevo usuario si cumple con las validaciones
-	 * </p>
+	 * <p> <b> CU001_Seguridad_Creacion_Usuario </b> Metodo de servicio que crea un
+	 * nuevo usuario si cumple con las validaciones </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * 
 	 * @param dto
+	 * 
 	 * @param principal
+	 * 
 	 * @param startTime
+	 * 
 	 * @return
+	 * 
 	 * @throws JsonProcessingException
 	 */
 	public Long createUser(UserDTO dto, HttpServletRequest request, Principal principal, Long startTime) {
@@ -93,7 +108,7 @@ public class UserService extends ApiRestSecurityHelper {
 		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_CREATE.getCode());
 		try {
-			return transactionCreateUser(dto, logSecurity, startTime);
+			return createUserTx(dto, logSecurity, startTime);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, startTime);
 			if (isFunctionalException(e)) {
@@ -122,7 +137,7 @@ public class UserService extends ApiRestSecurityHelper {
 		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_UPDATE.getCode());
 		try {
-			return transactionUpdateUser(idUser, dto, person, logSecurity, starTime);
+			return updateUserTx(idUser, dto, person, logSecurity, starTime);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
@@ -152,7 +167,7 @@ public class UserService extends ApiRestSecurityHelper {
 				SecurityServiceNameEnum.USER_DELETE.getCode());
 
 		try {
-			return transactionDeleteUser(idUser, logSecurity, request != null, principal, starTime);
+			return deleteUserTx(idUser, logSecurity, request != null, principal, starTime);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
@@ -176,8 +191,8 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param starTime
 	 * @return
 	 */
-	private boolean transactionDeleteUser(Long idUser, LogSecurity logSecurity, boolean isDeletePerson,
-			Principal principal, Long starTime) {
+	private boolean deleteUserTx(Long idUser, LogSecurity logSecurity, boolean isDeletePerson, Principal principal,
+			Long starTime) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 
@@ -185,7 +200,7 @@ public class UserService extends ApiRestSecurityHelper {
 			deletePersonEvent(user.getPerson().getId(), principal);
 		}
 
-		return transactionTemplate.execute(transaction -> {
+		return templateTx.execute(transaction -> {
 			try {
 				return deleteUserRecord(idUser, logSecurity, user, starTime);
 			} catch (RuntimeException e) {
@@ -231,8 +246,8 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param person
 	 * @return
 	 */
-	private Long transactionCreateUser(UserDTO dto, LogSecurity logSecurity, Long startTime) {
-		return transactionTemplate.execute(transaction -> {
+	private Long createUserTx(UserDTO dto, LogSecurity logSecurity, Long startTime) {
+		return templateTx.execute(transaction -> {
 			try {
 				return createUserRecord(dto, logSecurity, startTime).getId();
 			} catch (RuntimeException e) {
@@ -258,12 +273,11 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @return
 	 * @throws SQLException
 	 */
-	private boolean transactionUpdateUser(Long idUser, UserDTO dto, Person person, LogSecurity logSecurity,
-			Long starTime) {
+	private boolean updateUserTx(Long idUser, UserDTO dto, Person person, LogSecurity logSecurity, Long starTime) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 		// Se da inicio a la transccion de actualizacion
-		return transactionTemplate.execute(transaction -> {
+		return templateTx.execute(transaction -> {
 			try {
 				updateUserRecord(user, idUser, dto, person, logSecurity, starTime);
 				return true;
@@ -451,11 +465,15 @@ public class UserService extends ApiRestSecurityHelper {
 		user.setUserCreation(logSecurity.getUserCreation());
 		user.setState(UserStateEnum.INCOMPLETE_PERFIL);
 		user.setCreationDate(LocalDateTime.now());
-		user = userRepository.save(user);
-		// Persistencia en log
-		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.INSERT, UserHistService.class);
-		setLogSecuritySuccesfull(HttpStatus.CREATED.value(), logSecurity, startTime);
-		logSecurityUserRespository.save(logSecurity);
+		// validacion si el usuario ya existe
+		if (!isExistuser(user)) {
+			user = userRepository.save(user);
+			// Persistencia en log
+			HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.INSERT, UserHistService.class);
+			setLogSecuritySuccesfull(HttpStatus.CREATED.value(), logSecurity, startTime);
+			logSecurityUserRespository.save(logSecurity);
+		}
+
 		return user;
 	}
 
@@ -473,16 +491,36 @@ public class UserService extends ApiRestSecurityHelper {
 		PersonDeleteEvent event = new PersonDeleteEvent(this, id, principal);
 		eventPublisher.publishEvent(event);
 	}
-	
+
 	/**
-	 * <p> <b> CU001_XX </b> XXX  </p> 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a> 
+	 * <p>
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Valida si existe el usuario por id
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @return
 	 */
 	public boolean existsById(Long idUser) {
 		User user = userRepository.findById(idUser).orElse(null);
-		return user != null && user.getId() > 0; 
+		return user != null && user.getId() > 0;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Valida si el request usado para la
+	 * creacion de la persona ya existe
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param person
+	 * @return
+	 */
+	private boolean isExistuser(User user) {
+		if (userRepository.existsByUsernameAndEmail(user.getUsername(), user.getEmail())) {
+			throw new IllegalArgumentException(SecurityExceptionEnum.FUNC_USER_EXIST.getCodeMessage());
+		}
+		return false;
 	}
 
 }
