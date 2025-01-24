@@ -24,6 +24,9 @@ import com.alineumsoft.zenwk.security.common.util.HistoricalUtil;
 import com.alineumsoft.zenwk.security.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.constants.SecurityConstants;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
+import com.alineumsoft.zenwk.security.entity.Role;
+import com.alineumsoft.zenwk.security.entity.RoleUser;
+import com.alineumsoft.zenwk.security.enums.RoleEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityServiceNameEnum;
 import com.alineumsoft.zenwk.security.enums.UserPersonEnum;
@@ -32,6 +35,8 @@ import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.person.event.PersonDeleteEvent;
 import com.alineumsoft.zenwk.security.repository.LogSecurityRespository;
+import com.alineumsoft.zenwk.security.repository.RolUserRepository;
+import com.alineumsoft.zenwk.security.repository.RoleRepository;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.entity.User;
@@ -66,6 +71,14 @@ public class UserService extends ApiRestSecurityHelper {
 	 * Interfaz para publicacion de evento
 	 */
 	private final ApplicationEventPublisher eventPublisher;
+	/**
+	 * Repositorio para entidad RolUser
+	 */
+	private final RolUserRepository rolUserRepo;
+	/**
+	 * Repositorio para la entidad persona
+	 */
+	private final RoleRepository rolRepo;
 
 	/**
 	 * <p>
@@ -77,13 +90,18 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param logRepository
 	 * @param transationTemplate
 	 * @param eventPublisher
+	 * @param rolUserRepo
+	 * @param rolRepo
 	 */
 	public UserService(UserRepository userRepository, LogSecurityRespository logRepository,
-			TransactionTemplate transationTemplate, ApplicationEventPublisher eventPublisher) {
+			TransactionTemplate transationTemplate, ApplicationEventPublisher eventPublisher,
+			RolUserRepository rolUserRepo, RoleRepository rolRepo) {
 		this.userRepository = userRepository;
 		this.logSecurityUserRespository = logRepository;
 		this.templateTx = transationTemplate;
 		this.eventPublisher = eventPublisher;
+		this.rolUserRepo = rolUserRepo;
+		this.rolRepo = rolRepo;
 	}
 
 	/*
@@ -165,7 +183,6 @@ public class UserService extends ApiRestSecurityHelper {
 		LogSecurity logSecurity = initializeLog(request, principal.getName(),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
 				SecurityServiceNameEnum.USER_DELETE.getCode());
-
 		try {
 			return deleteUserTx(idUser, logSecurity, request != null, principal, starTime);
 		} catch (RuntimeException e) {
@@ -196,13 +213,9 @@ public class UserService extends ApiRestSecurityHelper {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
 
-		if (isDeletePerson && user.getPerson() != null) {
-			deletePersonEvent(user.getPerson().getId(), principal);
-		}
-
 		return templateTx.execute(transaction -> {
 			try {
-				return deleteUserRecord(idUser, logSecurity, user, starTime);
+				return deleteUserRecord(idUser, logSecurity, user, starTime, isDeletePerson, principal);
 			} catch (RuntimeException e) {
 				transaction.setRollbackOnly();
 				throw new RuntimeException(getMessageSQLException(e));
@@ -221,14 +234,23 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param logSecurity
 	 * @param user
 	 * @param starTime
+	 * @param isDeletePerson
+	 * @param principal
 	 * @return
 	 */
-	private Boolean deleteUserRecord(Long idUser, LogSecurity logSecurity, User user, Long starTime) {
+	private Boolean deleteUserRecord(Long idUser, LogSecurity logSecurity, User user, Long starTime,
+			boolean isDeletePerson, Principal principal) {
+		// Eliminacion de los permisos del usuario
+		rolUserRepo.deleteByIdUser(user.getId());
 		userRepository.deleteById(idUser);
 		// Registro de logs
 		setLogSecuritySuccesfull(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
 		HistoricalUtil.registerHistorical(user, HistoricalOperationEnum.DELETE, UserHistService.class);
 		logSecurityUserRespository.save(logSecurity);
+		// Se elimina la persona
+		if (isDeletePerson && user.getPerson() != null) {
+			deletePersonEvent(user.getPerson().getId(), principal);
+		}
 		return true;
 	}
 
@@ -304,10 +326,12 @@ public class UserService extends ApiRestSecurityHelper {
 	 */
 	private void updateUserRecord(User user, Long idUser, UserDTO dto, Person person, LogSecurity logSecurity,
 			Long starTime) {
-		// actualizacion del usuario desde api creacion de persona
+		// actualizacion de la persona, el estado y el rol
 		if (person != null) {
 			user.setPerson(person);
 			user.setState(UserStateEnum.ACTIVE);
+			// Se actualiza el rol por defecto.
+			createUserRole(idUser, logSecurity.getUserCreation());
 		}
 
 		ObjectUpdaterUtil.updateDataEqualObject(getUser(dto), user);
@@ -521,6 +545,24 @@ public class UserService extends ApiRestSecurityHelper {
 			throw new IllegalArgumentException(SecurityExceptionEnum.FUNC_USER_EXIST.getCodeMessage());
 		}
 		return false;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Se define un rol por defecto en
+	 * este caso user
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @param user
+	 */
+	private void createUserRole(Long idUser, String user) {
+		// Se consulta el rol User
+		Role rol = rolRepo.findByName(RoleEnum.USER).orElseThrow(() -> new EntityNotFoundException(
+				SecurityExceptionEnum.FUNC_ROLE_NOT_EXIST.getCodeMessage(RoleEnum.USER.name())));
+		// Se guarda la relacion
+		rolUserRepo.save(new RoleUser(idUser, rol.getId(), user, LocalDateTime.now()));
 	}
 
 }

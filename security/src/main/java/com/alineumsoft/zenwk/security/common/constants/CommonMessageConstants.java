@@ -25,7 +25,7 @@ public final class CommonMessageConstants {
 	// Mensage error general para no mostrar datos sensibles.
 	public static final String MSG_EXEPTION_GENERAL = "An unexpected error occurred. Please contact support";
 	// Codigo de error general para casos donde aun no se ha definido un codigo.
-	public static final String CODE_MSG_GENERAL = "GEN_SEGUSE";
+	public static final String CODE_MSG_GENERAL = "GEN_MSG";
 	public final static String ILEGAL_ARGUMENT_EXCEPTION = "IllegalArgumentException:";
 	public final static String ILEGAL_ACCESS_EXCEPTION = "IllegalAccessException:";
 	// Formato: [codigo] mensaje para mostrar los errores.

@@ -15,12 +15,12 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "sec_user_rol")
+@Table(name = "sec_role")
 @Data
 public class Role {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "secrolid")
+	@Column(name = "secrolidrole")
 	private Long id;
 
 	@Enumerated(EnumType.STRING)

@@ -48,11 +48,11 @@ public class PersonService extends ApiRestSecurityHelper {
 	/**
 	 * Repositorio de la persona
 	 */
-	private final PersonRepository personRepository;
+	private final PersonRepository personRepo;
 	/**
 	 * Repositorio para log persistible de modulo
 	 */
-	private final LogSecurityRespository logSecurityUserRespository;
+	private final LogSecurityRespository logSecUserRespo;
 	/**
 	 * Template para transaccion
 	 */
@@ -64,19 +64,20 @@ public class PersonService extends ApiRestSecurityHelper {
 
 	/**
 	 * <p>
-	 * <b> Constructor </b>
+	 * <b>Constructor </b>
 	 * </p>
 	 * 
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
-	 * @param personRepository
+	 * @param personRepo
 	 * @param logSecurityUser
-	 * @param transactionTemplate
+	 * @param templateTx
+	 * @param eventPublisher
 	 */
-	public PersonService(PersonRepository personRepository, LogSecurityRespository logSecurityUser,
-			TransactionTemplate transactionTemplate, ApplicationEventPublisher eventPublisher) {
-		this.personRepository = personRepository;
-		this.logSecurityUserRespository = logSecurityUser;
-		this.templateTx = transactionTemplate;
+	public PersonService(PersonRepository personRepo, LogSecurityRespository logSecurityUser,
+			TransactionTemplate templateTx, ApplicationEventPublisher eventPublisher) {
+		this.personRepo = personRepo;
+		this.logSecUserRespo = logSecurityUser;
+		this.templateTx = templateTx;
 		this.eventPublisher = eventPublisher;
 	}
 
@@ -97,16 +98,14 @@ public class PersonService extends ApiRestSecurityHelper {
 		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.PERSON_CREATE.getCode());
 		try {
-			Person person = createPersonTx(dto, logSecurity, starTime);
-			// Se asocia la persona la usuario
-			updateUserEvent(dto.getIdUser(), person, principal);
+			Person person = createPersonTx(dto, logSecurity, starTime, principal);
 			return person.getId();
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 		}
 	}
 
@@ -133,9 +132,9 @@ public class PersonService extends ApiRestSecurityHelper {
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 		}
 	}
 
@@ -157,14 +156,13 @@ public class PersonService extends ApiRestSecurityHelper {
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
 				SecurityServiceNameEnum.PERSON_DELETE.getCode());
 		try {
-			deleteUserEvent(idPerson, principal);
-			return deletePersonTx(idPerson, logSecurity, starTime);
+			return deletePersonTx(idPerson, logSecurity, starTime, principal, request != null);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 		}
 	}
 
@@ -179,12 +177,16 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @param dto
 	 * @param logSecurity
 	 * @param starTime
+	 * @param principal
 	 * @return
 	 */
-	private Person createPersonTx(PersonDTO dto, LogSecurity logSecurity, Long starTime) {
+	private Person createPersonTx(PersonDTO dto, LogSecurity logSecurity, Long starTime, Principal principal) {
 		return templateTx.execute(transaction -> {
 			try {
-				return createPersonRecord(dto, logSecurity, starTime);
+				Person person = createPersonRecord(dto, logSecurity, starTime);
+				// Se asocia la persona la usuario
+				updateUserEvent(dto.getIdUser(), person, principal);
+				return person;
 			} catch (ConstraintViolationException e) {
 				throw new RuntimeException(e.getMessage());
 			}
@@ -208,7 +210,7 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private boolean updatePersonTx(Long idPerson, PersonDTO dto, String name, LogSecurity logSecurity, Long starTime) {
-		Person target = personRepository.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
+		Person target = personRepo.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
 		return templateTx.execute(transaction -> {
 			try {
@@ -233,11 +235,19 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @param idPerson
 	 * @param logSecurity
 	 * @param starTime
+	 * @param principal
+	 * @param isDeleteUser
 	 * @return
 	 */
-	private boolean deletePersonTx(Long idPerson, LogSecurity logSecurity, Long starTime) {
+	private boolean deletePersonTx(Long idPerson, LogSecurity logSecurity, Long starTime, Principal principal,
+			boolean isDeleteUser) {
 		return templateTx.execute(transaction -> {
 			try {
+				// ELminacion del usuario a travez del evento
+				if (isDeleteUser) {
+					deleteUserEvent(idPerson, principal);
+				}
+
 				return deletePersonRecord(idPerson, logSecurity, starTime);
 			} catch (RuntimeException e) {
 				transaction.setRollbackOnly();
@@ -264,11 +274,11 @@ public class PersonService extends ApiRestSecurityHelper {
 		person.setCreationDate(LocalDateTime.now());
 		// Si la person no existe se persiste
 		if (!isExistPerson(person)) {
-			person = personRepository.save(person);
+			person = personRepo.save(person);
 			// Persistencia de logs
 			HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.INSERT, PersonHistService.class);
 			setLogSecuritySuccesfull(HttpStatus.CREATED.value(), logSecurity, starTime);
-			logSecurityUserRespository.save(logSecurity);
+			logSecUserRespo.save(logSecurity);
 		}
 		return person;
 
@@ -290,10 +300,10 @@ public class PersonService extends ApiRestSecurityHelper {
 	private void updatePersonRecord(Person person, String userModification, LogSecurity logSecurity, Long starTime) {
 		person.setUserModification(userModification);
 		person.setModificationDate(LocalDateTime.now());
-		personRepository.save(person);
+		personRepo.save(person);
 		HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.UPDATE, PersonHistService.class);
 		setLogSecuritySuccesfull(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
-		logSecurityUserRespository.save(logSecurity);
+		logSecUserRespo.save(logSecurity);
 	}
 
 	/**
@@ -309,12 +319,12 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private Boolean deletePersonRecord(Long idPerson, LogSecurity logSecurity, Long starTime) {
-		Person person = personRepository.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
+		Person person = personRepo.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
-		personRepository.deleteById(idPerson);
+		personRepo.deleteById(idPerson);
 		HistoricalUtil.registerHistorical(person, HistoricalOperationEnum.DELETE, PersonHistService.class);
 		setLogSecuritySuccesfull(HttpStatus.NO_CONTENT.value(), logSecurity, starTime);
-		logSecurityUserRespository.save(logSecurity);
+		logSecUserRespo.save(logSecurity);
 		return true;
 	}
 
@@ -375,17 +385,17 @@ public class PersonService extends ApiRestSecurityHelper {
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
 				SecurityServiceNameEnum.PERSON_FIND_BY_ID.getCode());
 		try {
-			Person person = personRepository.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
+			Person person = personRepo.findById(idPerson).orElseThrow(() -> new EntityNotFoundException(
 					SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(idPerson.toString())));
 			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity, starTime);
-			logSecurityUserRespository.save(logSecurity);
+			logSecUserRespo.save(logSecurity);
 			return new PersonDTO(person);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 		}
 
 	}
@@ -401,7 +411,7 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	public Person findEntityByIdPerson(Long id) {
-		return personRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(
+		return personRepo.findById(id).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_PERSON_NOT_FOUND.getCodeMessage(id.toString())));
 	}
 
@@ -424,7 +434,7 @@ public class PersonService extends ApiRestSecurityHelper {
 				SecurityServiceNameEnum.PERSON_FIND_ALL.getCode());
 		try {
 			int pageNumber = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
-			Page<Person> pagePerson = personRepository.findAll(PageRequest.of(pageNumber, pageable.getPageSize(),
+			Page<Person> pagePerson = personRepo.findAll(PageRequest.of(pageNumber, pageable.getPageSize(),
 					pageable.getSortOr(Sort.by(Sort.Direction.ASC, UserPersonEnum.PERSON_LAST_NAME.getMessageKey())
 							.and(Sort.by(Sort.Direction.ASC, UserPersonEnum.PERSON_FIRST_NAME.getMessageKey())))));
 
@@ -432,9 +442,9 @@ public class PersonService extends ApiRestSecurityHelper {
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
-				throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+				throw new FunctionalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 			}
-			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+			throw new TechnicalException(e.getMessage(), e.getCause(), logSecUserRespo, logSecurity);
 		}
 	}
 
@@ -454,7 +464,7 @@ public class PersonService extends ApiRestSecurityHelper {
 		List<PersonDTO> listPeople = pagePerson.stream().map(person -> new PersonDTO(person))
 				.collect(Collectors.toList());
 		setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity, starTime);
-		logSecurityUserRespository.save(logSecurity);
+		logSecUserRespo.save(logSecurity);
 		return new PagePersonDTO(listPeople, pagePerson.getTotalElements(), pagePerson.getTotalPages(),
 				pagePerson.getNumber() + 1);
 	}
@@ -474,6 +484,7 @@ public class PersonService extends ApiRestSecurityHelper {
 		eventPublisher.publishEvent(eventFindUser);
 		User user = eventFindUser.getUser();
 		if (user != null) {
+			// Evento para la eliminacion del usuario
 			DeleteUserEvent eventDelete = new DeleteUserEvent(this, user.getId(), principal);
 			eventPublisher.publishEvent(eventDelete);
 		}
@@ -508,9 +519,8 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private boolean isExistPerson(Person person) {
-		if (personRepository.existsByFirstNameAndMiddleNameAndLastNameAndMiddleLastNameAndDateOfBirth(
-				person.getFirstName(), person.getMiddleName(), person.getLastName(), person.getMiddleLastName(),
-				person.getDateOfBirth())) {
+		if (personRepo.existsByFirstNameAndMiddleNameAndLastNameAndMiddleLastNameAndDateOfBirth(person.getFirstName(),
+				person.getMiddleName(), person.getLastName(), person.getMiddleLastName(), person.getDateOfBirth())) {
 			throw new IllegalArgumentException(SecurityExceptionEnum.FUNC_PERSON_EXIST.getCodeMessage());
 		}
 		return false;

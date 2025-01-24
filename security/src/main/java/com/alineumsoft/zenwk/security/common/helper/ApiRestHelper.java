@@ -119,7 +119,7 @@ public class ApiRestHelper {
 	 */
 	public boolean isFunctionalException(RuntimeException e) {
 		String code = GlobalHandlerException.extractCode(e.getMessage());
-		if (code.contains(CommonMessageConstants.FUNCTIONAL_EXCEPTION_PREFIX)) {
+		if (code != null && code.contains(CommonMessageConstants.FUNCTIONAL_EXCEPTION_PREFIX)) {
 			return true;
 		}
 		return false;

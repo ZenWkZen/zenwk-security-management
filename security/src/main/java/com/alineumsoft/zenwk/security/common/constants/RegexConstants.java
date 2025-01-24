@@ -11,7 +11,7 @@ package com.alineumsoft.zenwk.security.common.constants;
  */
 public class RegexConstants {
 	// Letras, espacios, longitud 1-50.
-	public static final String NAME = "^[A-Za-záéíóúÁÉÍÓÚñÑ ]{1,50}$";
+	public static final String NAME = "^[A-Za-záéíóúÁÉÍÓÚñÑ]{1,30}$";
 	// Formato de email.
 	public static final String EMAIL = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 	// Teléfonos con o sin prefijo internacional.
