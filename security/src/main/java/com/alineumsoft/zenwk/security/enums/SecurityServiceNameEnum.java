@@ -11,6 +11,7 @@ public  enum SecurityServiceNameEnum {
 	USER_DELETE("user.delete"),
 	USER_FIND_BY_ID("user.findById"),
 	USER_FIND_ALL("user.findAll"),
+	USER_FIND_ROLE("user.findRole"),
 	PERSON_CREATE("person.create"),
 	PERSON_UPDATE("person.update"),
 	PERSON_DELETE("person.delete"),

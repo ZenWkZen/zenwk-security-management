@@ -30,4 +30,15 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 	 */
 	public Optional<Role> findByName(RoleEnum name);
 
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Busca un role por su id
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param name
+	 * @return
+	 */
+	public Optional<Role> findById(Long id);
+
 }

@@ -43,7 +43,7 @@ public final class HistoricalUtil {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_HISTORICAL_ENTITY_NOT_FOUND
-					.getCodeDescription(entity.getClass().getSimpleName()).concat(e.getMessage()));
+					.getCodeMessage(entity.getClass().getSimpleName()).concat(e.getMessage()));
 		}
 	}
 

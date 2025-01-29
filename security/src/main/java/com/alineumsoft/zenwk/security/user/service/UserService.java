@@ -18,6 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
+import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
 import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
 import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
 import com.alineumsoft.zenwk.security.common.util.HistoricalUtil;
@@ -211,7 +212,7 @@ public class UserService extends ApiRestSecurityHelper {
 	private boolean deleteUserTx(Long idUser, LogSecurity logSecurity, boolean isDeletePerson, Principal principal,
 			Long starTime) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
-				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+				SecurityExceptionEnum.FUNC_USER_NOT_FOUND_ID.getCodeMessage(idUser.toString())));
 
 		return templateTx.execute(transaction -> {
 			try {
@@ -297,7 +298,7 @@ public class UserService extends ApiRestSecurityHelper {
 	 */
 	private boolean updateUserTx(Long idUser, UserDTO dto, Person person, LogSecurity logSecurity, Long starTime) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
-				SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+				SecurityExceptionEnum.FUNC_USER_NOT_FOUND_ID.getCodeMessage(idUser.toString())));
 		// Se da inicio a la transccion de actualizacion
 		return templateTx.execute(transaction -> {
 			try {
@@ -380,7 +381,7 @@ public class UserService extends ApiRestSecurityHelper {
 				SecurityServiceNameEnum.USER_FIND_BY_ID.getCode());
 		try {
 			User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
-					SecurityExceptionEnum.FUNC_USER_NOT_FOUND.getCodeMessage(idUser.toString())));
+					SecurityExceptionEnum.FUNC_USER_NOT_FOUND_ID.getCodeMessage(idUser.toString())));
 			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity, starTime);
 			logSecurityUserRespository.save(logSecurity);
 			return new UserDTO(user);
@@ -560,9 +561,36 @@ public class UserService extends ApiRestSecurityHelper {
 	private void createUserRole(Long idUser, String user) {
 		// Se consulta el rol User
 		Role rol = rolRepo.findByName(RoleEnum.USER).orElseThrow(() -> new EntityNotFoundException(
-				SecurityExceptionEnum.FUNC_ROLE_NOT_EXIST.getCodeMessage(RoleEnum.USER.name())));
+				CoreExceptionEnum.FUNC_COMMON_ROLE_NOT_EXIST.getCodeMessage(RoleEnum.USER.name())));
 		// Se guarda la relacion
 		rolUserRepo.save(new RoleUser(idUser, rol.getId(), user, LocalDateTime.now()));
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Recupera la entidad rol del usuario
+	 * si tiene un rol asignado asociada
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
+	 * @return
+	 */
+	public Role getRoleUser(String username) {
+		try {
+			User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(
+					SecurityExceptionEnum.FUNC_USER_NOT_FOUND_USERNAME.getCodeMessage(username)));
+			RoleUser rolUser = rolUserRepo.findByIdUser(user.getId()).orElseThrow(() -> new EntityNotFoundException(
+					SecurityExceptionEnum.FUNC_ROLE_USER_NOT_EXIST.getCodeMessage(user.getUsername())));
+			Role role = rolRepo.findById(rolUser.getIdRole()).orElseThrow(() -> new EntityNotFoundException(
+					CoreExceptionEnum.FUNC_COMMON_ROLE_NOT_EXIST.getCodeMessage(rolUser.getIdRole().toString())));
+			return role;
+		} catch (EntityNotFoundException e) {
+			// inicializacion log transaccional
+			LogSecurity logSecurity = initializeLog(null, username, CommonMessageConstants.NOT_APPLICABLE_BODY,
+					CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_FIND_ROLE.getCode());
+			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
+		}
 	}
 
 }

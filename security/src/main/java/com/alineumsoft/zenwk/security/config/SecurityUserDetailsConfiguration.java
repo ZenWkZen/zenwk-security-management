@@ -10,7 +10,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import com.alineumsoft.zenwk.security.entity.Role;
 import com.alineumsoft.zenwk.security.enums.RoleEnum;
+import com.alineumsoft.zenwk.security.user.service.UserService;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -27,6 +29,19 @@ public class SecurityUserDetailsConfiguration {
 
 	@Value(USER_PASSWORD_PROPERTY)
 	private String userPassword;
+	/**
+	 * Servicio para la gestion de user
+	 */
+	private final UserService userService;
+
+	/**
+	 * <p> <b> CU001_Seguridad_Creacion_Usuario </b> Constructor  </p> 
+	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a> 
+	 * @param userService
+	 */
+	public SecurityUserDetailsConfiguration(UserService userService) {
+		this.userService = userService;
+	}
 
 	/**
 	 * <p>
@@ -56,6 +71,18 @@ public class SecurityUserDetailsConfiguration {
 		UserDetails userTemp = users.username(userName).password(passwordEncoder.encode(userPassword))
 				.authorities(RoleEnum.USER.name()).build();
 		return new InMemoryUserDetailsManager(userTemp);
+	}
+
+	/**
+	 * <p> <b> Security: </b> Recupera el rol del usuario  </p> 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a> 
+	 * @param username
+	 * @return
+	 */
+	@Bean
+	public UserDetails loadUserByUsername(String username) {
+		Role role = userService.getRoleUser(username);
+		return null;
 	}
 
 }

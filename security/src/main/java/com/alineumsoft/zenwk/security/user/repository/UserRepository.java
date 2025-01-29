@@ -59,4 +59,16 @@ public interface UserRepository
 	 * @return
 	 */
 	public boolean existsByUsernameAndEmail(String username, String email);
+
+	/**
+	 * 
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Recupera un usuario por el username
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
+	 * @return
+	 */
+	public Optional<User> findByUsername(String username);
 }

@@ -12,12 +12,13 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
 public enum SecurityExceptionEnum {
 	// fun/tec_entidad_operacion_campo/proceso_descripcion
 	FUNC_USER_CREATE_EMAIL_UNIQUE("FUNC_SEC_001", "functional.user.create.email.unique"),
-	FUNC_USER_NOT_FOUND("FUNC_SEC_002", "functional.user.notfound"),
+	FUNC_USER_NOT_FOUND_ID("FUNC_SEC_002", "functional.user.id.notfound"),
+	FUNC_USER_NOT_FOUND_USERNAME("FUNC_SEC_002","functional.user.username.notfound"),
 	FUNC_USER_MAIL_EXISTS("FUNC_SEC_003", "functional.user.email.exists"),
 	FUNC_PERSON_NOT_FOUND("FUNC_SEC_004", "functional.person.notfound"),
 	FUNC_PERSON_EXIST("FUNC_SEC_005", "functional.person.exist"),
 	FUNC_USER_EXIST("FUNC_SEC_006", "functional.user.exist"),
-	FUNC_ROLE_NOT_EXIST("FUNC_SEC_007", "functional.role.not.exist");
+	FUNC_ROLE_USER_NOT_EXIST("FUNC_SEC_007", "functional.roleuser.not.exist");
 
 	private String code;
 	private String key;
@@ -49,7 +50,7 @@ public enum SecurityExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(key);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription(key));
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeMessage(key));
 		}
 	}
 
@@ -61,7 +62,7 @@ public enum SecurityExceptionEnum {
 		try {
 			return MessageSourceAccessorComponent.getMessage(key, params);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeDescription(key));
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeMessage(key));
 		}
 	}
 

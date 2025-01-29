@@ -13,7 +13,8 @@ public enum RoleEnum {
 	APP_ADMIN("role.security.appadmin"), 
 	AUDITOR("role.security.auditor"), 
 	USER("role.security.user");
-
+	
+	
 	private final String messageKey;
 
 	/**

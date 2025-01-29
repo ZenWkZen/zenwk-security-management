@@ -73,7 +73,7 @@ public class EntityExistsValidator implements ConstraintValidator<EntityExists, 
 			Method existsByIdMethod = serviceClass.getMethod(GeneralConstants.ANOTATION_ENTITY_EXISTS, Long.class);
 			return (boolean) existsByIdMethod.invoke(serviceBean, id);
 		} catch (Exception e) {
-			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_ANOTATION_ENTITY_NOT_EXISTS.getCodeDescription(),
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_ANOTATION_ENTITY_NOT_EXISTS.getCodeMessage(),
 					e);
 		}
 	}

@@ -1,5 +1,7 @@
 package com.alineumsoft.zenwk.security.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -28,4 +30,16 @@ public interface RolUserRepository extends JpaRepository<RoleUser, RolUserId> {
 	 * @return
 	 */
 	public void deleteByIdUser(Long idUser);
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Se recupera el registro RoleUser a
+	 * partir de el id del usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idUser
+	 * @return
+	 */
+	public Optional<RoleUser> findByIdUser(Long idUser);
 }
