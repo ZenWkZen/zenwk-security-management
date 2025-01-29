@@ -16,6 +16,9 @@ import com.alineumsoft.zenwk.security.user.entity.User;
  */
 public interface UserRepository
 		extends JpaRepository<User, Long>, CrudRepository<User, Long>, PagingAndSortingRepository<User, Long> {
+	/**
+	 * JPQL que consulta un usuario a partir del id de la persona
+	 */
 	public final static String JPQL_FIND_USER_BY_PERSON_ID = "SELECT u FROM User u WHERE u.person.id = :idPerson";
 
 	/**

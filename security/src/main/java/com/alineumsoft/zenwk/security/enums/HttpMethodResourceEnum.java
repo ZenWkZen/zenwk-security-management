@@ -16,19 +16,19 @@ public enum HttpMethodResourceEnum {
 	/**
 	 * Recursos par ala entidad usuarios
 	 */
-	USER_CREATE(HttpMethod.POST, "api/user"),
-	USER_UPDATE(HttpMethod.PUT, "api/user"),
-	USER_DELETE(HttpMethod.DELETE, "api/user/{id}"),
-	USER_FIND_ALL(HttpMethod.GET, "api/user/"),
-	USER_FIND_BY_ID(HttpMethod.GET, "api/user/{id}"),
+	USER_CREATE(HttpMethod.POST, "/api/user"),
+	USER_UPDATE(HttpMethod.PUT, "/api/user"),
+	USER_DELETE(HttpMethod.DELETE, "/api/user/{id}"),
+	USER_FIND_ALL(HttpMethod.GET, "/api/user"),
+	USER_FIND_BY_ID(HttpMethod.GET, "/api/user/{id}"),
 	/**
 	 * Recursos para la entidad persona
 	 */
-	PERSON_CREATE(HttpMethod.POST, "api/person"),
-	PERSON_UPDATE(HttpMethod.PUT, "api/person"),
-	PERSON_DELETE(HttpMethod.DELETE, "api/person/{id}"),
-	PERSON_FIND_ALL(HttpMethod.GET, "api/person"),
-	PERSON_FIND_BY_ID(HttpMethod.GET, "api/person/{id}");
+	PERSON_CREATE(HttpMethod.POST, "/api/person"),
+	PERSON_UPDATE(HttpMethod.PUT, "/api/person"),
+	PERSON_DELETE(HttpMethod.DELETE, "/api/person/{id}"),
+	PERSON_FIND_ALL(HttpMethod.GET, "/api/person"),
+	PERSON_FIND_BY_ID(HttpMethod.GET, "/api/person/{id}");
 
 	/**
 	 * Metodo http

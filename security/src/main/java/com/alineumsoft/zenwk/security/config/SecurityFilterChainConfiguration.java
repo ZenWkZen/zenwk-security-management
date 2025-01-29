@@ -1,12 +1,27 @@
 package com.alineumsoft.zenwk.security.config;
 
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.*;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.*;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_CREATE;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_DELETE;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_FIND_ALL;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_FIND_BY_ID;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_UPDATE;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_CREATE;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_DELETE;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_FIND_ALL;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_FIND_BY_ID;
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_UPDATE;
+import static com.alineumsoft.zenwk.security.enums.RoleEnum.APP_ADMIN;
+import static com.alineumsoft.zenwk.security.enums.RoleEnum.AUDITOR;
+import static com.alineumsoft.zenwk.security.enums.RoleEnum.NEW_USER;
+import static com.alineumsoft.zenwk.security.enums.RoleEnum.SECURITY_ADMIN;
+import static com.alineumsoft.zenwk.security.enums.RoleEnum.SYSTEM_ADMIN;
+import static com.alineumsoft.zenwk.security.enums.RoleEnum.USER;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -17,6 +32,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  * @class SecurityConfiguration
  */
 @Configuration
+@EnableWebSecurity
 public class SecurityFilterChainConfiguration {
 
 	/**
@@ -37,8 +53,12 @@ public class SecurityFilterChainConfiguration {
 				.requestMatchers(matchersForUpdate()).hasAnyAuthority(roleUpdate())
 				.requestMatchers(matchersForDelete()).hasAnyAuthority(roleDelete())
 				.requestMatchers(matchersForFindAll()).hasAnyAuthority(roleFindAll())
-				.requestMatchers(matchersForFindById()).hasAnyAuthority(roleFinById()))
-				.httpBasic(Customizer.withDefaults()).csrf(csrf -> csrf.disable());
+				.requestMatchers(matchersForFindById()).hasAnyAuthority(roleFinById())
+				// Todas las solicitudes deben estar autenticadas
+				.anyRequest().authenticated()
+			)
+			.httpBasic(Customizer.withDefaults())
+			.csrf(csrf -> csrf.disable());
 		return http.build();
 	}
 
@@ -51,7 +71,7 @@ public class SecurityFilterChainConfiguration {
 	 * @return
 	 */
 	private static String[] roleCreate() {
-		return new String[] { USER.name(), SYSTEM_ADMIN.name() };
+		return new String[] { NEW_USER.name(), SYSTEM_ADMIN.name() };
 	}
 
 	/**
@@ -100,7 +120,7 @@ public class SecurityFilterChainConfiguration {
 	 * @return
 	 */
 	private static String[] roleFindAll() {
-		return new String[] { USER.name(), SYSTEM_ADMIN.name(), SECURITY_ADMIN.name(), AUDITOR.name() };
+		return new String[] { SYSTEM_ADMIN.name(), SECURITY_ADMIN.name(), AUDITOR.name() };
 	}
 
 	/**

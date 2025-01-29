@@ -576,21 +576,71 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param username
 	 * @return
 	 */
-	public Role getRoleUser(String username) {
+	public List<Role> findRolesByUsername(String username) {
 		try {
-			User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(
-					SecurityExceptionEnum.FUNC_USER_NOT_FOUND_USERNAME.getCodeMessage(username)));
-			RoleUser rolUser = rolUserRepo.findByIdUser(user.getId()).orElseThrow(() -> new EntityNotFoundException(
-					SecurityExceptionEnum.FUNC_ROLE_USER_NOT_EXIST.getCodeMessage(user.getUsername())));
-			Role role = rolRepo.findById(rolUser.getIdRole()).orElseThrow(() -> new EntityNotFoundException(
-					CoreExceptionEnum.FUNC_COMMON_ROLE_NOT_EXIST.getCodeMessage(rolUser.getIdRole().toString())));
-			return role;
+			// Consulta del usuario desde el campo username
+			User user = findByUsername(username);
+			// Consulta que roles estan asignados al usuario
+			List<RoleUser> rolesUser = findRolesUserByUser(user);
+			// Consulta los roles del usuario
+			return findRolesByRolesUser(rolesUser);
 		} catch (EntityNotFoundException e) {
 			// inicializacion log transaccional
 			LogSecurity logSecurity = initializeLog(null, username, CommonMessageConstants.NOT_APPLICABLE_BODY,
 					CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_FIND_ROLE.getCode());
 			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Consulta los roles del usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param rolesUser
+	 * @return
+	 */
+	private List<Role> findRolesByRolesUser(List<RoleUser> rolesUser) {
+		List<Role> roles = rolRepo.findByIds(rolesUser.stream().map(RoleUser::getIdRole).collect(Collectors.toList()));
+		if (roles == null || roles.isEmpty()) {
+			throw new EntityNotFoundException(CoreExceptionEnum.FUNC_COMMON_ROLE_NOT_EXIST.getCodeMessage());
+		}
+		return roles;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Consulta los registros de la tabla
+	 * sec_role_user asociados al del usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param user
+	 * @return
+	 */
+	private List<RoleUser> findRolesUserByUser(User user) {
+		List<RoleUser> rolesUser = rolUserRepo.findByIdUser(user.getId());
+		if (rolesUser == null || rolesUser.isEmpty()) {
+			throw new EntityNotFoundException(
+					SecurityExceptionEnum.FUNC_ROLE_USER_NOT_EXIST.getCodeMessage(user.getUsername()));
+		}
+		return rolesUser;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Recupera la entidad user con el
+	 * username si tiene un rol asignado asociada
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
+	 * @return
+	 */
+	public User findByUsername(String username) {
+		return userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(
+				SecurityExceptionEnum.FUNC_USER_NOT_FOUND_USERNAME.getCodeMessage(username)));
 	}
 
 }

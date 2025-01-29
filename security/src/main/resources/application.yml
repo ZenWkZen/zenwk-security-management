@@ -1,13 +1,13 @@
 # Niveles de log
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: DEBUG #DEBUG
 # Log de datasource-hikari
     #com.zaxxer.hikari: INFO #DEBUG
     #org.springframework.jdbc.datasource: INFO #DEBUG
 # Log de aplicacion
-    root: INFO #TRACE
-    com.alineumsoft: INFO
+    root: INFO  #TRACEINFO
+    com.alineumsoft: DEBUG
   file:
     name: logs/application.log
   logback:
@@ -16,7 +16,10 @@ logging:
       max-history: 5
 
 # Congiguracion general aplicacion
+# En ambiente de pruebas habilitar la propiedad profile.active: test
 spring:
+  #profiles:
+    #active: test
   application:
     name: security-zenwk
   messages:
@@ -74,3 +77,7 @@ management:
       enabled: true
   metrics:
     enabled: true
+# Deshablitar / hablitar autienciación perfil de pruebas
+security:
+  test-config:
+    config.enabled: test

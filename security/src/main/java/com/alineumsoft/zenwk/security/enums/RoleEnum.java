@@ -12,9 +12,12 @@ public enum RoleEnum {
 	SECURITY_ADMIN("role.security.securityadmin"),
 	APP_ADMIN("role.security.appadmin"), 
 	AUDITOR("role.security.auditor"), 
-	USER("role.security.user");
+	USER("role.security.user"),
+	NEW_USER("role.security.newuser");
 	
-	
+	/**
+	 * clave del mensaje
+	 */
 	private final String messageKey;
 
 	/**

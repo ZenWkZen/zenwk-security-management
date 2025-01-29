@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * @class UserController
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 @Slf4j
 public class UserController {
 	/**

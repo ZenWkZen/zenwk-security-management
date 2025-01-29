@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @class PersonController
  */
 @RestController
-@RequestMapping("/person")
+@RequestMapping("/api/person")
 public class PersonController {
 	/**
 	 * Servicio de controlador
