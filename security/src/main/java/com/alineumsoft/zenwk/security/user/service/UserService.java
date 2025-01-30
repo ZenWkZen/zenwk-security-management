@@ -3,6 +3,7 @@ package com.alineumsoft.zenwk.security.user.service;
 import java.security.Principal;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -35,7 +37,7 @@ import com.alineumsoft.zenwk.security.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.person.event.PersonDeleteEvent;
-import com.alineumsoft.zenwk.security.repository.LogSecurityRespository;
+import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
 import com.alineumsoft.zenwk.security.repository.RolUserRepository;
 import com.alineumsoft.zenwk.security.repository.RoleRepository;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
@@ -47,6 +49,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.*;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -63,7 +67,7 @@ public class UserService extends ApiRestSecurityHelper {
 	/**
 	 * Repositorio para log persistible de modulo
 	 */
-	private final LogSecurityRespository logSecurityUserRespository;
+	private final LogSecurityRepository logSecurityUserRespository;
 	/**
 	 * Template para transaccion
 	 */
@@ -94,7 +98,7 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param rolUserRepo
 	 * @param rolRepo
 	 */
-	public UserService(UserRepository userRepository, LogSecurityRespository logRepository,
+	public UserService(UserRepository userRepository, LogSecurityRepository logRepository,
 			TransactionTemplate transationTemplate, ApplicationEventPublisher eventPublisher,
 			RolUserRepository rolUserRepo, RoleRepository rolRepo) {
 		this.userRepository = userRepository;
@@ -574,22 +578,85 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param username
+	 * @param starTime
+	 * @param httpRequest
 	 * @return
 	 */
-	public List<Role> findRolesByUsername(String username) {
+	public List<Role> findRolesByUsername(String username, Long starTime, HttpServletRequest httpRequest) {
 		try {
-			// Consulta del usuario desde el campo username
-			User user = findByUsername(username);
-			// Consulta que roles estan asignados al usuario
-			List<RoleUser> rolesUser = findRolesUserByUser(user);
-			// Consulta los roles del usuario
-			return findRolesByRolesUser(rolesUser);
+			// Cuando se crea un registro user por primera vez no se esepera el username.
+			if (isCreateUserOrPerson(username, httpRequest)) {
+				return getRoleNewUser();
+			}
+			// se obtienen los roles del usuario
+			return getRolesForUser(username);
 		} catch (EntityNotFoundException e) {
 			// inicializacion log transaccional
 			LogSecurity logSecurity = initializeLog(null, username, CommonMessageConstants.NOT_APPLICABLE_BODY,
 					CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_FIND_ROLE.getCode());
+			logSecurity.setStatusCode(HttpStatus.FORBIDDEN.value());
+			logSecurity.setExecutionTime(getExecutionTime(starTime));
+			// Se lanza excepcion funcional
 			throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Identifica si se realiza una
+	 * invoacion POST para los servicios user.create o person.create, si el caso
+	 * retorna el rol por defecto NEW_USER
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
+	 * @param httpRequest
+	 * @return
+	 */
+	private boolean isCreateUserOrPerson(String username, HttpServletRequest httpRequest) {
+		return username == null && httpRequest != null && HttpMethod.POST.matches(httpRequest.getMethod())
+				&& (httpRequest.getRequestURI().endsWith(USER_CREATE.getResource())
+						|| httpRequest.getRequestURI().endsWith(PERSON_CREATE.getResource()));
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Obtien los roles del usuario si
+	 * existe en caso contrario guarda un log con la excepcion generada
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
+	 * @return
+	 */
+	private List<Role> getRolesForUser(String username) {
+		// Consulta del usuario desde el campo username
+		User user = findByUsername(username);
+		// Se valida el estado del usuario.
+		if (UserStateEnum.INCOMPLETE_PERFIL.equals(user.getState())) {
+			// Se retorna el rol temporal new user
+			return getRoleNewUser();
+		} else {
+			// Consulta que roles estan asignados al usuario
+			List<RoleUser> rolesUser = findRolesUserByUser(user);
+			// Consulta los roles del usuario
+			return findRolesByRolesUser(rolesUser);
+		}
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Se genera una lista con el rol
+	 * temporal new_user
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @return
+	 */
+	private List<Role> getRoleNewUser() {
+		Role rolTemp = rolRepo.findByName(RoleEnum.NEW_USER).orElseThrow(
+				() -> new EntityNotFoundException(SecurityExceptionEnum.FUNC_ROLE_USER_NOT_EXIST.getCodeMessage()));
+		return Arrays.asList(rolTemp);
 	}
 
 	/**

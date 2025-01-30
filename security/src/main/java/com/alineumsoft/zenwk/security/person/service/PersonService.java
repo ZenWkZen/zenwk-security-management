@@ -30,7 +30,7 @@ import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.person.repository.PersonRepository;
-import com.alineumsoft.zenwk.security.repository.LogSecurityRespository;
+import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.event.DeleteUserEvent;
@@ -52,7 +52,7 @@ public class PersonService extends ApiRestSecurityHelper {
 	/**
 	 * Repositorio para log persistible de modulo
 	 */
-	private final LogSecurityRespository logSecUserRespo;
+	private final LogSecurityRepository logSecUserRespo;
 	/**
 	 * Template para transaccion
 	 */
@@ -73,7 +73,7 @@ public class PersonService extends ApiRestSecurityHelper {
 	 * @param templateTx
 	 * @param eventPublisher
 	 */
-	public PersonService(PersonRepository personRepo, LogSecurityRespository logSecurityUser,
+	public PersonService(PersonRepository personRepo, LogSecurityRepository logSecurityUser,
 			TransactionTemplate templateTx, ApplicationEventPublisher eventPublisher) {
 		this.personRepo = personRepo;
 		this.logSecUserRespo = logSecurityUser;

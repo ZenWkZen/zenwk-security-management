@@ -7,8 +7,12 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alineumsoft.zenwk.security.user.service.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -25,6 +29,11 @@ public class UserDetailsService implements org.springframework.security.core.use
 	 * Servicio para la gestion de user
 	 */
 	private final UserService userService;
+
+	/**
+	 * Contador de tiempo de la solicitud
+	 */
+	private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
 	/**
 	 * <p>
@@ -47,8 +56,11 @@ public class UserDetailsService implements org.springframework.security.core.use
 	 */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		List<String> rolesName = userService.findRolesByUsername(username).stream().map(rol -> rol.getName().name())
-				.collect(Collectors.toList());
+		startTime.set(System.currentTimeMillis());
+		HttpServletRequest request = getCurrentHttpRequest();
+		// Consulta de los roles asociados al usuario
+		List<String> rolesName = userService.findRolesByUsername(username, startTime.get(), request).stream()
+				.map(rol -> rol.getName().name()).collect(Collectors.toList());
 
 		com.alineumsoft.zenwk.security.user.entity.User userEntity = userService.findByUsername(username);
 		User.UserBuilder userBuilder = User.builder();
@@ -56,6 +68,19 @@ public class UserDetailsService implements org.springframework.security.core.use
 		UserDetails userDetail = userBuilder.username(userEntity.getUsername()).password(userEntity.getPassword())
 				.authorities(rolesName.toArray(new String[0])).build();
 		return userDetail;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Obtiene la solicitud HTTP actual.
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @return
+	 */
+	private HttpServletRequest getCurrentHttpRequest() {
+		ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		return attrs != null ? attrs.getRequest() : null;
 	}
 
 }

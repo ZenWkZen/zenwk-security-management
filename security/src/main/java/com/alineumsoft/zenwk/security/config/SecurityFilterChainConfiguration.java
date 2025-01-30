@@ -1,22 +1,5 @@
 package com.alineumsoft.zenwk.security.config;
 
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_CREATE;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_DELETE;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_FIND_ALL;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_FIND_BY_ID;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.PERSON_UPDATE;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_CREATE;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_DELETE;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_FIND_ALL;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_FIND_BY_ID;
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.USER_UPDATE;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.APP_ADMIN;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.AUDITOR;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.NEW_USER;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.SECURITY_ADMIN;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.SYSTEM_ADMIN;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.USER;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -25,6 +8,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.*;
+import static com.alineumsoft.zenwk.security.enums.RoleEnum.*;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -47,7 +33,6 @@ public class SecurityFilterChainConfiguration {
 	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
 		http.authorizeHttpRequests(request -> request
 				.requestMatchers(matchersForCreate()).hasAnyAuthority(roleCreate())
 				.requestMatchers(matchersForUpdate()).hasAnyAuthority(roleUpdate())

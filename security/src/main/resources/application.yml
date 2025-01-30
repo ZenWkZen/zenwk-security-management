@@ -1,7 +1,7 @@
 # Niveles de log
 logging:
   level:
-    org.springframework.security: DEBUG #DEBUG
+    org.springframework.security: INFO #DEBUG
 # Log de datasource-hikari
     #com.zaxxer.hikari: INFO #DEBUG
     #org.springframework.jdbc.datasource: INFO #DEBUG
