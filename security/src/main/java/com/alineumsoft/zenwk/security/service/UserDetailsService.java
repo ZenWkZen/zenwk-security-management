@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
 import com.alineumsoft.zenwk.security.user.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,17 +57,23 @@ public class UserDetailsService implements org.springframework.security.core.use
 	 */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		startTime.set(System.currentTimeMillis());
+		UserDetails userDetail = null;
+		User.UserBuilder userBuilder = User.builder();
 		HttpServletRequest request = getCurrentHttpRequest();
+		startTime.set(System.currentTimeMillis());
 		// Consulta de los roles asociados al usuario
 		List<String> rolesName = userService.findRolesByUsername(username, startTime.get(), request).stream()
 				.map(rol -> rol.getName().name()).collect(Collectors.toList());
 
-		com.alineumsoft.zenwk.security.user.entity.User userEntity = userService.findByUsername(username);
-		User.UserBuilder userBuilder = User.builder();
-		// Retorno de user details
-		UserDetails userDetail = userBuilder.username(userEntity.getUsername()).password(userEntity.getPassword())
-				.authorities(rolesName.toArray(new String[0])).build();
+		if (!"anonymous_user".equals(username)) {
+			com.alineumsoft.zenwk.security.user.entity.User userEntity = userService.findByUsername(username);
+
+			// Retorno de user details
+			userDetail = userBuilder.username(userEntity.getUsername()).password(userEntity.getPassword())
+					.authorities(rolesName.toArray(new String[0])).build();
+		} else {
+			userDetail = userBuilder.username("anonymous_user").password(CryptoUtil.encryptPassword("anonymous_user")).authorities(rolesName.toArray(new String[0])).build();
+		}
 		return userDetail;
 	}
 

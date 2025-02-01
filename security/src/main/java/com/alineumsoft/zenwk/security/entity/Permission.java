@@ -12,11 +12,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "sec_permission")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Permission {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +33,12 @@ public class Permission {
 
 	@Column(name = "secperdescription")
 	private String description;
+	
+	@Column(name="secperresource")
+	private String resource;
+	
+	@Column(name="secpermethod")
+	private String method;
 
 	@Column(name = "secpercreationdate")
 	private LocalDateTime creationDate;

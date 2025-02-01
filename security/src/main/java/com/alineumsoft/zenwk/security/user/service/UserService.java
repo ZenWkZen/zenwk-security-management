@@ -614,7 +614,7 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private boolean isCreateUserOrPerson(String username, HttpServletRequest httpRequest) {
-		return username == null && httpRequest != null && HttpMethod.POST.matches(httpRequest.getMethod())
+		return "anonymous_user".equals(username) && httpRequest != null && HttpMethod.POST.matches(httpRequest.getMethod())
 				&& (httpRequest.getRequestURI().endsWith(USER_CREATE.getResource())
 						|| httpRequest.getRequestURI().endsWith(PERSON_CREATE.getResource()));
 	}
@@ -654,8 +654,8 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private List<Role> getRoleNewUser() {
-		Role rolTemp = rolRepo.findByName(RoleEnum.NEW_USER).orElseThrow(
-				() -> new EntityNotFoundException(SecurityExceptionEnum.FUNC_ROLE_USER_NOT_EXIST.getCodeMessage()));
+		Role rolTemp = rolRepo.findByName(RoleEnum.NEW_USER).orElseThrow(() -> new EntityNotFoundException(
+				SecurityExceptionEnum.FUNC_ROLE_USER_NOT_EXIST.getCodeMessage(RoleEnum.NEW_USER.name())));
 		return Arrays.asList(rolTemp);
 	}
 
