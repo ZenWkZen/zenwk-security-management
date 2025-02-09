@@ -2,10 +2,11 @@ package com.alineumsoft.zenwk.security.controller;
 
 import java.io.IOException;
 import java.net.URI;
-import java.security.Principal;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.constants.SecurityConstants;
+import com.alineumsoft.zenwk.security.constants.ServiceControllerConstants;
+import com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.service.UserService;
@@ -61,17 +63,18 @@ public class UserController {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param dto
 	 * @param uriCB
-	 * @param principal
+	 * @param userDetails
 	 * @param request
 	 * @return
 	 * @throws JsonProcessingException
 	 */
 	@PostMapping
 	public ResponseEntity<Void> createUser(@Validated @RequestBody UserDTO dto, UriComponentsBuilder uriCB,
-			Principal principal, HttpServletRequest request) throws JsonProcessingException {
+			@AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request)
+			throws JsonProcessingException {
 		startTime.set(System.currentTimeMillis());
-		Long idUser = userService.createUser(dto, request, principal, startTime.get());
-		URI location = uriCB.path(SecurityConstants.HEADER_USER_LOCATION).buildAndExpand(idUser).toUri();
+		Long idUser = userService.createUser(dto, request, userDetails, startTime.get());
+		URI location = uriCB.path(HttpMethodResourceEnum.USER_FIND_BY_ID.getResource()).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
 	}
 
@@ -88,9 +91,9 @@ public class UserController {
 	 */
 	@PutMapping("{idUser}")
 	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody UserDTO dto,
-			HttpServletRequest request, Principal principal) throws IOException {
+			HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) throws IOException {
 		startTime.set(System.currentTimeMillis());
-		userService.updateUser(request, idUser, dto, principal, null, startTime.get());
+		userService.updateUser(request, idUser, dto, userDetails, null, startTime.get());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -106,9 +109,10 @@ public class UserController {
 	 * @throws JsonProcessingException
 	 */
 	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request, Principal principal) {
+	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request,
+			@AuthenticationPrincipal UserDetails userDetails) {
 		startTime.set(System.currentTimeMillis());
-		userService.deleteUser(idUser, request, principal, startTime.get());
+		userService.deleteUser(idUser, request, userDetails, startTime.get());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -120,14 +124,14 @@ public class UserController {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @param request
-	 * @param principal
+	 * @param userDetails
 	 * @return
 	 */
 	@GetMapping("/{idUser}")
 	public ResponseEntity<UserDTO> findById(@PathVariable Long idUser, HttpServletRequest request,
-			Principal principal) {
+			@AuthenticationPrincipal UserDetails userDetails) {
 		startTime.set(System.currentTimeMillis());
-		return ResponseEntity.ok(userService.findByIdUser(idUser, request, principal, startTime.get()));
+		return ResponseEntity.ok(userService.findByIdUser(idUser, request, userDetails, startTime.get()));
 	}
 
 	/**
@@ -142,8 +146,9 @@ public class UserController {
 	 * @return
 	 */
 	@GetMapping
-	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request, Principal principal) {
+	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request,
+			@AuthenticationPrincipal UserDetails userDetails) {
 		startTime.set(System.currentTimeMillis());
-		return ResponseEntity.ok(userService.findAll(pageable, request, principal, startTime.get()));
+		return ResponseEntity.ok(userService.findAll(pageable, request, userDetails, startTime.get()));
 	}
 }

@@ -1,6 +1,5 @@
 package com.alineumsoft.zenwk.security.user.service;
 
-import java.security.Principal;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -14,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -25,13 +25,14 @@ import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
 import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
 import com.alineumsoft.zenwk.security.common.util.HistoricalUtil;
 import com.alineumsoft.zenwk.security.common.util.ObjectUpdaterUtil;
-import com.alineumsoft.zenwk.security.constants.SecurityConstants;
+import com.alineumsoft.zenwk.security.constants.ServiceControllerConstants;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.entity.Role;
 import com.alineumsoft.zenwk.security.entity.RoleUser;
+import  com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
 import com.alineumsoft.zenwk.security.enums.RoleEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
-import com.alineumsoft.zenwk.security.enums.SecurityServiceNameEnum;
+import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
 import com.alineumsoft.zenwk.security.enums.UserPersonEnum;
 import com.alineumsoft.zenwk.security.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
@@ -49,8 +50,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.*;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -109,27 +108,23 @@ public class UserService extends ApiRestSecurityHelper {
 		this.rolRepo = rolRepo;
 	}
 
-	/*
-	 * 
-	 * <p> <b> CU001_Seguridad_Creacion_Usuario </b> Metodo de servicio que crea un
-	 * nuevo usuario si cumple con las validaciones </p>
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Metodo de servicio que crea un
+	 * nuevo usuario si cumple con las validaciones
+	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * 
 	 * @param dto
-	 * 
-	 * @param principal
-	 * 
+	 * @param userDetails
 	 * @param startTime
-	 * 
 	 * @return
-	 * 
 	 * @throws JsonProcessingException
 	 */
-	public Long createUser(UserDTO dto, HttpServletRequest request, Principal principal, Long startTime) {
+	public Long createUser(UserDTO dto, HttpServletRequest request, UserDetails userDetails, Long startTime) {
 		// inicializacion log transaccional
-		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
-				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_CREATE.getCode());
+		LogSecurity logSecurity = initializeLog(request, dto.getUsername(), getJson(dto),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityActionEnum.USER_CREATE.getCode());
 		try {
 			return createUserTx(dto, logSecurity, startTime);
 		} catch (RuntimeException e) {
@@ -150,15 +145,15 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param request
 	 * @param idUser
 	 * @param dto
-	 * @param principal
+	 * @param userDetails
 	 * @param starTime
 	 * @oaram person
 	 */
-	public boolean updateUser(HttpServletRequest request, Long idUser, UserDTO dto, Principal principal, Person person,
+	public boolean updateUser(HttpServletRequest request, Long idUser, UserDTO dto, UserDetails userDetails, Person person,
 			Long starTime) {
 		// Inicializacion log transaccional
-		LogSecurity logSecurity = initializeLog(request, principal.getName(), getJson(dto),
-				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_UPDATE.getCode());
+		LogSecurity logSecurity = initializeLog(request, userDetails.getUsername(), getJson(dto),
+				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityActionEnum.USER_UPDATE.getCode());
 		try {
 			return updateUserTx(idUser, dto, person, logSecurity, starTime);
 		} catch (RuntimeException e) {
@@ -178,18 +173,18 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
-	 * @param principal
 	 * @param request
+	 * @param userDetails
 	 * @param starTime
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public boolean deleteUser(Long idUser, HttpServletRequest request, Principal principal, Long starTime) {
-		LogSecurity logSecurity = initializeLog(request, principal.getName(),
+	public boolean deleteUser(Long idUser, HttpServletRequest request, UserDetails userDetails, Long starTime) {
+		LogSecurity logSecurity = initializeLog(request, userDetails.getUsername(),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
-				SecurityServiceNameEnum.USER_DELETE.getCode());
+				SecurityActionEnum.USER_DELETE.getCode());
 		try {
-			return deleteUserTx(idUser, logSecurity, request != null, principal, starTime);
+			return deleteUserTx(idUser, logSecurity, request != null, userDetails, starTime);
 		} catch (RuntimeException e) {
 			setLogSecurityError(e, logSecurity, starTime);
 			if (isFunctionalException(e)) {
@@ -209,18 +204,18 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @param logSecurity
-	 * @param principal
+	 * @param userDetails
 	 * @param starTime
 	 * @return
 	 */
-	private boolean deleteUserTx(Long idUser, LogSecurity logSecurity, boolean isDeletePerson, Principal principal,
+	private boolean deleteUserTx(Long idUser, LogSecurity logSecurity, boolean isDeletePerson, UserDetails userDetails,
 			Long starTime) {
 		User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
 				SecurityExceptionEnum.FUNC_USER_NOT_FOUND_ID.getCodeMessage(idUser.toString())));
 
 		return templateTx.execute(transaction -> {
 			try {
-				return deleteUserRecord(idUser, logSecurity, user, starTime, isDeletePerson, principal);
+				return deleteUserRecord(idUser, logSecurity, user, starTime, isDeletePerson, userDetails);
 			} catch (RuntimeException e) {
 				transaction.setRollbackOnly();
 				throw new RuntimeException(getMessageSQLException(e));
@@ -240,11 +235,11 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @param user
 	 * @param starTime
 	 * @param isDeletePerson
-	 * @param principal
+	 * @param userDetails
 	 * @return
 	 */
 	private Boolean deleteUserRecord(Long idUser, LogSecurity logSecurity, User user, Long starTime,
-			boolean isDeletePerson, Principal principal) {
+			boolean isDeletePerson, UserDetails userDetails) {
 		// Eliminacion de los permisos del usuario
 		rolUserRepo.deleteByIdUser(user.getId());
 		userRepository.deleteById(idUser);
@@ -254,7 +249,7 @@ public class UserService extends ApiRestSecurityHelper {
 		logSecurityUserRespository.save(logSecurity);
 		// Se elimina la persona
 		if (isDeletePerson && user.getPerson() != null) {
-			deletePersonEvent(user.getPerson().getId(), principal);
+			deletePersonEvent(user.getPerson().getId(), userDetails);
 		}
 		return true;
 	}
@@ -375,14 +370,14 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
 	 * @param request
-	 * @param principal
+	 * @param userDetails
 	 * @param long1
 	 * @return
 	 */
-	public UserDTO findByIdUser(Long idUser, HttpServletRequest request, Principal principal, Long starTime) {
-		LogSecurity logSecurity = initializeLog(request, principal.getName(),
+	public UserDTO findByIdUser(Long idUser, HttpServletRequest request, UserDetails userDetails, Long starTime) {
+		LogSecurity logSecurity = initializeLog(request, userDetails.getUsername(),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
-				SecurityServiceNameEnum.USER_FIND_BY_ID.getCode());
+				SecurityActionEnum.USER_FIND_BY_ID.getCode());
 		try {
 			User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException(
 					SecurityExceptionEnum.FUNC_USER_NOT_FOUND_ID.getCodeMessage(idUser.toString())));
@@ -418,13 +413,15 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param pageable
+	 * @param request
+	 * @param userDetails
 	 * @param starTime
 	 * @return
 	 */
-	public PageUserDTO findAll(Pageable pageable, HttpServletRequest request, Principal principal, Long starTime) {
-		LogSecurity logSecurity = initializeLog(request, principal.getName(),
+	public PageUserDTO findAll(Pageable pageable, HttpServletRequest request, UserDetails userDetails, Long starTime) {
+		LogSecurity logSecurity = initializeLog(request, userDetails.getUsername(),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
-				SecurityServiceNameEnum.USER_FIND_ALL.getCode());
+				SecurityActionEnum.USER_FIND_ALL.getCode());
 		try {
 			// Conteo paginacion en 1
 			int pageNumber = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
@@ -434,6 +431,7 @@ public class UserService extends ApiRestSecurityHelper {
 							.and(Sort.by(Sort.Direction.ASC, UserPersonEnum.USER_USERNAME.getMessageKey())))));
 			return getFindAll(pageUser, logSecurity, starTime);
 		} catch (RuntimeException e) {
+			log.error(CommonMessageConstants.LOG_MSG_EXCEPTION,e);
 			setLogSecurityError(e, logSecurity, starTime);
 			throw new TechnicalException(e.getMessage(), e.getCause(), logSecurityUserRespository, logSecurity);
 		}
@@ -469,7 +467,7 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private String getMessageSQLException(Exception e) {
-		if (e.getMessage().contains(SecurityConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
+		if (e.getMessage().contains(ServiceControllerConstants.SQL_MESSAGE_EMAIL_EXISTS)) {
 			return SecurityExceptionEnum.FUNC_USER_MAIL_EXISTS.getCodeMessage();
 		}
 		return e.getMessage();
@@ -514,10 +512,10 @@ public class UserService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param id
-	 * @param principal
+	 * @param userDetails
 	 */
-	private void deletePersonEvent(Long id, Principal principal) {
-		PersonDeleteEvent event = new PersonDeleteEvent(this, id, principal);
+	private void deletePersonEvent(Long id, UserDetails userDetails) {
+		PersonDeleteEvent event = new PersonDeleteEvent(this, id, userDetails);
 		eventPublisher.publishEvent(event);
 	}
 
@@ -593,7 +591,7 @@ public class UserService extends ApiRestSecurityHelper {
 		} catch (EntityNotFoundException e) {
 			// inicializacion log transaccional
 			LogSecurity logSecurity = initializeLog(null, username, CommonMessageConstants.NOT_APPLICABLE_BODY,
-					CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityServiceNameEnum.USER_FIND_ROLE.getCode());
+					CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityActionEnum.USER_FIND_ROLE.getCode());
 			logSecurity.setStatusCode(HttpStatus.FORBIDDEN.value());
 			logSecurity.setExecutionTime(getExecutionTime(starTime));
 			// Se lanza excepcion funcional
@@ -614,9 +612,10 @@ public class UserService extends ApiRestSecurityHelper {
 	 * @return
 	 */
 	private boolean isCreateUserOrPerson(String username, HttpServletRequest httpRequest) {
-		return "anonymous_user".equals(username) && httpRequest != null && HttpMethod.POST.matches(httpRequest.getMethod())
-				&& (httpRequest.getRequestURI().endsWith(USER_CREATE.getResource())
-						|| httpRequest.getRequestURI().endsWith(PERSON_CREATE.getResource()));
+		return "anonymous_user".equals(username) && httpRequest != null
+				&& HttpMethod.POST.matches(httpRequest.getMethod())
+				&& (httpRequest.getRequestURI().endsWith(HttpMethodResourceEnum.USER_CREATE.getResource())
+						|| httpRequest.getRequestURI().endsWith(HttpMethodResourceEnum.PERSON_CREATE.getResource()));
 	}
 
 	/**

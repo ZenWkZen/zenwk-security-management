@@ -2,15 +2,18 @@ package com.alineumsoft.zenwk.security.constants;
 
 /**
  * <p>
- * Refencia a los mensajes de validacion de las entidades del modulo de
- * seguridad. Soporta la internacionalizacion
+ * Contiene las claves de los mensajes de validación utilizados en los DTOs para
+ * anotaciones de validación como {@code @Valid}, {@code @NotNull},
+ * {@code @Size}, entre otras. Estas claves se utilizan en archivos de
+ * internacionalización (i18n) para proporcionar mensajes de error
+ * personalizados en las validaciones.
  * </p>
  * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project security-zenwk
  * @class PersonValidationEnum
  */
-public final class ValidationKeyMessagesConstants {
+public final class DtoValidationKeys {
 	public static final String PERSON_ID_USER_NOT_NULL = "validation.person.iduser.notnull";
 	public static final String PERSON_ID_USER_NOT_FOUND = "validation.person.iduser.notfound";
 	public static final String PERSON_FIRST_NAME_NOT_NULL = "validation.person.firstname.notnull";
@@ -33,6 +36,5 @@ public final class ValidationKeyMessagesConstants {
 	public static final String USER_EMAIL_MAX_LENGTH = "validation.user.email.maxlength";
 	public static final String USER_PASSWORD_MAX_LENGTH = "validation.user.password.maxlength";
 	public static final String USER_USERNAME_MAX_LENGTH = "validation.user.username.maxlength";
-
 
 }

@@ -1,29 +1,77 @@
 package com.alineumsoft.zenwk.security.config;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import static com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum.*;
-import static com.alineumsoft.zenwk.security.enums.RoleEnum.*;
+import com.alineumsoft.zenwk.security.auth.Service.PermissionService;
+import com.alineumsoft.zenwk.security.auth.jwt.JwtAuthenticationFilter;
+import com.alineumsoft.zenwk.security.common.enums.PermissionOperationEnum;
+import com.alineumsoft.zenwk.security.dto.PermissionDTO;
+import com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
+import com.alineumsoft.zenwk.security.person.repository.RolePermissionRepository;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
+ * <p>
+ * Configuración de seguridad para el control de acceso basado en permisos y
+ * roles. Define la configuración de Spring Security y la asignación de permisos
+ * a las rutas.
+ * </p>
+ * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  * @class SecurityConfiguration
  */
 @Configuration
-@EnableWebSecurity
+@Slf4j
 public class SecurityFilterChainConfiguration {
+	private final JwtAuthenticationFilter jwtAuthFilter;
+
+	/**
+	 * AuthenticationProvider para la autenticacion del usuario
+	 */
+	private final AuthenticationProvider authenticationProvider;
+
+	private final PermissionService permService;
 
 	/**
 	 * <p>
-	 * <b> Security: </b> autenticacion basica
+	 * Constructor que inyecta el repositorio de permisos de roles.
+	 * </p>
+	 * 
+	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+	 * @param rolePermRepo
+	 * @param jwtAuthFilter
+	 * @param authenticationProvider
+	 */
+	public SecurityFilterChainConfiguration(RolePermissionRepository rolePermRepo,
+			JwtAuthenticationFilter jwtAuthFilter, AuthenticationProvider authenticationProvider,
+			PermissionService permService) {
+		this.jwtAuthFilter = jwtAuthFilter;
+		this.authenticationProvider = authenticationProvider;
+		this.permService = permService;
+	}
+
+	/**
+	 * 
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Configura la seguridad de la
+	 * aplicación utilizando Spring Security. Define las reglas de autorización de
+	 * acceso a los endpoints agrupando por operación.
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -33,149 +81,93 @@ public class SecurityFilterChainConfiguration {
 	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(request -> request
-				.requestMatchers(matchersForCreate()).hasAnyAuthority(roleCreate())
-				.requestMatchers(matchersForUpdate()).hasAnyAuthority(roleUpdate())
-				.requestMatchers(matchersForDelete()).hasAnyAuthority(roleDelete())
-				.requestMatchers(matchersForFindAll()).hasAnyAuthority(roleFindAll())
-				.requestMatchers(matchersForFindById()).hasAnyAuthority(roleFinById())
-				// Todas las solicitudes deben estar autenticadas
-				.anyRequest().authenticated()
-			)
-			.httpBasic(Customizer.withDefaults())
-			.csrf(csrf -> csrf.disable());
+		final Map<PermissionOperationEnum, List<PermissionDTO>> maRolPermissions = permService.getOperationPermission();
+
+		http.authorizeHttpRequests(request -> {
+			request.requestMatchers(HttpMethodResourceEnum.USER_CREATE.getMethod(),
+					HttpMethodResourceEnum.USER_CREATE.getResource()).permitAll()
+					.requestMatchers(HttpMethodResourceEnum.AUTH_LOGIN.getResource()).permitAll();
+			// Se agregan los filtros restantes
+			addAuthorizationForOperation(request, maRolPermissions);
+			request.anyRequest().authenticated();
+		}).csrf(csrf -> csrf.disable()).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authenticationProvider(authenticationProvider);
 		return http.build();
 	}
 
 	/**
 	 * <p>
-	 * <b> Security: </b> Role create
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Agrega restricciones solo si hay
+	 * permisos en el mapa
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
+	 * @param request
+	 * @param maRolPermissions
 	 */
-	private static String[] roleCreate() {
-		return new String[] { NEW_USER.name(), SYSTEM_ADMIN.name() };
+	private void addAuthorizationForOperation(
+			AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry request,
+			Map<PermissionOperationEnum, List<PermissionDTO>> maRolPermissions) {
+		if (!maRolPermissions.isEmpty()) {
+			request.requestMatchers(getRequestMatchersForOperation(PermissionOperationEnum.CREATE, maRolPermissions))
+					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.CREATE)))
+					.requestMatchers(getRequestMatchersForOperation(PermissionOperationEnum.UPDATE, maRolPermissions))
+					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.UPDATE)))
+					.requestMatchers(getRequestMatchersForOperation(PermissionOperationEnum.DELETE, maRolPermissions))
+					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.DELETE)))
+					.requestMatchers(getRequestMatchersForOperation(PermissionOperationEnum.FIND_ALL, maRolPermissions))
+					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.FIND_ALL)))
+					.requestMatchers(
+							getRequestMatchersForOperation(PermissionOperationEnum.FIND_BY_ID, maRolPermissions))
+					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.FIND_BY_ID)));
+		}
 	}
 
 	/**
 	 * <p>
-	 * <b> Security: </b> Role update
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Obtiene los `RequestMatcher`
+	 * correspondientes a una operación especifica, eliminando rutas duplicadas.
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param operation
+	 * @param mapPermission
 	 * @return
 	 */
-	private static String[] roleUpdate() {
-		return new String[] { USER.name(), SYSTEM_ADMIN.name(), APP_ADMIN.name(), SECURITY_ADMIN.name() };
+	private RequestMatcher[] getRequestMatchersForOperation(PermissionOperationEnum operation,
+			Map<PermissionOperationEnum, List<PermissionDTO>> mapPermission) {
+		// Obtener los permisos asociados al rol
+		List<PermissionDTO> listPermissions = mapPermission.get(operation);
+
+		// Si no hay permisos, devolver un array vacio
+		if (listPermissions == null || listPermissions.isEmpty()) {
+			return new RequestMatcher[0];
+		}
+
+		// Elminar permisos duplicados por la consulta.
+		// Convertir los permisos en RequestMatchers[].
+		return listPermissions.stream()
+				.map(perm -> new AntPathRequestMatcher(perm.getResource(), perm.getMethod().toUpperCase()))
+				.collect(Collectors.toCollection(LinkedHashSet::new)).toArray(RequestMatcher[]::new);
 	}
 
 	/**
 	 * <p>
-	 * <b> Security: </b> Role delete
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Obtiene los roles asociados a una
+	 * lista de permisos eliminando duplicados.
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param listPermission
 	 * @return
 	 */
-	private static String[] roleDelete() {
-		return new String[] { USER.name(), SYSTEM_ADMIN.name(), SECURITY_ADMIN.name() };
-	}
+	private String[] getRoles(List<PermissionDTO> listPermission) {
+		// Elimina roles duplicados por la consulta original.
+		// Convierte una lista de roles en un String[]
+		return listPermission.stream().map(PermissionDTO::getRolName)
+				.collect(Collectors.toCollection(LinkedHashSet::new)).toArray(String[]::new);
 
-	/**
-	 * <p>
-	 * <b> Security: </b> Role find by id
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private static String[] roleFinById() {
-		return new String[] { USER.name(), SYSTEM_ADMIN.name(), APP_ADMIN.name(), SECURITY_ADMIN.name(),
-				AUDITOR.name() };
-	}
-
-	/**
-	 * <p>
-	 * <b> Security: </b> Role find all
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private static String[] roleFindAll() {
-		return new String[] { SYSTEM_ADMIN.name(), SECURITY_ADMIN.name(), AUDITOR.name() };
-	}
-
-	/**
-	 * <p>
-	 * <b> Security: </b> RequestMatcher para create
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private RequestMatcher[] matchersForCreate() {
-		return new RequestMatcher[] {
-				new AntPathRequestMatcher(USER_CREATE.getResource(), USER_CREATE.getMethod().name()),
-				new AntPathRequestMatcher(PERSON_CREATE.getResource(), PERSON_CREATE.getMethod().name()) };
-	}
-
-	/**
-	 * <p>
-	 * <b> Security: </b> RequestMatcher para update
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private static RequestMatcher[] matchersForUpdate() {
-		return new RequestMatcher[] {
-				new AntPathRequestMatcher(USER_UPDATE.getResource(), USER_UPDATE.getMethod().name()),
-				new AntPathRequestMatcher(PERSON_UPDATE.getResource(), PERSON_UPDATE.getMethod().name()) };
-	}
-
-	/**
-	 * <p>
-	 * <b> Security: </b> RequestMatcher para delete
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private static RequestMatcher[] matchersForDelete() {
-		return new RequestMatcher[] {
-				new AntPathRequestMatcher(USER_DELETE.getResource(), USER_DELETE.getMethod().name()),
-				new AntPathRequestMatcher(PERSON_DELETE.getResource(), PERSON_DELETE.getMethod().name()) };
-	}
-
-	/**
-	 * <p>
-	 * <b> Security: </b> RequestMatcher para find all
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private static RequestMatcher[] matchersForFindAll() {
-		return new RequestMatcher[] {
-				new AntPathRequestMatcher(USER_FIND_ALL.getResource(), USER_FIND_ALL.getMethod().name()),
-				new AntPathRequestMatcher(PERSON_FIND_ALL.getResource(), PERSON_FIND_ALL.getMethod().name()) };
-	}
-
-	/**
-	 * <p>
-	 * <b> Security: </b> RequestMatcher para find by id
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	private static RequestMatcher[] matchersForFindById() {
-		return new RequestMatcher[] {
-				new AntPathRequestMatcher(USER_FIND_BY_ID.getResource(), USER_FIND_BY_ID.getMethod().name()),
-				new AntPathRequestMatcher(PERSON_FIND_BY_ID.getResource(), PERSON_FIND_BY_ID.getMethod().name()) };
 	}
 
 }

@@ -9,8 +9,8 @@ import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.handler.GlobalHandlerException;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
-import com.alineumsoft.zenwk.security.constants.SecurityConstants;
-import com.alineumsoft.zenwk.security.constants.ValidationKeyMessagesConstants;
+import com.alineumsoft.zenwk.security.constants.ServiceControllerConstants;
+import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -123,7 +123,7 @@ public class ApiRestHelper {
 			return true;
 		}
 		return false;
-	}
+	} 
 
 	/**
 	 * <p>
@@ -140,8 +140,8 @@ public class ApiRestHelper {
 		if (request == null) {
 			return GeneralConstants.AUTO_GENERATED_EVENT;
 		}
-		String ipAddress = request.getHeader(SecurityConstants.HEADER_X_FORWARDED_FOR);
-		if (ipAddress == null || ipAddress.isEmpty() || SecurityConstants.IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
+		String ipAddress = request.getHeader(ServiceControllerConstants.HEADER_X_FORWARDED_FOR);
+		if (ipAddress == null || ipAddress.isEmpty() || ServiceControllerConstants.IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
 			ipAddress = request.getRemoteAddr();
 		}
 		return ipAddress;
@@ -158,7 +158,7 @@ public class ApiRestHelper {
 	 * @return
 	 */
 	public String getUserAgent(HttpServletRequest request) {
-		return request != null ? request.getHeader(SecurityConstants.HEADER_USER_AGENT)
+		return request != null ? request.getHeader(ServiceControllerConstants.HEADER_USER_AGENT)
 				: GeneralConstants.AUTO_GENERATED_EVENT;
 	}
 
@@ -178,7 +178,7 @@ public class ApiRestHelper {
 		}
 		long timeMillis = System.currentTimeMillis() - startTime;
 		double timeSeconds = timeMillis / 1000.0;
-		return String.format(SecurityConstants.TIME_FORMAT_SECONDS, timeSeconds);
+		return String.format(ServiceControllerConstants.TIME_FORMAT_SECONDS, timeSeconds);
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class ApiRestHelper {
 			return LocalDateTime.parse(dateString, ISO_DATE_TIME_FORMATTER);
 		} catch (DateTimeParseException e) {
 			String msgError = MessageSourceAccessorComponent
-					.getMessage(ValidationKeyMessagesConstants.PERSON_DATE_INVALID);
+					.getMessage(DtoValidationKeys.PERSON_DATE_INVALID);
 			throw new IllegalArgumentException(msgError);
 		}
 

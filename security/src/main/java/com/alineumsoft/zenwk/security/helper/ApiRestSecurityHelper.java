@@ -66,7 +66,7 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 	 * @param starTime
 	 */
 	public void setLogSecurityError(RuntimeException e, LogSecurity logSecUser, Long startTime) {
-		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e.getMessage());
+		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e);
 		logSecUser.setErrorMessage(e.getMessage());
 		logSecUser.setExecutionTime(getExecutionTime(startTime));
 		if (e instanceof FunctionalException || e instanceof EntityNotFoundException) {

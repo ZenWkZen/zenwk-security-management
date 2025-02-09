@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.alineumsoft.zenwk.security.entity.RoleUser;
-import com.alineumsoft.zenwk.security.entity.id.RolUserId;
+import com.alineumsoft.zenwk.security.entity.id.RoleUserId;
 
 /**
  * <p>
@@ -18,7 +18,7 @@ import com.alineumsoft.zenwk.security.entity.id.RolUserId;
  * @class RolUserRepository
  */
 @Repository
-public interface RolUserRepository extends JpaRepository<RoleUser, RolUserId> {
+public interface RolUserRepository extends JpaRepository<RoleUser, RoleUserId> {
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Eliminacion de los registros

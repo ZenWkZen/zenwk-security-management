@@ -1,8 +1,7 @@
 package com.alineumsoft.zenwk.security.person.event;
 
-import java.security.Principal;
-
 import org.springframework.context.ApplicationEvent;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -12,7 +11,7 @@ import org.springframework.context.ApplicationEvent;
 public class PersonDeleteEvent extends ApplicationEvent {
 	private static final long serialVersionUID = 1L;
 	private final Long idPerson;
-	private final Principal principal;
+	private final UserDetails userDetails;
 	private boolean isDelete;
 
 	/**
@@ -23,12 +22,12 @@ public class PersonDeleteEvent extends ApplicationEvent {
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param source
 	 * @param personDTO
-	 * @param principal
+	 * @param userDetails
 	 */
-	public PersonDeleteEvent(Object source, Long personDTO, Principal principal) {
+	public PersonDeleteEvent(Object source, Long personDTO, UserDetails userDetails) {
 		super(source);
 		this.idPerson = personDTO;
-		this.principal = principal;
+		this.userDetails = userDetails;
 	}
 
 	/**
@@ -59,12 +58,12 @@ public class PersonDeleteEvent extends ApplicationEvent {
 	}
 
 	/**
-	 * Gets the value of principal.
+	 * Gets the value of userDetails.
 	 * 
-	 * @return the value of principal.
+	 * @return the value of userDetails.
 	 */
-	public Principal getPrincipal() {
-		return principal;
+	public UserDetails getUserDetails() {
+		return userDetails;
 	}
 
 }

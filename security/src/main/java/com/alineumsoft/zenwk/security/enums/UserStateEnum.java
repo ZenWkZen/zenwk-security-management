@@ -10,7 +10,7 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
 public enum UserStateEnum {
 	INCOMPLETE_PERFIL("user.state.icompleteperfil"),
 	ACTIVE("user.state.active"), 
-	DISABLE("user.state.disabled");
+	DISABLED("user.state.disabled");
 
 	private final String messageKey;
 

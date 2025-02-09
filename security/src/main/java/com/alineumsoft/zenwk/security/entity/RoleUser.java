@@ -2,7 +2,7 @@ package com.alineumsoft.zenwk.security.entity;
 
 import java.time.LocalDateTime;
 
-import com.alineumsoft.zenwk.security.entity.id.RolUserId;
+import com.alineumsoft.zenwk.security.entity.id.RoleUserId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@IdClass(RolUserId.class)
+@IdClass(RoleUserId.class)
 public class RoleUser {
 	/**
 	 * Referencia la pk con sec_user

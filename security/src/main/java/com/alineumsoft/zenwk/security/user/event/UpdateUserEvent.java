@@ -1,8 +1,7 @@
 package com.alineumsoft.zenwk.security.user.event;
 
-import java.security.Principal;
-
 import org.springframework.context.ApplicationEvent;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.alineumsoft.zenwk.security.person.entity.Person;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
@@ -16,7 +15,7 @@ public class UpdateUserEvent extends ApplicationEvent {
 	private static final long serialVersionUID = 1L;
 	private final Long idUser;
 	private final UserDTO dto;
-	private final Principal principal;
+	private final UserDetails userDetails;
 	private final Person person;
 	private boolean isUpdate;
 
@@ -29,14 +28,14 @@ public class UpdateUserEvent extends ApplicationEvent {
 	 * @param source
 	 * @param idUser
 	 * @param dto
-	 * @param principal
+	 * @param userDetails
 	 * @param person
 	 */
-	public UpdateUserEvent(Object source, Long idUser, UserDTO dto, Principal principal, Person person) {
+	public UpdateUserEvent(Object source, Long idUser, UserDTO dto,  UserDetails userDetails, Person person) {
 		super(source);
 		this.idUser = idUser;
 		this.dto = dto;
-		this.principal = principal;
+		this.userDetails = userDetails;
 		this.person = person;
 	}
 
@@ -81,8 +80,8 @@ public class UpdateUserEvent extends ApplicationEvent {
 	 * 
 	 * @return the value of principal.
 	 */
-	public Principal getPrincipal() {
-		return principal;
+	public UserDetails getUserDetails() {
+		return userDetails;
 	}
 
 	/**

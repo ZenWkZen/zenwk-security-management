@@ -55,7 +55,7 @@ public class UserEventListener {
 	 */
 	@EventListener
 	public void handleDeleteUserEvent(DeleteUserEvent event) {
-		boolean isDelete = userService.deleteUser(event.getIdUser(), null, event.getPrincipal(), null);
+		boolean isDelete = userService.deleteUser(event.getIdUser(), null, event.getUserDetails(), null);
 		event.setDelete(isDelete);
 	}
 
@@ -69,7 +69,7 @@ public class UserEventListener {
 	 */
 	@EventListener
 	public void handleUpdateUserEvent(UpdateUserEvent event) {
-		boolean isUpdate = userService.updateUser(null, event.getIdUser(), event.getDto(), event.getPrincipal(),
+		boolean isUpdate = userService.updateUser(null, event.getIdUser(), event.getDto(), event.getUserDetails(),
 				event.getPerson(), null);
 		event.setUpdate(isUpdate);
 	}

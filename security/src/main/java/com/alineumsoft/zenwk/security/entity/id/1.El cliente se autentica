@@ -1,0 +1,11 @@
+	1.	El cliente se autentica
+	•	El usuario envía sus credenciales (username/password) en una solicitud HTTP (generalmente un POST a /login o /authenticate).
+	•	Opcionalmente, se pueden incluir más factores de autenticación (MFA).
+	2.	El servidor valida y genera el JWT
+	•	Se verifica que las credenciales sean correctas.
+	•	Si son válidas, el servidor genera un JWT (JSON Web Token) con información del usuario (claims), firma digital y una fecha de expiración.
+	•	El JWT es devuelto al cliente en la respuesta, usualmente dentro del encabezado Authorization: Bearer <token>.
+	3.	El cliente usa el token para acceder a recursos protegidos
+	•	Para cada petición a un endpoint protegido, el cliente envía el JWT en el encabezado Authorization.
+	•	El servidor verifica la validez del token (integridad, firma y expiración).
+	•	Si el token es válido, permite el acceso a los recursos solicitados.

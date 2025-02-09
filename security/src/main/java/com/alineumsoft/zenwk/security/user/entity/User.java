@@ -28,36 +28,57 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class User implements Cloneable {
+	/**
+	 * id
+	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "secuseiduser")
 	private Long id;
-
+	/**
+	 * username
+	 */
 	@Column(name = "secuseusername")
 	private String username;
-
+	/**
+	 * password
+	 */
 	@Column(name = "secusepassword")
 	private String password;
-
+	/**
+	 * email
+	 */
 	@Column(name = "secuseemail")
 	private String email;
-
+	/**
+	 * creationDate
+	 */
 	@Column(name = "secusecreationdate")
 	private LocalDateTime creationDate;
-
+	/**
+	 * modificationDate
+	 */
 	@Column(name = "secusemodificationdate")
 	private LocalDateTime modificationDate;
-
+	/**
+	 * userCreation
+	 */
 	@Column(name = "secuseusecreation")
 	private String userCreation;
-
+	/**
+	 * userModification
+	 */
 	@Column(name = "secuseusemodification")
 	private String userModification;
-
+	/**
+	 * state
+	 */
 	@Enumerated(EnumType.STRING)
 	@Column(name = "secusestate")
 	private UserStateEnum state;
-
+	/**
+	 * person
+	 */
 	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "secuseidperson")
 	private Person person;

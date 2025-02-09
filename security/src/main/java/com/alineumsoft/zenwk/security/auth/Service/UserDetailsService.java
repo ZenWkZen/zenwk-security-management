@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.service;
+package com.alineumsoft.zenwk.security.auth.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
 import com.alineumsoft.zenwk.security.user.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,16 +63,12 @@ public class UserDetailsService implements org.springframework.security.core.use
 		// Consulta de los roles asociados al usuario
 		List<String> rolesName = userService.findRolesByUsername(username, startTime.get(), request).stream()
 				.map(rol -> rol.getName().name()).collect(Collectors.toList());
-
-		if (!"anonymous_user".equals(username)) {
-			com.alineumsoft.zenwk.security.user.entity.User userEntity = userService.findByUsername(username);
-
-			// Retorno de user details
-			userDetail = userBuilder.username(userEntity.getUsername()).password(userEntity.getPassword())
-					.authorities(rolesName.toArray(new String[0])).build();
-		} else {
-			userDetail = userBuilder.username("anonymous_user").password(CryptoUtil.encryptPassword("anonymous_user")).authorities(rolesName.toArray(new String[0])).build();
-		}
+		// Se recupera el usuario desde la bd
+		com.alineumsoft.zenwk.security.user.entity.User userEntity = userService.findByUsername(username);
+		// Se construye UserDetails y se cargan los roles
+		userDetail = userBuilder.username(userEntity.getUsername()).password(userEntity.getPassword())
+				.authorities(rolesName.toArray(new String[0])).build();
+		// Se retorna el user details que se usara de forma transversal en el sistema
 		return userDetail;
 	}
 
