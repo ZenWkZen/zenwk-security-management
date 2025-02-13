@@ -13,9 +13,7 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
  * @class AuthEnums
  */
 public enum AuthEnums {
-	AUTH_LOGOUT_SUCCES("auth.logout.succes"), 
-	AUTH_TOKEN_INVALID("auth.token.invalid"), 
-	AUTH_URI_FORBIDEN("auth.uri.forbiden");
+	AUTH_LOGOUT_SUCCES("auth.logout.succes");
 
 	/**
 	 * key

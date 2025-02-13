@@ -3,13 +3,17 @@ package com.alineumsoft.zenwk.security.helper;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
+import com.alineumsoft.zenwk.security.auth.definitions.AuthConfig;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
+import com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
+import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,12 +67,11 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param e
 	 * @param logSecUser
-	 * @param starTime
 	 */
-	public void setLogSecurityError(RuntimeException e, LogSecurity logSecUser, Long startTime) {
+	public void setLogSecurityError(RuntimeException e, LogSecurity logSecUser) {
 		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e);
 		logSecUser.setErrorMessage(e.getMessage());
-		logSecUser.setExecutionTime(getExecutionTime(startTime));
+		logSecUser.setExecutionTime(getExecutionTime());
 		if (e instanceof FunctionalException || e instanceof EntityNotFoundException) {
 			logSecUser.setStatusCode(HttpStatus.NOT_FOUND.value());
 		} else {
@@ -85,13 +88,43 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param e
 	 * @param logSecUser
-	 * @param starTime
 	 */
-	public void setLogSecuritySuccesfull(int httpStatusCode, LogSecurity logSecUser, Long startTime) {
+	public void setLogSecuritySuccesfull(int httpStatusCode, LogSecurity logSecUser) {
 		log.info(CommonMessageConstants.REQUEST_SUCCESSFUL);
 		logSecUser.setStatusCode(httpStatusCode);
 		logSecUser.setErrorMessage(CommonMessageConstants.REQUEST_SUCCESSFUL);
-		logSecUser.setExecutionTime(getExecutionTime(startTime));
+		// Calculo tiempo de la solicitud
+		if (GeneralConstants.AUTO_GENERATED_EVENT.equals(logSecUser.getIpAddress())) {
+			logSecUser.setExecutionTime(GeneralConstants.AUTO_GENERATED_EVENT);
+		} else {
+			logSecUser.setExecutionTime(getExecutionTime());
+		}
+	}
 
+	/**
+	 * 
+	 * <p>
+	 * <b> CU001_Seguridad_Creación_Usuario </b> Obtiene el nombre el servicio
+	 * (SecurityActionEnum) a desde del HttpServletRequest, si no lo cuengra retorna
+	 * NOT_FOUND
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param request
+	 * @return
+	 */
+	public String getSecurityActionCodeFromRequest(HttpServletRequest request) {
+		HttpMethod method = HttpMethod.valueOf(request.getMethod());
+		String uri = request.getRequestURI();
+		String param = Optional.ofNullable(request.getParameter(AuthConfig.ID)).orElse("");
+		for (HttpMethodResourceEnum resourceEnum : HttpMethodResourceEnum.values()) {
+			if (resourceEnum.getMethod().equals(method)
+					&& uri.matches(resourceEnum.getResource().replace(AuthConfig.ID, param))) {
+				String actionName = resourceEnum.name();
+				SecurityActionEnum securityActionEnum = SecurityActionEnum.valueOf(actionName);
+				return securityActionEnum.getCode();
+			}
+		}
+		return CommonMessageConstants.NOT_FOUND;
 	}
 }

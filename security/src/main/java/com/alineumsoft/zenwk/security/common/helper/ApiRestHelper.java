@@ -1,16 +1,13 @@
 package com.alineumsoft.zenwk.security.common.helper;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.math.BigDecimal;
 import java.util.Map;
 
+import com.alineumsoft.zenwk.security.common.component.RequestTimingFilter;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.handler.GlobalHandlerException;
-import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 import com.alineumsoft.zenwk.security.constants.ServiceControllerConstants;
-import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,9 +22,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ApiRestHelper {
-	// Constante para el formato ISO-8601
-	private static final DateTimeFormatter ISO_DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
 	/**
 	 * <p>
 	 * <b> General </b> Escribe el log de la peticion cuando existe un request body
@@ -123,7 +117,7 @@ public class ApiRestHelper {
 			return true;
 		}
 		return false;
-	} 
+	}
 
 	/**
 	 * <p>
@@ -141,7 +135,8 @@ public class ApiRestHelper {
 			return GeneralConstants.AUTO_GENERATED_EVENT;
 		}
 		String ipAddress = request.getHeader(ServiceControllerConstants.HEADER_X_FORWARDED_FOR);
-		if (ipAddress == null || ipAddress.isEmpty() || ServiceControllerConstants.IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
+		if (ipAddress == null || ipAddress.isEmpty()
+				|| ServiceControllerConstants.IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
 			ipAddress = request.getRemoteAddr();
 		}
 		return ipAddress;
@@ -169,39 +164,16 @@ public class ApiRestHelper {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param startTime
 	 * @return
 	 */
-	public String getExecutionTime(Long startTime) {
+	public String getExecutionTime() {
+		Long startTime = RequestTimingFilter.getStartTime();
 		if (startTime == null) {
 			return GeneralConstants.AUTO_GENERATED_EVENT;
 		}
 		long timeMillis = System.currentTimeMillis() - startTime;
-		double timeSeconds = timeMillis / 1000.0;
-		return String.format(ServiceControllerConstants.TIME_FORMAT_SECONDS, timeSeconds);
+		BigDecimal timeSeconds = BigDecimal.valueOf(timeMillis).divide(BigDecimal.valueOf(1000.00));
+		RequestTimingFilter.destroyStartTime();
+		return timeSeconds.toString().concat(GeneralConstants.TIMER_SEG);
 	}
-
-	/**
-	 * <p>
-	 * <b> General </b> Convierte una cadena a un string usando el formato ISO-8601
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param dateString
-	 * @return
-	 */
-	public LocalDateTime getDateIso8601(String dateString) {
-		if (dateString == null) {
-			return null;
-		}
-		try {
-			return LocalDateTime.parse(dateString, ISO_DATE_TIME_FORMATTER);
-		} catch (DateTimeParseException e) {
-			String msgError = MessageSourceAccessorComponent
-					.getMessage(DtoValidationKeys.PERSON_DATE_INVALID);
-			throw new IllegalArgumentException(msgError);
-		}
-
-	}
-
 }

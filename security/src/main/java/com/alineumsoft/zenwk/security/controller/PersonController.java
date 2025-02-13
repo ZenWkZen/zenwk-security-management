@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.constants.ServiceControllerConstants;
 import com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
 import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
+import com.alineumsoft.zenwk.security.person.dto.CreatePersonDTO;
 import com.alineumsoft.zenwk.security.person.service.PersonService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -38,11 +38,6 @@ public class PersonController {
 	 * Servicio de controlador
 	 */
 	private final PersonService personService;
-	/**
-	 * Constante para metrica de tiempo
-	 */
-	private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
-
 	/**
 	 * <p>
 	 * <b> Constructor </b>
@@ -70,10 +65,10 @@ public class PersonController {
 	 * @throws JsonProcessingException
 	 */
 	@PostMapping
-	public ResponseEntity<Void> createPerson(@Validated @RequestBody PersonDTO dto, HttpServletRequest request,
+	public ResponseEntity<Void> createPerson(@Validated @RequestBody CreatePersonDTO dto, HttpServletRequest request,
 			UriComponentsBuilder uriCB, @AuthenticationPrincipal UserDetails userDetails) {
-		startTime.set(System.currentTimeMillis());
-		Long idPerson = personService.createPerson(dto, request, userDetails, startTime.get());
+	
+		Long idPerson = personService.createPerson(dto, request, userDetails);
 		URI location = uriCB.path(HttpMethodResourceEnum.PERSON_FIND_BY_ID.getResource()).buildAndExpand(idPerson)
 				.toUri();
 		return ResponseEntity.created(location).build();
@@ -92,11 +87,11 @@ public class PersonController {
 	 * @param userDetails
 	 * @return
 	 */
-	@PutMapping("/{idUser}")
+	@PutMapping("/{idPerson}")
 	public ResponseEntity<Void> updatePerson(@PathVariable Long idPerson, @Validated @RequestBody PersonDTO inDTO,
 			HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-		startTime.set(System.currentTimeMillis());
-		personService.updatePerson(idPerson, inDTO, request, userDetails, startTime.get());
+	
+		personService.updatePerson(idPerson, inDTO, request, userDetails);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -112,11 +107,11 @@ public class PersonController {
 	 * @param userDetails
 	 * @return
 	 */
-	@DeleteMapping("/{idUser}")
-	public ResponseEntity<Void> deletePerson(@PathVariable Long idUser, HttpServletRequest request,
+	@DeleteMapping("/{idPerson}")
+	public ResponseEntity<Void> deletePerson(@PathVariable Long idPerson, HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails) {
-		startTime.set(System.currentTimeMillis());
-		personService.deletePerson(idUser, request, userDetails, startTime.get());
+	
+		personService.deletePerson(idPerson, request, userDetails);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -133,10 +128,10 @@ public class PersonController {
 	 * @return
 	 */
 	@GetMapping("/{idPerson}")
-	public ResponseEntity<PersonDTO> findById(@PathVariable Long idPerson, HttpServletRequest request,
+	public ResponseEntity<CreatePersonDTO> findById(@PathVariable Long idPerson, HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails) {
-		startTime.set(System.currentTimeMillis());
-		return ResponseEntity.ok(personService.findByIdPerson(idPerson, request, userDetails, startTime.get()));
+	
+		return ResponseEntity.ok(personService.findByIdPerson(idPerson, request, userDetails));
 	}
 
 	/**
@@ -154,8 +149,8 @@ public class PersonController {
 	@GetMapping
 	public ResponseEntity<PagePersonDTO> findAll(HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails, Pageable pegeable) {
-		startTime.set(System.currentTimeMillis());
-		return ResponseEntity.ok(personService.findAll(pegeable, request, userDetails, startTime.get()));
+	
+		return ResponseEntity.ok(personService.findAll(pegeable, request, userDetails));
 	}
 
 }

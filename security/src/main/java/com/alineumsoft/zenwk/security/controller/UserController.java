@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alineumsoft.zenwk.security.constants.ServiceControllerConstants;
 import com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
 import com.alineumsoft.zenwk.security.user.dto.PageUserDTO;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
@@ -41,10 +40,6 @@ public class UserController {
 	 * Servicio de controlador
 	 */
 	private final UserService userService;
-	/**
-	 * Constante para metrica de tiempo
-	 */
-	private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
 	/**
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -72,8 +67,7 @@ public class UserController {
 	public ResponseEntity<Void> createUser(@Validated @RequestBody UserDTO dto, UriComponentsBuilder uriCB,
 			@AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request)
 			throws JsonProcessingException {
-		startTime.set(System.currentTimeMillis());
-		Long idUser = userService.createUser(dto, request, userDetails, startTime.get());
+		Long idUser = userService.createUser(dto, request, userDetails);
 		URI location = uriCB.path(HttpMethodResourceEnum.USER_FIND_BY_ID.getResource()).buildAndExpand(idUser).toUri();
 		return ResponseEntity.created(location).build();
 	}
@@ -92,8 +86,8 @@ public class UserController {
 	@PutMapping("{idUser}")
 	public ResponseEntity<Void> updateUser(@PathVariable Long idUser, @RequestBody UserDTO dto,
 			HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) throws IOException {
-		startTime.set(System.currentTimeMillis());
-		userService.updateUser(request, idUser, dto, userDetails, null, startTime.get());
+
+		userService.updateUser(request, idUser, dto, userDetails, null);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -111,8 +105,8 @@ public class UserController {
 	@DeleteMapping("/{idUser}")
 	public ResponseEntity<Void> deleteUser(@PathVariable Long idUser, HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails) {
-		startTime.set(System.currentTimeMillis());
-		userService.deleteUser(idUser, request, userDetails, startTime.get());
+
+		userService.deleteUser(idUser, request, userDetails);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -130,8 +124,8 @@ public class UserController {
 	@GetMapping("/{idUser}")
 	public ResponseEntity<UserDTO> findById(@PathVariable Long idUser, HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails) {
-		startTime.set(System.currentTimeMillis());
-		return ResponseEntity.ok(userService.findByIdUser(idUser, request, userDetails, startTime.get()));
+
+		return ResponseEntity.ok(userService.findByIdUser(idUser, request, userDetails));
 	}
 
 	/**
@@ -148,7 +142,7 @@ public class UserController {
 	@GetMapping
 	public ResponseEntity<PageUserDTO> findAll(Pageable pageable, HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails) {
-		startTime.set(System.currentTimeMillis());
-		return ResponseEntity.ok(userService.findAll(pageable, request, userDetails, startTime.get()));
+
+		return ResponseEntity.ok(userService.findAll(pageable, request, userDetails));
 	}
 }

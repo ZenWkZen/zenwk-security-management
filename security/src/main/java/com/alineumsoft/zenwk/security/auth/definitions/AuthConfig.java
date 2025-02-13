@@ -20,6 +20,8 @@ public final class AuthConfig {
 	public static final String JWT_SECRET_KEY = "${security.jwt.secret}";
 	public static final String JWT_ROLES = "roles";
 	public static final String JWT_URLS_ALLOWED_ROL_USER = "urlsRolUser";
+	public static final String JWT_ID_USER = "idUser";
+	public static final String JWT_USER_STATE = "idState";
 	/**
 	 * class: PermissionService
 	 */

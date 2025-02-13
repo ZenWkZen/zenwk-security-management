@@ -40,7 +40,7 @@ public class PersonEventListener {
 	 */
 	@EventListener
 	public void handlePersonDeleteEvent(PersonDeleteEvent event) {
-		boolean isDelete = personService.deletePerson(event.getIdPerson(), null, event.getUserDetails(), null);
+		boolean isDelete = personService.deletePerson(event.getIdPerson(), null, event.getUserDetails());
 		event.setDelete(isDelete);
 	}
 

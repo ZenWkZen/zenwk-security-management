@@ -20,4 +20,5 @@ public final class GeneralConstants {
 	public static final String AUTO_GENERATED_EVENT = "AUTO_GENERATED_EVENT";
 	// Rerencia la anotacion personalizada @EntityExists
 	public final static String ANOTATION_ENTITY_EXISTS = "existsById";
+	public final static String TIMER_SEG="(s)";
 }

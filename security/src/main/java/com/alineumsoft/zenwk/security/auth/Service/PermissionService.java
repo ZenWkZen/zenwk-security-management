@@ -1,10 +1,15 @@
 package com.alineumsoft.zenwk.security.auth.Service;
 
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.ID;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.URL_PERSON;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.URL_USER;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -12,13 +17,13 @@ import org.springframework.stereotype.Service;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.enums.PermissionOperationEnum;
 import com.alineumsoft.zenwk.security.dto.PermissionDTO;
+import com.alineumsoft.zenwk.security.entity.RoleUser;
 import com.alineumsoft.zenwk.security.enums.RoleEnum;
 import com.alineumsoft.zenwk.security.person.repository.RolePermissionRepository;
 import com.alineumsoft.zenwk.security.user.entity.User;
 import com.alineumsoft.zenwk.security.user.service.UserService;
-import lombok.extern.slf4j.Slf4j;
 
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -88,18 +93,42 @@ public class PermissionService {
 	 */
 	public List<String> listAllowedUrlsForUserRole(String username) {
 		User user = userService.findByUsername(username);
-		List<String> urlsRolUser = rolePermRepo.findResourcesByRolName(RoleEnum.USER);
+		List<RoleUser> rolesUser = userService.findRolesUserByUser(user);
+		List<RoleEnum> namesRole = rolesUser.stream().map(role -> role.getRole().getName())
+				.collect(Collectors.toList());
+		List<String> permissionResources = rolePermRepo.findResourcesByRolName(namesRole);
 
-		return urlsRolUser.stream().map(url -> {
-			String updateUrl = url;
-			if (url.contains(URL_USER) && user.getId() != null) {
-				updateUrl = url.replace(ID, user.getId().toString());
+		permissionResources = permissionResources.stream().map(url -> {
+			if (url.contains(ID)) {
+				url = generatedUrlFromId(user, url);
 			}
-			if (url.contains(URL_PERSON) && user.getPerson() != null && user.getPerson().getId() != null) {
-				updateUrl = url.replace(ID, user.getPerson().getId().toString());
-			}
-			return updateUrl;
+			return url;
 		}).collect(Collectors.toList());
+
+		return permissionResources.stream().filter(Objects::nonNull).collect(Collectors.toList());
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Actualiza las rutas de los recursos
+	 * que tengan como parametro el valor {id}
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param user
+	 * @param url
+	 * @return
+	 */
+	private String generatedUrlFromId(User user, String url) {
+		String updateUrl = null;
+		if (url.contains(URL_USER) && user.getId() != null) {
+			updateUrl = url.replace(ID, user.getId().toString());
+		}
+		if (url.contains(URL_PERSON) && url.contains(ID) && user.getPerson() != null
+				&& user.getPerson().getId() != null) {
+			updateUrl = url.replace(ID, user.getPerson().getId().toString());
+		}
+		return updateUrl;
 	}
 
 	/**

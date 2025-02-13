@@ -14,6 +14,9 @@ package com.alineumsoft.zenwk.security.constants;
  * @class PersonValidationEnum
  */
 public final class DtoValidationKeys {
+	/**
+	 * PersonDTO
+	 */
 	public static final String PERSON_ID_USER_NOT_NULL = "validation.person.iduser.notnull";
 	public static final String PERSON_ID_USER_NOT_FOUND = "validation.person.iduser.notfound";
 	public static final String PERSON_FIRST_NAME_NOT_NULL = "validation.person.firstname.notnull";
@@ -26,7 +29,9 @@ public final class DtoValidationKeys {
 	public static final String PERSON_ALPHANUMERIC_INVALID = "validation.person.alphanumeric.invalid";
 	public static final String PERSON_COLOMBIA_ADDRESS = "validation.address.invalidformat";
 	public static final String PERSON_URL_INVALID = "validation.person.url.invalid";
-
+	/**
+	 * UserDTO
+	 */
 	public static final String USER_PASSWORD_INVALID = "validation.user.password.invalid";
 	public static final String USER_USERNAME_INVALID = "validation.user.username.invalid";
 	public static final String USER_EMAIL_INVALID = "validation.user.email.invalid";

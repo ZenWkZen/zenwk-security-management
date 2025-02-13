@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.alineumsoft.zenwk.security.entity.RoleUser;
-import com.alineumsoft.zenwk.security.entity.id.RoleUserId;
+import com.alineumsoft.zenwk.security.user.entity.User;
 
 /**
  * <p>
@@ -18,7 +18,7 @@ import com.alineumsoft.zenwk.security.entity.id.RoleUserId;
  * @class RolUserRepository
  */
 @Repository
-public interface RolUserRepository extends JpaRepository<RoleUser, RoleUserId> {
+public interface RolUserRepository extends JpaRepository<RoleUser, Long> {
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Eliminacion de los registros
@@ -26,10 +26,10 @@ public interface RolUserRepository extends JpaRepository<RoleUser, RoleUserId> {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param idUser
+	 * @param user
 	 * @return
 	 */
-	public void deleteByIdUser(Long idUser);
+	public void deleteByUser(User user);
 
 	/**
 	 * <p>
@@ -38,8 +38,8 @@ public interface RolUserRepository extends JpaRepository<RoleUser, RoleUserId> {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param idUser
+	 * @param user
 	 * @return
 	 */
-	public List<RoleUser> findByIdUser(Long idUser);
+	public List<RoleUser> findByUser(User user);
 }

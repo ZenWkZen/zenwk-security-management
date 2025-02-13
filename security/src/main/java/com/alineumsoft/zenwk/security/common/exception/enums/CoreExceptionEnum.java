@@ -15,10 +15,16 @@ public enum CoreExceptionEnum {
 	TECH_COMMON_HISTORICAL_ENTITY_NOT_FOUND("TECH_GEN_001", "common.exception.error.historical.entity.notfound"),
 	TECH_COMMON_MESSAGE_NOT_FOUND("TECH_GEN_002", "common.exception.error.enum.message.notfound"),
 	TECH_COMMON_ANOTATION_ENTITY_NOT_EXISTS("TECH_GEN_003", "common.exception.entity.noexists"),
-	FUNC_COMMON_ROLE_NOT_EXIST("FUNC_COM_01","common.exception.rol.noexists");
-	
+	FUNC_COMMON_ERROR_GENERAL("FUNC_COM_01","common.exception.error.general"),
+	FUNC_COMMON_ROLE_NOT_EXIST("FUNC_COM_02","common.exception.rol.noexists");
 
+	/**
+	 * code
+	 */
 	private String code;
+	/**
+	 * messageKey
+	 */
 	private String messageKey;
 
 	/**

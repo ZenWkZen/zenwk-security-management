@@ -1,7 +1,5 @@
 package com.alineumsoft.zenwk.security.common.exception.dto;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
@@ -14,15 +12,15 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class ErrorResponse {
+public class ErrorResponseDTO {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String field;
-
-	private String error;
-
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String code;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private LocalDateTime timestamp;
+	private String code;
+
+	private String error;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String timestamp;
 }

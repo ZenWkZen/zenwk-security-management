@@ -1,7 +1,18 @@
 package com.alineumsoft.zenwk.security.auth.jwt;
 
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.AUTHORIZATION_BEARER;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.HEADER_AUTHORIZATION;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.INDEX_TOKEN;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_EXPIRATION_TIME;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_ID_USER;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_ROLES;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_SECRET_KEY;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_URLS_ALLOWED_ROL_USER;
+import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_USER_STATE;
+
 import java.io.IOException;
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +31,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
+import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
+import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
+import com.alineumsoft.zenwk.security.common.exception.dto.ErrorResponseDTO;
+import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
+import com.alineumsoft.zenwk.security.common.util.LocalDateTimeUtil;
+import com.alineumsoft.zenwk.security.entity.LogSecurity;
+import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
+import com.alineumsoft.zenwk.security.enums.UserStateEnum;
+import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
+import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -29,10 +50,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.*;
 
 /**
  * <p>
@@ -45,8 +63,15 @@ import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.*;
  */
 @Component
 @Slf4j
-@Data
-public class JwtProvider {
+public class JwtProvider extends ApiRestSecurityHelper {
+	/**
+	 * Repositorio para log persistible de modulo
+	 */
+	private final LogSecurityRepository logSecRepo;
+	/**
+	 * Enum para error general
+	 */
+	private static final CoreExceptionEnum generalError = CoreExceptionEnum.FUNC_COMMON_ERROR_GENERAL;
 	/**
 	 * Tiempo de expiracion del token
 	 */
@@ -57,11 +82,23 @@ public class JwtProvider {
 	 */
 	@Value(JWT_SECRET_KEY)
 	private String secretKey;
-	
 	/**
 	 * Cache en memoria para los token
 	 */
-	private Map<String, String> cacheToken =  new HashMap<>();
+	private Map<String, String> cacheToken = new HashMap<>();
+
+	/**
+	 * 
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Constructor
+	 * </p>
+	 * 
+	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+	 * @param logSecRepo
+	 */
+	public JwtProvider(LogSecurityRepository logSecRepo) {
+		this.logSecRepo = logSecRepo;
+	}
 
 	/**
 	 * <p>
@@ -71,29 +108,31 @@ public class JwtProvider {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param userDetails
 	 * @param listAllowedUrlsForUserRole
+	 * @param idUser
+	 * @param userState
 	 * @return
 	 */
-	public String generateToken(UserDetails userDetails,
-			List<String >listAllowedUrlsForUserRole) {
+	public String generateToken(UserDetails userDetails, List<String> listAllowedUrlsForUserRole, Long idUser,
+			UserStateEnum userState) {
 		// Se agrega valor extra al calim, para agregar roles
 		Map<String, Object> extraClaim = new HashMap<>();
 		List<String> listRoles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
 		// Roles del usuario
-		extraClaim.put(JWT_ROLES,  listRoles);
+		extraClaim.put(JWT_ROLES, listRoles);
 		// Se agregan los permisos por operacion
 		extraClaim.put(JWT_URLS_ALLOWED_ROL_USER, listAllowedUrlsForUserRole);
+		// Se almacena el id del usuario
+		extraClaim.put(JWT_ID_USER, idUser);
+		// estado del usuario
+		extraClaim.put(JWT_USER_STATE, userState);
 
 		// Generacion del token.
-		String token = Jwts.builder()
-				.setClaims(new HashMap<>())
-				.addClaims(extraClaim)
-				.setSubject(userDetails.getUsername())
-				.setIssuedAt(new Date(System.currentTimeMillis()))
+		String token = Jwts.builder().setClaims(new HashMap<>()).addClaims(extraClaim)
+				.setSubject(userDetails.getUsername()).setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(getDateExpiration())
 				// La firma evita que el token pueda ser modificado sin ser detectado.
-				.signWith(getSignInKey(),SignatureAlgorithm.HS256)
-				.compact();
+				.signWith(getSignInKey(), SignatureAlgorithm.HS256).compact();
 		// Se actualiza cache.
 		cacheToken.put(userDetails.getUsername(), token);
 		return token;
@@ -118,7 +157,7 @@ public class JwtProvider {
 		// Crea una instancia de Key utilizando HMAC con SHA (normalmente SHA-256).
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
-	
+
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Se usa la misma clave para
@@ -132,9 +171,7 @@ public class JwtProvider {
 	public Claims extractAllClaims(String token) {
 		// Si el token es invalido, expirado o alterado, lanzará una excepcion
 		// (JwtException u otra relacionada)
-		return Jwts.parserBuilder()
-				.setSigningKey(getSignInKey())
-				.build()
+		return Jwts.parserBuilder().setSigningKey(getSignInKey()).build()
 				// Parsea y valida el token
 				.parseClaimsJws(token).getBody();
 	}
@@ -158,13 +195,13 @@ public class JwtProvider {
 			String tokenUsername = claim.getSubject();
 			Date tokenExpired = claim.getExpiration();
 			String validToken = cacheToken.get(username);
-			return username.equals(tokenUsername) && !tokenExpired.before(new Date()) && validToken.equals(token);
+			return username.equals(tokenUsername) && !tokenExpired.before(new Date()) && token.equals(validToken);
 		} catch (JwtException | IllegalArgumentException e) {
 			log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e.getMessage());
 			return false;
 		}
 	}
-	
+
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Invalida el token de un usuario
@@ -187,6 +224,7 @@ public class JwtProvider {
 			log.warn("Intento de invalidación de un token inválido: {}", e.getMessage());
 		}
 	}
+
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Una hora de expiració para el token
@@ -195,13 +233,12 @@ public class JwtProvider {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @return
 	 */
-	private  Date getDateExpiration() {
-		//log.info("JwtUtil.getDateExpiration(): " + (1000 * 60 * 60) / 60 + "m");
+	private Date getDateExpiration() {
+		// log.info("JwtUtil.getDateExpiration(): " + (1000 * 60 * 60) / 60 + "m");
 		log.info("JwtUtil.getDateExpiration() - " + JWT_EXPIRATION_TIME + ":" + expirationTime / 60 + "m");
-		//return new Date(System.currentTimeMillis() + 1000 * 60);
+		// return new Date(System.currentTimeMillis() + 1000 * 60);
 		return new Date(System.currentTimeMillis() + expirationTime);
 	}
-	
 
 	/**
 	 * <p>
@@ -242,7 +279,7 @@ public class JwtProvider {
 		List<String> roles = (List<String>) claims.get(JWT_ROLES);
 		return roles != null ? roles : Collections.emptyList();
 	}
-	
+
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Optiene la lista de urls permitidas
@@ -259,7 +296,6 @@ public class JwtProvider {
 		List<String> urlsAllowed = (List<String>) claims.get(JWT_URLS_ALLOWED_ROL_USER);
 		return urlsAllowed != null ? urlsAllowed : Collections.emptyList();
 	}
-	
 
 	/**
 	 * 
@@ -279,7 +315,7 @@ public class JwtProvider {
 		}
 		return Optional.empty();
 	}
-	
+
 	/**
 	 * <p>
 	 * <b> CU001_Seguridad_Creacion_Usuario </b> Escribe el mensaje de error en el
@@ -287,15 +323,117 @@ public class JwtProvider {
 	 * </p>
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
 	 * @param response
 	 * @param status
-	 * @param message
+	 * @param error
 	 */
-	public void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+	public void sendErrorResponse(String username, HttpServletRequest request, HttpServletResponse response, int status,
+			SecurityExceptionEnum error) throws IOException {
+		// Se incializa log
+		LogSecurity logSecurity = setLogSecurity(username, request, status, error.getCodeMessage());
+		// Se inicializa objecto de reponse con error
+		ErrorResponseDTO errorDTO = new ErrorResponseDTO(null, error.getCode(), generalError.getMessage(),
+				LocalDateTimeUtil.getLocalDateTimeIso86018(LocalDateTime.now()));
+		// Se actualiza response de la solicitud
+		writeResponse(response, status, errorDTO);
+		throw new FunctionalException(error.getCodeMessage(), null, logSecRepo, logSecurity);
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Escribe el mensaje de error en el
+	 * objeto reponse cuando se presenta un error indesperado
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
+	 * @param response
+	 * @param status
+	 * @param exception
+	 */
+	public void sendErrorResponse(String username, HttpServletRequest request, HttpServletResponse response, int status,
+			Exception exception) throws IOException {
+		// Se incializa log
+		LogSecurity logSecurity = setLogSecurity(username, request, status, exception.getMessage());
+		// Se inicializa objecto de reponse con error
+		ErrorResponseDTO errorDTO = new ErrorResponseDTO(null, generalError.getCode(), generalError.getMessage(),
+				LocalDateTimeUtil.getLocalDateTimeIso86018(LocalDateTime.now()));
+		// Se actualiza response de la solicitud
+		writeResponse(response, status, errorDTO);
+		throw new TechnicalException(exception.getMessage(), exception.getCause(), logSecRepo, logSecurity);
+	}
+
+	/**
+	 * 
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Metodo privado reutilizable para
+	 * escribir JSON en la respuesta HTTP
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param response
+	 * @param status
+	 * @param errorDTO
+	 * @throws IOException
+	 */
+	private void writeResponse(HttpServletResponse response, int status, ErrorResponseDTO errorDTO) throws IOException {
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setStatus(status);
-		response.getWriter().write(message);
+		response.getWriter().write(getJson(errorDTO));
 		response.getWriter().flush();
+	}
+
+	/**
+	 * 
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Inicializacion de log persistible
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param username
+	 * @param request
+	 * @param status
+	 * @param error
+	 * @return
+	 */
+	private LogSecurity setLogSecurity(String username, HttpServletRequest request, int status, String error) {
+		LogSecurity logSecurity = initializeLog(request, username, CommonMessageConstants.NOT_FOUND,
+				CommonMessageConstants.NOT_FOUND, getSecurityActionCodeFromRequest(request));
+		logSecurity.setErrorMessage(error);
+		logSecurity.setStatusCode(status);
+		logSecurity.setExecutionTime(getExecutionTime());
+		return logSecurity;
+	}
+	
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Optiene el id del usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param token
+	 * @return
+	 */
+	public Long extractIdUser(String token) {
+		Claims claims = extractAllClaims(token);
+		Long idUser = Long.parseLong(claims.get(JWT_ID_USER).toString());
+		return idUser;
+	}
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> Optiene el estado del usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param token
+	 * @return
+	 */
+	public UserStateEnum extractUserState(String token) {
+		Claims claims = extractAllClaims(token);
+		UserStateEnum userState = UserStateEnum.valueOf(claims.get(JWT_USER_STATE).toString());
+		return userState;
 	}
 
 }

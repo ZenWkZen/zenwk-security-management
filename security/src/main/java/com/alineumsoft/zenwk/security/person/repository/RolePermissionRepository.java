@@ -23,7 +23,7 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
 
 	public static final String JPQL_RESOURCES_FILTER_ROL_NAME = "SELECT DISTINCT p.resource "
 			+ "FROM RolePermission rp " + "LEFT JOIN rp.role r " + "LEFT JOIN rp.permission p "
-			+ "WHERE r.name = :rolName ";
+			+ "WHERE r.name IN (:rolName) ";
 
 	/**
 	 * <p>
@@ -48,6 +48,6 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
 	 * @return
 	 */
 	@Query(JPQL_RESOURCES_FILTER_ROL_NAME)
-	public List<String> findResourcesByRolName(RoleEnum rolName);
+	public List<String> findResourcesByRolName(List<RoleEnum> rolName);
 
 }

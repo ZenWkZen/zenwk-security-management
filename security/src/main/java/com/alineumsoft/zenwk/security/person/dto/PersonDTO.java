@@ -1,12 +1,8 @@
 package com.alineumsoft.zenwk.security.person.dto;
 
-import java.io.Serializable;
-
 import com.alineumsoft.zenwk.security.common.constants.RegexConstants;
-import com.alineumsoft.zenwk.security.common.validation.EntityExists;
 import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 import com.alineumsoft.zenwk.security.person.entity.Person;
-import com.alineumsoft.zenwk.security.user.service.UserService;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.validation.constraints.NotNull;
@@ -16,26 +12,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * <p>
+ * DTO para solicitud de creacion de persona
+ * </p>
+ * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
- * @project SecurityUser
- * @class PersonDTO
+ * @project security-zenwk
+ * @class CreatePersonDTO
  */
 @Data
 @NoArgsConstructor
-public class PersonDTO implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class PersonDTO {	
 	/**
 	 * Id de person.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Long id;
-	/**
-	 * Id del usuario asociado.
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@NotNull(message = DtoValidationKeys.PERSON_ID_USER_NOT_NULL)
-	@EntityExists(service = UserService.class, message = DtoValidationKeys.PERSON_ID_USER_NOT_FOUND)
-	private Long idUser;
 	/**
 	 * Primer nombre.
 	 */
@@ -88,5 +80,4 @@ public class PersonDTO implements Serializable {
 		this.dateOfBirth = person.getDateOfBirth().toString();
 		this.address = person.getAddress();
 	}
-
 }

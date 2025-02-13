@@ -19,7 +19,7 @@ import lombok.Data;
 public class PagePersonDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private List<PersonDTO> people;
+	private List<CreatePersonDTO> people;
 
 	private long totalElements;
 

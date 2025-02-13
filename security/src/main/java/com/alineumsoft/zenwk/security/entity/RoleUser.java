@@ -2,12 +2,16 @@ package com.alineumsoft.zenwk.security.entity;
 
 import java.time.LocalDateTime;
 
-import com.alineumsoft.zenwk.security.entity.id.RoleUserId;
+import com.alineumsoft.zenwk.security.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,28 +31,34 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@IdClass(RoleUserId.class)
 public class RoleUser {
+	/**
+	 * Pk
+	 */
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "secroluseid")
+	private Long id;
 	/**
 	 * Referencia la pk con sec_user
 	 */
-	@Id
-	@Column(name = "relroluseiduser")
-	private Long idUser;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "secroluseiduser")
+	private User user;
 	/**
 	 * Referencia la pk con role
 	 */
-	@Id
-	@Column(name = "relroluseidrole")
-	private Long idRole;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "secroluseidrole")
+	private Role role;
 	/**
 	 * Usuario de creacion
 	 */
-	@Column(name = "relrolusecreationuser")
+	@Column(name = "secrolusecreationuser")
 	private String creationUser;
 	/**
 	 * Fecha de creacion del registro
 	 */
-	@Column(name = "relrolusecreationdate")
+	@Column(name = "secrolusecreationdate")
 	private LocalDateTime creationDate;
 }

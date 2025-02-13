@@ -2,6 +2,7 @@
 logging:
   level:
     org.springframework.security: INFO #DEBUG
+    org.springframework.security.web.FilterChainProxy: INFO
 # Log de datasource-hikari
     #com.zaxxer.hikari: INFO #DEBUG
     #org.springframework.jdbc.datasource: INFO #DEBUG

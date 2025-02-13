@@ -1,6 +1,7 @@
 package com.alineumsoft.zenwk.security.auth.Service;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,8 @@ import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
 import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
+import com.alineumsoft.zenwk.security.user.entity.User;
+import com.alineumsoft.zenwk.security.user.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +57,10 @@ public class AuthService extends ApiRestSecurityHelper {
 	 * Servicio para la carga de los permisos
 	 */
 	private final PermissionService permissionService;
+	/**
+	 * Servicio para la gestion de user
+	 */
+	private final UserService userService;
 
 	/**
 	 * 
@@ -65,13 +72,15 @@ public class AuthService extends ApiRestSecurityHelper {
 	 * @param logSecRepo
 	 * @param authManager
 	 * @param jwtProvider
+	 * @param userService
 	 */
 	public AuthService(LogSecurityRepository logSecRepo, AuthenticationManager authManager, JwtProvider jwtProvider,
-			PermissionService permissionService) {
+			PermissionService permissionService, UserService userService) {
 		this.logSecRepo = logSecRepo;
 		this.authManager = authManager;
 		this.jwtProvider = jwtProvider;
 		this.permissionService = permissionService;
+		this.userService=userService;
 	}
 
 	/**
@@ -85,11 +94,9 @@ public class AuthService extends ApiRestSecurityHelper {
 	 * @param inDTO
 	 * @param request
 	 * @param principal
-	 * @param starTime
 	 * @return
 	 */
-	public AuthResponseDTO authenticate(AuthRequestDTO inDTO, HttpServletRequest request, Principal principal,
-			Long starTime) {
+	public AuthResponseDTO authenticate(AuthRequestDTO inDTO, HttpServletRequest request, Principal principal) {
 		AuthResponseDTO outDTO = new AuthResponseDTO();
 		LogSecurity logSec = initializeLog(request, inDTO.getUsername(), getJson(inDTO),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, SecurityActionEnum.AUTH_LOGIN.getCode());
@@ -99,15 +106,18 @@ public class AuthService extends ApiRestSecurityHelper {
 					.authenticate(new UsernamePasswordAuthenticationToken(inDTO.getUsername(), inDTO.getPassword()));
 			// La constrasea se borra por seguridad cuando la autentiacion es exitosa
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			User user = userService.findByUsername(inDTO.getUsername());
+			List<String> roles = permissionService.listAllowedUrlsForUserRole(inDTO.getUsername());
 			// Se genera el token con los permisos
 			outDTO.setToken(jwtProvider.generateToken(userDetails,
-					permissionService.listAllowedUrlsForUserRole(userDetails.getUsername())));
-			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSec, starTime);
+					roles, user.getId(), user.getState()));
+
+			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSec);
 			logSecRepo.save(logSec);
 			return outDTO;
 		} catch (RuntimeException e) {
 			log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e);
-			setLogSecurityError(e, logSec, starTime);
+			setLogSecurityError(e, logSec);
 			throw new FunctionalException(e.getMessage(), e.getCause(), logSecRepo, logSec);
 		}
 	}
@@ -119,20 +129,19 @@ public class AuthService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param request
-	 * @param starTime
 	 */
-	public void logout(HttpServletRequest request, UserDetails userDetails, Long starTime) {
+	public void logout(HttpServletRequest request, UserDetails userDetails) {
 		LogSecurity logSec = initializeLog(request, userDetails.getUsername(),
 				CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
 				SecurityActionEnum.AUTH_LOGOUT.getCode());
 		try {
 			String token = jwtProvider.extractToken(request).orElseThrow();
 			jwtProvider.invalidateToken(token);
-			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSec, starTime);
+			setLogSecuritySuccesfull(HttpStatus.OK.value(), logSec);
 			logSecRepo.save(logSec);
 		} catch (RuntimeException e) {
 			log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e);
-			setLogSecurityError(e, logSec, starTime);
+			setLogSecurityError(e, logSec);
 			throw new TechnicalException(e.getMessage(), e.getCause(), logSecRepo, logSec);
 		}
 	}

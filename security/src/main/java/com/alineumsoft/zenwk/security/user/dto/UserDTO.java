@@ -81,7 +81,7 @@ public class UserDTO implements Serializable {
 	 * @param user
 	 */
 	public UserDTO(User user) {
-		Long idpersonTemp = Optional.ofNullable(user.getPerson().getId()).get();
+		Long idpersonTemp = Optional.ofNullable(user.getPerson()).map(Person::getId).orElse(null);
 		this.id = user.getId();
 		this.idPerson = idpersonTemp;
 		this.username = user.getUsername();

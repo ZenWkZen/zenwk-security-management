@@ -10,17 +10,38 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
  * @class ErrorCodeException
  */
 public enum SecurityExceptionEnum {
-	// fun/tec_entidad_operacion_campo/proceso_descripcion
-	FUNC_USER_CREATE_EMAIL_UNIQUE("FUNC_SEC_001", "functional.user.create.email.unique"),
-	FUNC_USER_NOT_FOUND_ID("FUNC_SEC_002", "functional.user.id.notfound"),
-	FUNC_USER_NOT_FOUND_USERNAME("FUNC_SEC_002","functional.user.username.notfound"),
-	FUNC_USER_MAIL_EXISTS("FUNC_SEC_003", "functional.user.email.exists"),
-	FUNC_PERSON_NOT_FOUND("FUNC_SEC_004", "functional.person.notfound"),
-	FUNC_PERSON_EXIST("FUNC_SEC_005", "functional.person.exist"),
-	FUNC_USER_EXIST("FUNC_SEC_006", "functional.user.exist"),
-	FUNC_ROLE_USER_NOT_EXIST("FUNC_SEC_007", "functional.roleuser.not.exist");
+	/**
+	 * Auth
+	 */
+	FUNC_AUTH_TOKEN_INVALID("FUNC_SEC_001", "auth.token.invalid"),
+	FUNC_AUTH_URI_FORBIDEN("FUNC_SEC_002", "auth.uri.forbiden"),
+	/**
+	 * Roles
+	 */
+	FUNC_ROLE_USER_NOT_EXIST("FUNC_SEC_003", "functional.roleuser.not.exist"),
+	/**
+	 * User
+	 */
+	FUNC_USER_CREATE_EMAIL_UNIQUE("FUNC_SEC_004", "functional.user.create.email.unique"),
+	FUNC_USER_NOT_FOUND_ID("FUNC_SEC_005", "functional.user.id.notfound"),
+	FUNC_USER_NOT_FOUND_USERNAME("FUNC_SEC_006", "functional.user.username.notfound"),
+	FUNC_USER_MAIL_EXISTS("FUNC_SEC_007", "functional.user.email.exists"),
+	FUNC_USER_EXIST("FUNC_SEC_007", "functional.user.exist"),
+	/**
+	 * Person
+	 */
+	FUNC_PERSON_NOT_FOUND("FUNC_SEC_008", "functional.person.notfound"),
+	FUNC_PERSON_EXIST("FUNC_SEC_009", "functional.person.exist"),
+	FUNC_PERSON_ID_USER_NOT_ASSOCIATE("FUNC_SEC_010", "functional.person.iduser.notassociate"),
+	FUNC_PERSON_ID_USER_IS_ASSOCIATE("FUNC_SEC_011", "functional.person.iduser.isassociate");
 
+	/**
+	 * code
+	 */
 	private String code;
+	/**
+	 * key
+	 */
 	private String key;
 
 	/**

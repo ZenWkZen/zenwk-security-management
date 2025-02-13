@@ -16,6 +16,7 @@ import com.alineumsoft.zenwk.security.auth.Service.AuthService;
 import com.alineumsoft.zenwk.security.auth.definitions.AuthEnums;
 import com.alineumsoft.zenwk.security.auth.dto.AuthRequestDTO;
 import com.alineumsoft.zenwk.security.auth.dto.AuthResponseDTO;
+import com.alineumsoft.zenwk.security.auth.dto.LogoutOutDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -31,10 +32,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-	/**
-	 * Contador de tiempo de la solicitud
-	 */
-	private static final ThreadLocal<Long> starTime = new ThreadLocal<>();
 	/**
 	 * Servicio para auth
 	 */
@@ -68,8 +65,7 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponseDTO> login(@RequestBody @Validated AuthRequestDTO request,
 			HttpServletRequest servRequest, Principal principal) {
-		starTime.set(System.currentTimeMillis());
-		return ResponseEntity.ok(authService.authenticate(request, servRequest, principal, starTime.get()));
+		return ResponseEntity.ok(authService.authenticate(request, servRequest, principal));
 	}
 
 	/**
@@ -84,10 +80,10 @@ public class AuthController {
 	 * @return
 	 */
 	@DeleteMapping("/logout")
-	public ResponseEntity<String> logout(HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-		starTime.set(System.currentTimeMillis());
-		authService.logout(request, userDetails, starTime.get());
-		return ResponseEntity.ok(AuthEnums.AUTH_LOGOUT_SUCCES.getMessage());
+	public ResponseEntity<LogoutOutDTO> logout(HttpServletRequest request,
+			@AuthenticationPrincipal UserDetails userDetails) {
+		authService.logout(request, userDetails);
+		return ResponseEntity.ok(new LogoutOutDTO(AuthEnums.AUTH_LOGOUT_SUCCES.getMessage()));
 	}
 
 }

@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -39,14 +40,22 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @Slf4j
 public class SecurityFilterChainConfiguration {
+	/**
+	 * Componenete para jwt
+	 */
 	private final JwtAuthenticationFilter jwtAuthFilter;
-
 	/**
 	 * AuthenticationProvider para la autenticacion del usuario
 	 */
 	private final AuthenticationProvider authenticationProvider;
-
+	/**
+	 * Servicio para la gestion de permisos
+	 */
 	private final PermissionService permService;
+	/**
+	 * Manejador para los errores de acceso denegado
+	 */
+	private final AccessDeniedHandler customAccessDeniedHandler;
 
 	/**
 	 * <p>
@@ -57,13 +66,16 @@ public class SecurityFilterChainConfiguration {
 	 * @param rolePermRepo
 	 * @param jwtAuthFilter
 	 * @param authenticationProvider
+	 * @param permService
+	 * @param customAccessDeniedHandler
 	 */
 	public SecurityFilterChainConfiguration(RolePermissionRepository rolePermRepo,
 			JwtAuthenticationFilter jwtAuthFilter, AuthenticationProvider authenticationProvider,
-			PermissionService permService) {
+			PermissionService permService, AccessDeniedHandler customAccessDeniedHandler) {
 		this.jwtAuthFilter = jwtAuthFilter;
 		this.authenticationProvider = authenticationProvider;
 		this.permService = permService;
+		this.customAccessDeniedHandler = customAccessDeniedHandler;
 	}
 
 	/**
@@ -92,7 +104,11 @@ public class SecurityFilterChainConfiguration {
 			request.anyRequest().authenticated();
 		}).csrf(csrf -> csrf.disable()).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authenticationProvider(authenticationProvider);
+				.authenticationProvider(authenticationProvider)
+				// Configuración con el handler personalizado
+				// Captura el error y muestra un mensaje descriptivo con la causa
+				.exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler));
+
 		return http.build();
 	}
 

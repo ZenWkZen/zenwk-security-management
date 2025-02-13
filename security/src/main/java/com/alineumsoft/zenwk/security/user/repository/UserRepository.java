@@ -20,6 +20,10 @@ public interface UserRepository
 	 * JPQL que consulta un usuario a partir del id de la persona
 	 */
 	public final static String JPQL_FIND_USER_BY_PERSON_ID = "SELECT u FROM User u WHERE u.person.id = :idPerson";
+	/**
+	 * JPQL que consulta el id de la persona, recibe el id del usuario
+	 */
+	public final static String JPQL_FIND_PERSON_ID = "SELECT p.id FROM User u  LEFT JOIN u.person p WHERE u.id = :idUser";
 
 	/**
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -49,6 +53,19 @@ public interface UserRepository
 	 */
 	@Query(JPQL_FIND_USER_BY_PERSON_ID)
 	public User finByIdPerson(Long idPerson);
+
+	/**
+	 * <p>
+	 * <b> CU001_Seguridad_Creacion_Usuario </b> JPQL para la busqueda del id de
+	 * persona con el id del usuario
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param idPerson
+	 * @return
+	 */
+	@Query(JPQL_FIND_PERSON_ID)
+	public Object findIdPersonByIdUser(Long idUser);
 
 	/**
 	 * <p>

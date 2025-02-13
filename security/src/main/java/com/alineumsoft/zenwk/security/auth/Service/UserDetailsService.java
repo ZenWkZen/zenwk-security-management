@@ -61,7 +61,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 		HttpServletRequest request = getCurrentHttpRequest();
 		startTime.set(System.currentTimeMillis());
 		// Consulta de los roles asociados al usuario
-		List<String> rolesName = userService.findRolesByUsername(username, startTime.get(), request).stream()
+		List<String> rolesName = userService.findRolesByUsername(username, request).stream()
 				.map(rol -> rol.getName().name()).collect(Collectors.toList());
 		// Se recupera el usuario desde la bd
 		com.alineumsoft.zenwk.security.user.entity.User userEntity = userService.findByUsername(username);

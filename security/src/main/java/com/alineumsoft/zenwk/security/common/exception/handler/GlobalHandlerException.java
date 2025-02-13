@@ -14,8 +14,10 @@ import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
-import com.alineumsoft.zenwk.security.common.exception.dto.ErrorResponse;
+import com.alineumsoft.zenwk.security.common.exception.dto.ErrorResponseDTO;
+import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
+import com.alineumsoft.zenwk.security.common.util.LocalDateTimeUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GlobalHandlerException {
 	/**
+	 * Error geneal
+	 */
+	private static final CoreExceptionEnum generalError = CoreExceptionEnum.FUNC_COMMON_ERROR_GENERAL;
+	/**
+	/**
 	 * <p>
 	 * <b> CommonException: </b> Manejador general
 	 * </p>
@@ -37,7 +44,7 @@ public class GlobalHandlerException {
 	 * @return
 	 */
 	@ExceptionHandler(RuntimeException.class)
-	public ResponseEntity<ErrorResponse> HandleGeneralException(RuntimeException e) {
+	public ResponseEntity<ErrorResponseDTO> HandleGeneralException(RuntimeException e) {
 		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e.getMessage());
 		String code = extractCode(e.getMessage());
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, code));
@@ -53,7 +60,7 @@ public class GlobalHandlerException {
 	 * @return
 	 */
 	@ExceptionHandler(TechnicalException.class)
-	public ResponseEntity<ErrorResponse> HandleTechnicalException(TechnicalException e) {
+	public ResponseEntity<ErrorResponseDTO> HandleTechnicalException(TechnicalException e) {
 		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_TECHNICAL, e.getMessage());
 		String code = extractCode(e.getMessage());
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createNewError(e, code));
@@ -69,7 +76,7 @@ public class GlobalHandlerException {
 	 * @return
 	 */
 	@ExceptionHandler(FunctionalException.class)
-	public ResponseEntity<ErrorResponse> HandleFunctionalException(FunctionalException e) {
+	public ResponseEntity<ErrorResponseDTO> HandleFunctionalException(FunctionalException e) {
 		log.error(CommonMessageConstants.LOG_MSG_EXCEPTION_FUNCTIONAL, e.getMessage());
 		String code = extractCode(e.getMessage());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createNewError(e, code));
@@ -86,9 +93,9 @@ public class GlobalHandlerException {
 	 * @return
 	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<List<ErrorResponse>> handleValidationException(MethodArgumentNotValidException e) {
-		List<ErrorResponse> listError = e.getBindingResult().getFieldErrors().stream()
-				.map(fieldError -> new ErrorResponse(fieldError.getField(),
+	public ResponseEntity<List<ErrorResponseDTO>> handleValidationException(MethodArgumentNotValidException e) {
+		List<ErrorResponseDTO> listError = e.getBindingResult().getFieldErrors().stream()
+				.map(fieldError -> new ErrorResponseDTO(fieldError.getField(),
 						MessageSourceAccessorComponent.getMessage(fieldError.getDefaultMessage()), null, null))
 				.collect(Collectors.toList());
 		return ResponseEntity.badRequest().body(listError);
@@ -103,14 +110,15 @@ public class GlobalHandlerException {
 	 * @param e
 	 * @return
 	 */
-	private static ErrorResponse createNewError(RuntimeException e, String code) {
+	private static ErrorResponseDTO createNewError(RuntimeException e, String code) {
 		// Se realiza una ultima comprobacion del codigo de error
 		if (code == null) {
 			code = extractCode(e.getMessage());
 		}
 
-		return new ErrorResponse(null, CommonMessageConstants.MSG_EXEPTION_GENERAL,
-				code == null ? CommonMessageConstants.CODE_MSG_GENERAL : code, LocalDateTime.now());
+		return new ErrorResponseDTO(null, generalError.getMessage(),
+				code == null ? generalError.getCode() : code,
+				LocalDateTimeUtil.getLocalDateTimeIso86018(LocalDateTime.now()));
 	}
 
 	/**
