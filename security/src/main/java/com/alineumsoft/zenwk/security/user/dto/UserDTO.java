@@ -19,6 +19,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * <p>
+ * DTO usado para la gestion usuarios usado en el api de users
+ * </p>
+ * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  * @class UserInDTO

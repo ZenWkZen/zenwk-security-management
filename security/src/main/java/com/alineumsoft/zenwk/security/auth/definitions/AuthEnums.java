@@ -3,6 +3,8 @@ package com.alineumsoft.zenwk.security.auth.definitions;
 import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
+import lombok.Getter;
+
 /**
  * <p>
  * enums utilizadas en la autenticacion y autorizacion
@@ -12,13 +14,14 @@ import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAcce
  * @project security-zenwk
  * @class AuthEnums
  */
+@Getter
 public enum AuthEnums {
 	AUTH_LOGOUT_SUCCES("auth.logout.succes");
 
 	/**
 	 * key
 	 */
-	private String key;
+	private final String key;
 
 	/**
 	 * <p>
@@ -28,7 +31,7 @@ public enum AuthEnums {
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param key
 	 */
-	private AuthEnums(String key) {
+	AuthEnums(String key) {
 		this.key = key;
 	}
 

@@ -1,5 +1,7 @@
 package com.alineumsoft.zenwk.security.person.dto;
 
+import java.io.Serializable;
+
 import com.alineumsoft.zenwk.security.common.constants.RegexConstants;
 import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 import com.alineumsoft.zenwk.security.person.entity.Person;
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * <p>
- * DTO para solicitud de creacion de persona
+ * DTO base para solicitud de creacion de persona
  * </p>
  * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -22,7 +24,8 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class PersonDTO {	
+public class PersonDTO implements Serializable {
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Id de person.
 	 */

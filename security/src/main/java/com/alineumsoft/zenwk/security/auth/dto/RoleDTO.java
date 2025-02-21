@@ -1,8 +1,14 @@
 package com.alineumsoft.zenwk.security.auth.dto;
 
+import com.alineumsoft.zenwk.security.common.constants.RegexConstants;
+import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 import com.alineumsoft.zenwk.security.entity.Role;
-import com.alineumsoft.zenwk.security.enums.RoleEnum;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,19 +23,27 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class RoleDTO {
 	/**
 	 * idRol
 	 */
-	private Long idRol;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Long id;
 	/**
 	 * rolName
 	 */
-	private RoleEnum rolName;
+	@Pattern(regexp = RegexConstants.NAME_ROLE_PERMISSION, message = DtoValidationKeys.ROLE_NAME_INVALID)
+	@Size(max = 100, message = DtoValidationKeys.ROLE_NAME_MAX_LENGTH)
+	@NotNull(message = DtoValidationKeys.ROLE_NAME_NOT_NULL)
+	private String name;
 	/**
 	 * rolDescription
 	 */
-	private String rolDescription;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@Size(max = 255, message = DtoValidationKeys.ROLE_DESCRIPTION_MAX_LENGTH)
+	@NotNull(message = DtoValidationKeys.ROLE_DECRIPTION_NOT_NULL)
+	private String description;
 
 	/**
 	 * 
@@ -41,9 +55,9 @@ public class RoleDTO {
 	 * @param role
 	 */
 	public RoleDTO(Role role) {
-		this.idRol = role.getId();
-		this.rolName = role.getName();
-		this.rolDescription = role.getDescription();
+		this.id = role.getId();
+		this.name = role.getName();
+		this.description = role.getDescription();
 	}
 
 }

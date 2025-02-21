@@ -3,46 +3,41 @@ package com.alineumsoft.zenwk.security.common.exception.enums;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
+import lombok.Getter;
+
 /**
  * <b>Enum que define las excepciones tecnicas y funcionales a nivel general del
- * core</b>
+ * sistema.</b>
  * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  * @class GeneralCoreExceptionEnum
  */
+@Getter
 public enum CoreExceptionEnum {
 	TECH_COMMON_HISTORICAL_ENTITY_NOT_FOUND("TECH_GEN_001", "common.exception.error.historical.entity.notfound"),
 	TECH_COMMON_MESSAGE_NOT_FOUND("TECH_GEN_002", "common.exception.error.enum.message.notfound"),
 	TECH_COMMON_ANOTATION_ENTITY_NOT_EXISTS("TECH_GEN_003", "common.exception.entity.noexists"),
 	FUNC_COMMON_ERROR_GENERAL("FUNC_COM_01","common.exception.error.general"),
 	FUNC_COMMON_ROLE_NOT_EXIST("FUNC_COM_02","common.exception.rol.noexists");
-
 	/**
 	 * code
 	 */
-	private String code;
+	private final String code;
 	/**
 	 * messageKey
 	 */
-	private String messageKey;
+	private final String messageKey;
 
 	/**
 	 * @param code
 	 * @param messageKey
 	 */
-	private CoreExceptionEnum(String code, String messageKey) {
+	CoreExceptionEnum(String code, String messageKey) {
 		this.code = code;
 		this.messageKey = messageKey;
 	}
-
-	/**
-	 * @return
-	 */
-	public String getCode() {
-		return this.code;
-	}
-
+	
 	/**
 	 * @return
 	 */

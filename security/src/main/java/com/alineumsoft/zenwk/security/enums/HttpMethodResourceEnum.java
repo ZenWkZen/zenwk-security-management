@@ -2,6 +2,8 @@ package com.alineumsoft.zenwk.security.enums;
 
 import org.springframework.http.HttpMethod;
 
+import lombok.Getter;
+
 /**
  * <p>
  * Enum que define los recursos expuestos y sus metodos http para el api de
@@ -12,29 +14,45 @@ import org.springframework.http.HttpMethod;
  * @project security-zenwk
  * @class HttpMethodResourceEnum
  */
+@Getter
 public enum HttpMethodResourceEnum {
 	/**
 	 * Recursos par ala entidad usuarios
 	 */
-	USER_CREATE(HttpMethod.POST, "/api/user"),
-	USER_UPDATE(HttpMethod.PUT, "/api/user/{id}"),
-	USER_DELETE(HttpMethod.DELETE, "/api/user/{id}"),
-	USER_FIND_ALL(HttpMethod.GET, "/api/user"),
-	USER_FIND_BY_ID(HttpMethod.GET, "/api/user/{id}"),
+	USER_CREATE(HttpMethod.POST, "/api/users"),
+	USER_UPDATE(HttpMethod.PUT, "/api/users/{id}"),
+	USER_DELETE(HttpMethod.DELETE, "/api/users/{id}"),
+	USER_LIST(HttpMethod.GET, "/api/users"),
+	USER_GET(HttpMethod.GET, "/api/users/{id}"),
 	/**
 	 * Recursos para la entidad persona
 	 */
-	PERSON_CREATE(HttpMethod.POST, "/api/person"),
-	PERSON_UPDATE(HttpMethod.PUT, "/api/person/{id}"),
-	PERSON_DELETE(HttpMethod.DELETE, "/api/person/{id}"),
-	PERSON_FIND_ALL(HttpMethod.GET, "/api/person"),
-	PERSON_FIND_BY_ID(HttpMethod.GET, "/api/person/{id}"),
+	PERSON_CREATE(HttpMethod.POST, "/api/persons"),
+	PERSON_UPDATE(HttpMethod.PUT, "/api/persons/{id}"),
+	PERSON_DELETE(HttpMethod.DELETE, "/api/persons/{id}"),
+	PERSON_LIST(HttpMethod.GET, "/api/persons"),
+	PERSON_GET(HttpMethod.GET, "/api/persons/{id}"),
+	/**
+	 * Permisos
+	 */
+	PERMISSION_CREATE(HttpMethod.POST, "/api/permissions"),
+	PERMISSION_LIST(HttpMethod.GET, "/api/permissions"),
+	PERMISSION_GET(HttpMethod.GET, "api/permissions/{id}"),
+	PERMISSION_UPDATE(HttpMethod.PUT, "/api/permissions/{id}"),
+	PERMISSION_DELETE(HttpMethod.DELETE, "/api/permissions/{id}"),
+	/**
+	 * Roles
+	 */
+	ROLE_CREATE(HttpMethod.POST, "/api/roles"),
+	ROLE_UPDATE(HttpMethod.PUT, "/api/roles/{id}"),
+	ROLE_DELETE(HttpMethod.DELETE, "/api/roles/{id}"),
+	ROLE_GET(HttpMethod.GET, "/api/roles/{id}"),
+	ROLE_LIST(HttpMethod.GET, "/api/roles"),
 	/**
 	 * Auth
 	 */
 	AUTH_LOGIN(HttpMethod.POST, "/api/auth/login"),
 	AUTH_LOGOUT(HttpMethod.DELETE, "/api/auth/logout");
-
 	/**
 	 * Metodo http
 	 */
@@ -53,27 +71,8 @@ public enum HttpMethodResourceEnum {
 	 * @param method
 	 * @param resource
 	 */
-	private HttpMethodResourceEnum(HttpMethod method, String resource) {
+	HttpMethodResourceEnum(HttpMethod method, String resource) {
 		this.method = method;
 		this.resource = resource;
 	}
-
-	/**
-	 * Gets the value of method.
-	 * 
-	 * @return the value of method.
-	 */
-	public HttpMethod getMethod() {
-		return method;
-	}
-
-	/**
-	 * Gets the value of resource.
-	 * 
-	 * @return the value of resource.
-	 */
-	public String getResource() {
-		return resource;
-	}
-
 }

@@ -3,7 +3,7 @@ package com.alineumsoft.zenwk.security.entity;
 import java.time.LocalDateTime;
 
 import com.alineumsoft.zenwk.security.common.enums.PermissionOperationEnum;
-import com.alineumsoft.zenwk.security.enums.PermissionEnum;
+import com.alineumsoft.zenwk.security.dto.PermissionDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,8 +35,7 @@ public class Permission {
 	 * name
 	 */
 	@Column(name = "secpername")
-	@Enumerated(EnumType.STRING)
-	private PermissionEnum name;
+	private String name;
 
 	/**
 	 * description
@@ -78,13 +77,29 @@ public class Permission {
 	 */
 	@Column(name = "secpermodificationuser")
 	private String modificationUser;
-	
+
 	/**
 	 * operation
 	 */
 	@Enumerated(EnumType.STRING)
 	@Column(name = "secperoperation")
 	private PermissionOperationEnum operation;
-	
+
+	/**
+	 * <p>
+	 * <b> Constructor. </b> Constructor a partir de su DTO
+	 * </p>
+	 * 
+	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+	 * @param dto
+	 */
+	public Permission(PermissionDTO dto) {
+		this.name = dto.getName().toString();
+		this.description = dto.getDescription();
+		this.method = dto.getMethod();
+		this.resource = dto.getResource();
+		this.operation = PermissionOperationEnum.valueOf(dto.getOperation());
+
+	}
 
 }

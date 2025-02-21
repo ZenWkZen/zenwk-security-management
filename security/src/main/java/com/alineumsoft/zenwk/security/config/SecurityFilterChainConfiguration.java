@@ -132,11 +132,11 @@ public class SecurityFilterChainConfiguration {
 					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.UPDATE)))
 					.requestMatchers(getRequestMatchersForOperation(PermissionOperationEnum.DELETE, maRolPermissions))
 					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.DELETE)))
-					.requestMatchers(getRequestMatchersForOperation(PermissionOperationEnum.FIND_ALL, maRolPermissions))
-					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.FIND_ALL)))
+					.requestMatchers(getRequestMatchersForOperation(PermissionOperationEnum.LIST, maRolPermissions))
+					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.LIST)))
 					.requestMatchers(
-							getRequestMatchersForOperation(PermissionOperationEnum.FIND_BY_ID, maRolPermissions))
-					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.FIND_BY_ID)));
+							getRequestMatchersForOperation(PermissionOperationEnum.GET, maRolPermissions))
+					.hasAnyAuthority(getRoles(maRolPermissions.get(PermissionOperationEnum.GET)));
 		}
 	}
 
@@ -181,7 +181,7 @@ public class SecurityFilterChainConfiguration {
 	private String[] getRoles(List<PermissionDTO> listPermission) {
 		// Elimina roles duplicados por la consulta original.
 		// Convierte una lista de roles en un String[]
-		return listPermission.stream().map(PermissionDTO::getRolName)
+		return listPermission.stream().map(PermissionDTO::getName)
 				.collect(Collectors.toCollection(LinkedHashSet::new)).toArray(String[]::new);
 
 	}

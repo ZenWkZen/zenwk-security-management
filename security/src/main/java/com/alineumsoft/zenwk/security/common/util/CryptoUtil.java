@@ -52,7 +52,7 @@ public final class CryptoUtil {
 	 * @return
 	 */
 	public static boolean matchesPassword(String rawPassword, String encodePassword) {
-		return BCRYPT_ENCODER.matches(rawPassword, rawPassword);
+		return BCRYPT_ENCODER.matches(rawPassword, encodePassword);
 	}
 
 	/**

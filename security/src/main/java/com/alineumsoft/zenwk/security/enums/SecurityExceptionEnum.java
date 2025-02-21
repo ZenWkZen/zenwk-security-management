@@ -4,11 +4,19 @@ import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
+import lombok.Getter;
+
 /**
+ * <p>
+ * Enum para los mensajes a mostrar cuando se generan excepciones funcionales
+ * predefinidas en el sistema.
+ * <p>
+ * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  * @class ErrorCodeException
  */
+@Getter
 public enum SecurityExceptionEnum {
 	/**
 	 * Auth
@@ -33,34 +41,41 @@ public enum SecurityExceptionEnum {
 	FUNC_PERSON_NOT_FOUND("FUNC_SEC_008", "functional.person.notfound"),
 	FUNC_PERSON_EXIST("FUNC_SEC_009", "functional.person.exist"),
 	FUNC_PERSON_ID_USER_NOT_ASSOCIATE("FUNC_SEC_010", "functional.person.iduser.notassociate"),
-	FUNC_PERSON_ID_USER_IS_ASSOCIATE("FUNC_SEC_011", "functional.person.iduser.isassociate");
+	FUNC_PERSON_ID_USER_IS_ASSOCIATE("FUNC_SEC_011", "functional.person.iduser.isassociate"),
+	/**
+	 * Role
+	 */
+	FUNC_ROLE_EXISTS("FUNC_SEC_012", "functional.role.exist"),
+	FUNC_ROLE_NOT_EXISTS("FUNC_SEC_013","common.exception.rol.noexists"),
+	TECH_ROLE_NOT_DELETE("TECH_SEC_001","functional.exception.rol.nodelete"),
+	FUNC_ROLE_ASSIGNMENT_PERMISSION_EXISTS("FUNC_SEC_016","functional.exception.rol.assignment.exists"),
+	FUNC_ROLE_ASSIGNMENT_PERMISSION_NOT_EXISTS("FUNC_SEC_017","functional.exception.rol.assignment.notexists"),
 
+	
+	/**
+	 * Permission
+	 */
+	FUNC_PERMISSION_EXIST("FUNC_SEC_014", "functional.permission.exist"),
+	FUNC_PERMISSION_NOT_EXISTS("FUNC_SEC_015","functional.permission.noexists"),
+	TECH_PERMISSION_NOT_DELETE("TECH_SEC_002","functional.permission.notdelete");
 	/**
 	 * code
 	 */
-	private String code;
+	private final String code;
 	/**
 	 * key
 	 */
-	private String key;
+	private final String key;
 
 	/**
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param codeException
 	 * @param keyMessage
 	 */
-	private SecurityExceptionEnum(String code, String keyMessage) {
+	SecurityExceptionEnum(String code, String keyMessage) {
 		this.code = code;
 		this.key = keyMessage;
 
-	}
-
-	/**
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @return
-	 */
-	public String getCode() {
-		return code;
 	}
 
 	/**

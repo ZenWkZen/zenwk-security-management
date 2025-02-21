@@ -41,5 +41,30 @@ public final class DtoValidationKeys {
 	public static final String USER_EMAIL_MAX_LENGTH = "validation.user.email.maxlength";
 	public static final String USER_PASSWORD_MAX_LENGTH = "validation.user.password.maxlength";
 	public static final String USER_USERNAME_MAX_LENGTH = "validation.user.username.maxlength";
+	/**
+	 *  RoleDTO
+	 */
+	public static final String ROLE_NAME_INVALID = "validation.role.name.invalid";
+	public static final String ROLE_NAME_MAX_LENGTH = "validation.role.name.invalid.maxlength";
+	public static final String ROLE_NAME_NOT_NULL = "validation.role.name.notnull";
+	public static final String ROLE_DECRIPTION_NOT_NULL = "validation.role.description.notnull";
+	public static final String ROLE_DESCRIPTION_MAX_LENGTH = "validation.role.description.maxlength";
+	/**
+	 *  PermissionDTO
+	 */
+	public static final String PERMISSION_NAME_INVALID = "validation.permission.name.invalid";
+	public static final String PERMISSION_NAME_MAX_LENGTH = "validation.permission.name.invalid.maxlength";
+	public static final String PERMISSION_NAME_NOT_NULL = "validation.permission.name.notnull";
+	public static final String PERMISSION_DESCRIPTION_MAX_LENGTH = "validation.permission.description.invalid.maxlength";
+	public static final String PERMISSION_DESCRIPTION_NOT_NULL = "validation.permission.description.notnull";
+	public static final String PERMISSION_RESOURCE_INVALID = "validation.permission.resource.invalid";
+	public static final String PERMISSION_RESOURCE_MAX_LENGTH = "validation.permission.resource.invalid.maxlength";
+	public static final String PERMISSION_RESOURCE_NOT_NULL = "validation.permission.resource.notnull";
+	public static final String PERMISSION_METHOD_INVALID = "validation.permission.method.invalid";
+	public static final String PERMISSION_METHOD_MAX_LENGTH = "validation.permission.method.invalid.maxlength";
+	public static final String PERMISSION_METHOD_NOT_NULL = "validation.permission.method.notnull";
+	public static final String PERMISSION_OPERATION_INVALID = "validation.permission.operation.invalid";
+	public static final String PERMISSION_OPERATION_MAX_LENGTH = "validation.permission.operation.invalid.maxlength";
+	public static final String PERMISSION_OPERATION_NOT_NULL = "validation.permission.operation.notnull";
 
 }

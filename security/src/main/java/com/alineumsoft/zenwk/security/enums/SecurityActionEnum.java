@@ -1,26 +1,67 @@
 package com.alineumsoft.zenwk.security.enums;
 
+import lombok.Getter;
+
 /**
+ * <p>
+ * Enum que representa las acciones de seguridad en el sistema.
+ * </p>
+ * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project security-zenwk
  * @class ServiceNameEnum
  */
-public  enum SecurityActionEnum {
+@Getter
+public enum SecurityActionEnum {
+	/**
+	 * User
+	 */
 	USER_CREATE("USER.CREATE"),
     USER_UPDATE("USER.UPDATE"),
     USER_DELETE("USER.DELETE"),
-    USER_FIND_BY_ID("USER.FIND_BY_ID"),
-    USER_FIND_ALL("USER.FIND_ALL"),
-    USER_FIND_ROLE("USER.FIND_ROLE"),
+    USER_GET("USER.GET"),
+    USER_LIST("USER.LIST"),
+    USER_LIST_ROLES("USER.LIST_ROLES"),
+    /**
+     * Person
+     */
     PERSON_CREATE("PERSON.CREATE"),
     PERSON_UPDATE("PERSON.UPDATE"),
     PERSON_DELETE("PERSON.DELETE"),
-    PERSON_FIND_BY_ID("PERSON.FIND_BY_ID"),
-    PERSON_FIND_ALL("PERSON.FIND_ALL"),
+    PERSON_GET("PERSON.GET"),
+    PERSON_LIST("PERSON.LIST"),
+    /**
+     * Auth
+     */
     AUTH_LOGIN("AUTH.LOGIN"),
-    AUTH_LOGOUT("AUTH.LOGOUT");
+    AUTH_LOGOUT("AUTH.LOGOUT"),
+	/**
+	 * Role
+	 */
+    ROLE_CREATE("ROLE.CREATE"),
+    ROLE_UPDATE("ROLE.UPDATE"),
+    ROLE_DELETE("ROLE.DELETE"),
+    ROLE_GET("ROLE.GET"),
+    ROLE_LIST("ROLE.LIST"),
+    ROLE_ASSIGNMENT_PERMISSION("ROLE.ASSIGNMENT_PERMISSION"),
+    ROLE_REMOVE_PERMISSION("ROLE.REMOVE_PERMISSION"),
+    ROLE_LIST_PERMISSIONS("ROLE.LIST_PERMISSIONS"),
+    ROLE_ASSIGNMENT_USER("ROLE.ASSIGNMENT_USER"),
+    ROLE_REMOVE_USER("ROLE.REMOVE_USER"),
+	/**
+	 * Permission
+	 */
+    PERMISSION_CREATE("PERMISSION.CREATE"),
+    PERMISSION_UPDATE("PERMISSION.UPDATE"),
+    PERMISSION_DELETE("PERMISSION.DELETE"),
+    PERMISSION_GET("PERMISSION.GET"),
+    PERMISSION_LIST("PERMISSION.LIST"),
+    PERMISSION_LIST_ROLES("PERMISSION.LIST_ROLES");
 	
-	private String code;
+	/**
+	 * code
+	 */
+	private final String code;
 
 	/**
 	 * <p>
@@ -30,17 +71,8 @@ public  enum SecurityActionEnum {
 	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
 	 * @param code
 	 */
-	private SecurityActionEnum(String code) {
+	SecurityActionEnum(String code) {
 		this.code = code;
-	}
-
-	/**
-	 * Gets the value of code.
-	 * 
-	 * @return the value of code.
-	 */
-	public String getCode() {
-		return code;
 	}
 
 }

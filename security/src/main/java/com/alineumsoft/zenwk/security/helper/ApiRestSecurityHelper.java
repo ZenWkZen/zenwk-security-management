@@ -3,6 +3,7 @@ package com.alineumsoft.zenwk.security.helper;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
@@ -14,6 +15,7 @@ import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
+import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +28,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ApiRestSecurityHelper extends ApiRestHelper {
+	protected static final String ID = "id";
+	protected static String notBody = CommonMessageConstants.NOT_APPLICABLE_BODY;
+
 	/**
 	 * <p>
 	 * <b> General </b> Fija el valor para los atributos: creationDate, userCreation
@@ -126,5 +131,33 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 			}
 		}
 		return CommonMessageConstants.NOT_FOUND;
+	}
+
+	/**
+	 * <p>
+	 * <b> Util </b> Persistencia de log para una solicitud exitosa.
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param httpEstatus
+	 * @param logSec
+	 * @param logSecurityRepo
+	 */
+	public void saveSuccessLog(int httpEstatus, LogSecurity logSec, LogSecurityRepository logSecurityRepo) {
+		setLogSecuritySuccesfull(httpEstatus, logSec);
+		logSecurityRepo.save(logSec);
+	}
+	
+	/**
+	 * <p>
+	 * <b> General: Paginación. </b> Obtiene el numero de pagina.
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param pageable
+	 * @return
+	 */
+	public int getPageNumber(Pageable pageable) {
+		return pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
 	}
 }

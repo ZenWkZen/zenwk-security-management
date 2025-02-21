@@ -2,21 +2,21 @@ package com.alineumsoft.zenwk.security.entity;
 
 import java.time.LocalDateTime;
 
-import com.alineumsoft.zenwk.security.enums.RoleEnum;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "sec_role")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Role {
 	/**
 	 * id (Pk)
@@ -29,9 +29,8 @@ public class Role {
 	/**
 	 * name
 	 */
-	@Enumerated(EnumType.STRING)
 	@Column(name = "secrolname")
-	private RoleEnum name;
+	private String name;
 
 	/**
 	 * description
@@ -58,6 +57,19 @@ public class Role {
 	 * modificationUser
 	 */
 	@Column(name = "secrolmodificationuser")
-	private LocalDateTime modificationUser;
+	private String modificationUser;
 
+	/**
+	 * <p>
+	 * Constructor
+	 * </p>
+	 * 
+	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+	 * @param name
+	 * @param description
+	 */
+	public Role(String name, String description) {
+		this.name = name;
+		this.description = description;
+	}
 }

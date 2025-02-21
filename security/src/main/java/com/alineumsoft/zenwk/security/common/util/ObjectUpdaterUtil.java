@@ -1,6 +1,9 @@
 package com.alineumsoft.zenwk.security.common.util;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 
@@ -13,36 +16,62 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class ObjectUpdaterUtil {
+	/**
+	 * Campos descartados
+	 */
+	private static final List<String> DISCARDED_FIELDS = Arrays.asList("creationUser", "modificationUser",
+			"userCreation", "modificationDate", "creationDate", "userModification", "id");
 
 	/**
 	 * <p>
-	 * <b>Util </b> Metodo para actualizar un objecto del mismo tipo descriminando
+	 * <b>Util</b> Método para actualizar un objeto del mismo tipo, discriminando
 	 * por datos nulos o iguales.
 	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param <T>
-	 * @param source
-	 * @param target
+	 *
+	 * @param <T>    Tipo del objeto.
+	 * @param source La entidad con los nuevos valores a actualizar.
+	 * @param target La entidad original recuperada de la BD, que será actualizada.
+	 * @return Retorna {@code true} si se actualizó algún dato (incluyendo
+	 *         asignaciones a {@code null}), {@code false} en caso contrario.
 	 */
-	static public <T> void updateDataEqualObject(T source, T target) {
+	static public <T> boolean updateDataEqualObject(T source, T target) {
+		boolean isPersist = false;
 		validateObjects(source, target);
 
 		// Campos de la clase del objeto
-		Field[] fields = source.getClass().getDeclaredFields();
+		Field[] fieldsSource = getFilteredFields(source.getClass());
 
-		for (Field field : fields) {
+		for (Field field : fieldsSource) {
 			field.setAccessible(true);
 
 			try {
-				Object value = field.get(source);
-				if (value != null) {
-					field.set(target, value);
+				Object valueTarget = field.get(target);
+				Object valueSource = field.get(source);
+				if (!Objects.equals(valueTarget, valueSource)) {
+					field.set(target, valueSource);
+					isPersist = true;
 				}
 			} catch (IllegalAccessException e) {
-				log.warn(e.getMessage());
+				log.warn(CommonMessageConstants.FORMAT_EXCEPTION, field.getName(), e.getMessage());
 			}
 		}
+		return isPersist;
+	}
+
+	/**
+	 * 
+	 * <p>
+	 * <b> Util. </b> Obtiene una lista de los atributos de la clase descartando
+	 * campos de auditoria y pk
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param clazz
+	 * @return
+	 */
+	public static Field[] getFilteredFields(Class<?> clazz) {
+		return Arrays.stream(clazz.getDeclaredFields()).filter(field -> !DISCARDED_FIELDS.contains(field.getName()))
+				.toArray(Field[]::new);
 	}
 
 	/**

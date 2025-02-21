@@ -1,5 +1,7 @@
 package com.alineumsoft.zenwk.security.auth.dto;
 
+import java.io.Serializable;
+
 import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +21,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthRequestDTO {
+public class AuthRequestDTO implements Serializable {
+	private static final long serialVersionUID = 1L;
 	/**
 	 * username
 	 */

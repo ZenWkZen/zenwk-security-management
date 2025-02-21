@@ -13,6 +13,6 @@ public enum PermissionOperationEnum {
 	CREATE,
 	UPDATE,
 	DELETE,
-	FIND_BY_ID,
-	FIND_ALL
+	GET,
+	LIST
 }

@@ -1,5 +1,7 @@
 package com.alineumsoft.zenwk.security.person.dto;
 
+import java.io.Serializable;
+
 import com.alineumsoft.zenwk.security.common.validation.EntityExists;
 import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 import com.alineumsoft.zenwk.security.person.entity.Person;
@@ -9,11 +11,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 
 /**
+ * <p>
+ * DTO para la gestion de personas
+ * </p>
+ * 
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
  * @project SecurityUser
  * @class PersonDTO
  */
-public class CreatePersonDTO extends PersonDTO {
+public class CreatePersonDTO extends PersonDTO implements Serializable {
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Id del usuario asociado.
 	 */
@@ -22,7 +29,6 @@ public class CreatePersonDTO extends PersonDTO {
 	@EntityExists(service = UserService.class, message = DtoValidationKeys.PERSON_ID_USER_NOT_FOUND)
 	private Long idUser;
 
-	
 	/**
 	 * <p>
 	 * <b> Constructor </b>

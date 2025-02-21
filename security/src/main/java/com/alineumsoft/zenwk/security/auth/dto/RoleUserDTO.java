@@ -1,5 +1,7 @@
 package com.alineumsoft.zenwk.security.auth.dto;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
@@ -18,7 +20,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleUserDTO {
+public class RoleUserDTO  implements Serializable{
+	private static final long serialVersionUID = 1L;
 	/**
 	 * idRole
 	 */

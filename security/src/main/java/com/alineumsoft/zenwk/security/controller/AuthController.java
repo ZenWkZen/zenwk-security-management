@@ -19,6 +19,7 @@ import com.alineumsoft.zenwk.security.auth.dto.AuthResponseDTO;
 import com.alineumsoft.zenwk.security.auth.dto.LogoutOutDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 /**
  * <p>
@@ -31,24 +32,13 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@Validated
 public class AuthController {
 	/**
 	 * Servicio para auth
 	 */
 	private final AuthService authService;
-
-	/**
-	 * 
-	 * <p>
-	 * <b>Constructor</b>
-	 * </p>
-	 * 
-	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
-	 * @param authService
-	 */
-	public AuthController(AuthService authService) {
-		this.authService = authService;
-	}
 
 	/**
 	 * 

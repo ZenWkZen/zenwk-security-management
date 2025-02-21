@@ -9,7 +9,7 @@ package com.alineumsoft.zenwk.security.common.constants;
  * @project security-zenwk
  * @class RegexConstants
  */
-public class RegexConstants {
+public final class RegexConstants {
 	// Letras, espacios, longitud 1-50.
 	public static final String NAME = "^[A-Za-záéíóúÁÉÍÓÚñÑ]{1,30}$";
 	// Formato de email.
@@ -32,5 +32,12 @@ public class RegexConstants {
 	public static final String POSTAL_CODE = "^[0-9]{5}(-[0-9]{4})?$";
 	// URL basica.
 	public static final String URL = "^(https?://)?([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$";
-
+	// Formato nombre del rol.
+	public static final String NAME_ROLE_PERMISSION = "^[A-Z]+(_[A-Z]+)*$";
+	// Valores permitidos para el campo operación en la entidad permisos.
+	public static final String OPERATION_PERMISSION = "^(CREATE|UPDATE|DELETE|GET|LIST)$";
+	// Expresión regular para validar los endpoints en el sistema.
+	public static final String RESOURCE_PERMISSION = "^\\/api\\/[a-z]+(\\/\\{?[a-zA-Z0-9_-]*\\}?)*$";
+	// Métodos http permitidos.
+	public static final String RESOURCE_METHOD = "^(GET|POST|PUT|DELETE)$";
 }

@@ -25,6 +25,7 @@ import com.alineumsoft.zenwk.security.person.service.PersonService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
@@ -32,23 +33,13 @@ import jakarta.servlet.http.HttpServletRequest;
  * @class PersonController
  */
 @RestController
-@RequestMapping("/api/person")
+@RequestMapping("/api/persons")
+@RequiredArgsConstructor
 public class PersonController {
 	/**
 	 * Servicio de controlador
 	 */
 	private final PersonService personService;
-	/**
-	 * <p>
-	 * <b> Constructor </b>
-	 * </p>
-	 * 
-	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
-	 * @param personService
-	 */
-	public PersonController(PersonService personService) {
-		this.personService = personService;
-	}
 
 	/**
 	 * <p>
@@ -67,9 +58,8 @@ public class PersonController {
 	@PostMapping
 	public ResponseEntity<Void> createPerson(@Validated @RequestBody CreatePersonDTO dto, HttpServletRequest request,
 			UriComponentsBuilder uriCB, @AuthenticationPrincipal UserDetails userDetails) {
-	
 		Long idPerson = personService.createPerson(dto, request, userDetails);
-		URI location = uriCB.path(HttpMethodResourceEnum.PERSON_FIND_BY_ID.getResource()).buildAndExpand(idPerson)
+		URI location = uriCB.path(HttpMethodResourceEnum.PERSON_GET.getResource()).buildAndExpand(idPerson)
 				.toUri();
 		return ResponseEntity.created(location).build();
 	}
@@ -82,16 +72,15 @@ public class PersonController {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param idUser
-	 * @param inDTO
+	 * @param dto
 	 * @param request
 	 * @param userDetails
 	 * @return
 	 */
 	@PutMapping("/{idPerson}")
-	public ResponseEntity<Void> updatePerson(@PathVariable Long idPerson, @Validated @RequestBody PersonDTO inDTO,
+	public ResponseEntity<Void> updatePerson(@PathVariable Long idPerson, @Validated @RequestBody PersonDTO dto,
 			HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-	
-		personService.updatePerson(idPerson, inDTO, request, userDetails);
+		personService.updatePerson(idPerson, dto, request, userDetails);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -110,7 +99,7 @@ public class PersonController {
 	@DeleteMapping("/{idPerson}")
 	public ResponseEntity<Void> deletePerson(@PathVariable Long idPerson, HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails) {
-	
+
 		personService.deletePerson(idPerson, request, userDetails);
 		return ResponseEntity.noContent().build();
 	}
@@ -130,7 +119,6 @@ public class PersonController {
 	@GetMapping("/{idPerson}")
 	public ResponseEntity<CreatePersonDTO> findById(@PathVariable Long idPerson, HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails) {
-	
 		return ResponseEntity.ok(personService.findByIdPerson(idPerson, request, userDetails));
 	}
 
@@ -147,10 +135,9 @@ public class PersonController {
 	 * @return
 	 */
 	@GetMapping
-	public ResponseEntity<PagePersonDTO> findAll(HttpServletRequest request,
+	public ResponseEntity<PagePersonDTO> getAllPersons(HttpServletRequest request,
 			@AuthenticationPrincipal UserDetails userDetails, Pageable pegeable) {
-	
-		return ResponseEntity.ok(personService.findAll(pegeable, request, userDetails));
+		return ResponseEntity.ok(personService.getAllPersons(pegeable, request, userDetails));
 	}
 
 }
