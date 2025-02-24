@@ -1,0 +1,48 @@
+name: zenwk-stack
+
+services:
+  security-zenwk:
+    build:
+      context: ../../../.. # Apunta al directorio raiz del proyecto
+      dockerfile: src/main/resources/docker/Dockerfile
+    container_name: security-zenwk
+    image: security-zenwk
+    ports:
+      - "8089:8089"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zenwk
+      SPRING_DATASOURCE_USERNAME: calegria
+      SPRING_DATASOURCE_PASSWORD: calegria
+      JAVA_OPTS: "--add-opens java.base/jdk.internal.platform=ALL-UNNAMED"
+    networks:
+      - zenwk-net
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-zenwk
+    environment:
+      POSTGRES_DB: zenwk
+      POSTGRES_USER: calegria
+      POSTGRES_PASSWORD: calegria
+    ports:
+      - "5432:5432"
+    networks:
+      - zenwk-net
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "calegria", "-d", "zenwk"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  zenwk-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
