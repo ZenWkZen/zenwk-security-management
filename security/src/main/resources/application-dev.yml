@@ -1,0 +1,17 @@
+server:
+  port: 8089
+
+app:
+  datasource:
+    hikari:
+      jdbc-url: jdbc:postgresql://postgres:5432/zenwk
+      username: calegria
+      password: calegria
+logging:
+  level:
+    root: INFO
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:U3VwM1I1Y1IzdFA0czVXMHJEIFwU3VwM1I1Y1IzdFA0czVXMHJEIFw=}
+    

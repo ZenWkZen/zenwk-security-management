@@ -13,9 +13,13 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zenwk
-      SPRING_DATASOURCE_USERNAME: calegria
-      SPRING_DATASOURCE_PASSWORD: calegria
+      # A pesar de que en application.properties están las variables se omiten cuando se indica la variable de entorno SPRING_PROFILES_ACTIV=
+      SPRING_PROFILES_ACTIVE: dev
+      # Estas variables de entorno no son necearias si los perfiles esta configurados correctamentE
+      #DB_URL: jdbc:postgresql://postgres:5432/zenwk
+      #DB_USER: calegria
+      #DB_PASSWORD: calegria
+      #JWT_SECRET: U3VwM1I1Y1IzdFA0czVXMHJEIFw=
       JAVA_OPTS: "--add-opens java.base/jdk.internal.platform=ALL-UNNAMED"
     networks:
       - zenwk-net

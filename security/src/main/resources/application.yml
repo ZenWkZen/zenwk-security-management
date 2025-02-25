@@ -1,6 +1,6 @@
 # Niveles de log
 server:
-  port: 8089
+  port: ${SEVER_PORT:8088}
 logging:
   level:
     org.springframework.security: INFO #DEBUG
@@ -45,7 +45,7 @@ spring:
   security:
     user:
       name: user
-      password: 12345
+      password: Userñ193@
 # Congiguracion aplicacion personalizada
 app:
 # Internacionalizacion
@@ -54,9 +54,9 @@ app:
 # Data source
   datasource:
     hikari:
-      jdbc-url: jdbc:postgresql://postgres:5432/zenwk
-      username: calegria
-      password: calegria
+      jdbc-url: ${DB_URL:jdbc:postgresql://localhost:5432/zenwk}
+      username: ${DB_USER:calegria}
+      password: ${DB_PASSWORD:calegria}
       driver-class-name: org.postgresql.Driver
       maximum-pool-size: 10
       minimum-idle: 5
@@ -86,9 +86,9 @@ security:
   # Configuración seguridad jwt
   jwt:
     # Clave secreta para la generación de tokens JWT
-    secret: U3VwM1I1Y1IzdFA0czVXMHJEIFwU3VwM1I1Y1IzdFA0czVXMHJEIFw=
+    secret: ${JWT_SECRET:U3VwM1I1Y1IzdFA0czVXMHJEIFwU3VwM1I1Y1IzdFA0czVXMHJEIFw=}
     # Tiempo en milisegundos que dura la validez del token JWT (24 horas)
-    expiration-time: 86400000
+    expiration-time: ${JWT_EXPIRATION:86400000}
     # Prefijo del token JWT 
     token-prefix: Bearer
     # Nombre del encabezado HTTP que contiene el token JWT
