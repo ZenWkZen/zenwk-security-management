@@ -43,6 +43,14 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5' 
+	// Spring Boot Starter AMQP (RabbitMQ)
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	// Spring Boot Starter Mail
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	// Jackson serialización
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	// Para plantillas HTML
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' 
 }
 
 tasks.named('test') {

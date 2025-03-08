@@ -1,6 +1,24 @@
 name: zenwk-stack
 
 services:
+  # Servicio para rabbit mq
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    container_name: rabbitmq-zenkw
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5    
+    networks:
+      - zenwk-net
+  # Servicio para API del módulo de seguridad
   security-zenwk:
     build:
       context: ../../../.. # Apunta al directorio raiz del proyecto
@@ -9,8 +27,11 @@ services:
     image: security-zenwk
     ports:
       - "8089:8089"
+      - "5005:5005"
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     environment:
       # A pesar de que en application.properties están las variables se omiten cuando se indica la variable de entorno SPRING_PROFILES_ACTIV=
@@ -20,10 +41,10 @@ services:
       #DB_USER: calegria
       #DB_PASSWORD: calegria
       #JWT_SECRET: U3VwM1I1Y1IzdFA0czVXMHJEIFw=
-      JAVA_OPTS: "--add-opens java.base/jdk.internal.platform=ALL-UNNAMED"
+      #JAVA_OPTS: "--add-opens java.base/jdk.internal.platform=ALL-UNNAMED"
     networks:
       - zenwk-net
-
+# Servicio para la base de datos
   postgres:
     image: postgres:15
     container_name: postgres-zenwk

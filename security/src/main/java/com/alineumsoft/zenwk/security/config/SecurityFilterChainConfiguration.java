@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
@@ -98,7 +99,10 @@ public class SecurityFilterChainConfiguration {
 		http.authorizeHttpRequests(request -> {
 			request.requestMatchers(HttpMethodResourceEnum.USER_CREATE.getMethod(),
 					HttpMethodResourceEnum.USER_CREATE.getResource()).permitAll()
-					.requestMatchers(HttpMethodResourceEnum.AUTH_LOGIN.getResource()).permitAll();
+					.requestMatchers(HttpMethodResourceEnum.AUTH_LOGIN.getResource()).permitAll()
+					.requestMatchers(HttpMethodResourceEnum.VERIFICATION_TOKEN.getMethod(),
+							HttpMethodResourceEnum.VERIFICATION_TOKEN.getResource())
+					.permitAll();
 			// Se agregan los filtros restantes
 			addAuthorizationForOperation(request, maRolPermissions);
 			request.anyRequest().authenticated();

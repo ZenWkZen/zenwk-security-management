@@ -50,14 +50,17 @@ public enum SecurityExceptionEnum {
 	TECH_ROLE_NOT_DELETE("TECH_SEC_001","functional.exception.rol.nodelete"),
 	FUNC_ROLE_ASSIGNMENT_PERMISSION_EXISTS("FUNC_SEC_016","functional.exception.rol.assignment.exists"),
 	FUNC_ROLE_ASSIGNMENT_PERMISSION_NOT_EXISTS("FUNC_SEC_017","functional.exception.rol.assignment.notexists"),
-
-	
 	/**
 	 * Permission
 	 */
 	FUNC_PERMISSION_EXIST("FUNC_SEC_014", "functional.permission.exist"),
 	FUNC_PERMISSION_NOT_EXISTS("FUNC_SEC_015","functional.permission.noexists"),
-	TECH_PERMISSION_NOT_DELETE("TECH_SEC_002","functional.permission.notdelete");
+	TECH_PERMISSION_NOT_DELETE("TECH_SEC_002","functional.permission.notdelete"),
+	/**
+	 * Verificación 
+	 */
+	FUNC_VERIFICATION_TOKEN_EXPIRATION("FUNC_SEC_0116","functional.verification.token.expiration"),
+	FUNC_VERIFICATION_TOKEN_NOT_FOUND("FUNC_SEC_0117","functional.verification.token.notfound");
 	/**
 	 * code
 	 */

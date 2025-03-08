@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>C\u00F3digo de Verificaci\u00F3n</title>
+</head>
+<body>
+    <h2>\u00A1Hola, <span th:text="${FILED_USERNAME}">Usuario</span>!</h2>
+    <p>Gracias por registrarte en <strong th:text="${FIELD_NAME_CORPORATION}"></strong>.</p>
+    <p>Tu c\u00F3digo de verificaci\u00F3n es:</p>
+    <h1 style="color: #007bff;" th:text="${FIELD_CODE_TOKEN}"></h1>
+    <p>Por favor, ingresa este c\u00F3digo en la p\u00E1gina de registro para continuar con el proceso.</p>
+    <p>Si no solicitaste este c\u00F3digo, ignora este mensaje.</p>
+    <p>Atentamente,</p>
+    <p><strong th:text="${FIELD_NAME_CORPORATION}"></strong></p>
+</body>
+</html>

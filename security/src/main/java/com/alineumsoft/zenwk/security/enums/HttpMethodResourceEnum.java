@@ -52,7 +52,12 @@ public enum HttpMethodResourceEnum {
 	 * Auth
 	 */
 	AUTH_LOGIN(HttpMethod.POST, "/api/auth/login"),
-	AUTH_LOGOUT(HttpMethod.DELETE, "/api/auth/logout");
+	AUTH_LOGOUT(HttpMethod.DELETE, "/api/auth/logout"),
+	/**
+	 * Verification
+	 */
+	VERIFICATION_TOKEN(HttpMethod.POST, "/api/verification/**");
+
 	/**
 	 * Metodo http
 	 */

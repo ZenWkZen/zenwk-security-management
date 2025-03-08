@@ -46,9 +46,28 @@ spring:
     user:
       name: user
       password: Userñ193@
+  # Configuración rabbitmq
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+  # Configuración para el envio del correo
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: alineumsoft@gmail.com
+    password: bldaupihvowyzhek
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 # Congiguracion aplicacion personalizada
 app:
-# Internacionalizacion
+# Internacionalizacionspring.mail.properties.mail.smtp.auth=true
   default:
     locale: es
 # Data source

@@ -28,6 +28,28 @@ SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
+
+--
+-- Name: sec_token; Type: TABLE; Schema: public; Owner: postgres
+--
+create table public.sec_token
+(
+    sectokid            serial   not null primary key,
+    sectokcode          varchar(10)   not null unique,
+    sectokemail         varchar(50) NOT NULL UNIQUE,
+    sectokcreationdate  timestamp NOT NULL  default CURRENT_TIMESTAMP,
+    sectoexpirationdate timestamp NOT NULL,
+    sectokcreateuser    varchar(50)
+);
+alter table public.sec_token  owner to postgres;
+
+comment on table public.sec_token is 'Tabla que almacena los tokens de verficación del usuario.';
+comment on column public.sec_token.sectokid is 'Identificador único.';
+comment on column public.sec_token.sectokcode is 'Nombre de código de token único.';
+comment on column public.sec_token.sectokemail is 'Email del usuario.';
+comment on column public.sec_token.sectokcreationdate is 'Fecha y hora de creación del registro.';
+comment on column public.sec_token.sectoexpirationdate is 'Fecha y hora de expiración de token.';
+comment on column public.sec_token.sectokcreateuser is 'Usuario que creó el registro.';
 --
 -- Name: log_sec; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -45,7 +67,7 @@ CREATE TABLE public.log_sec (
     logsecuseresponse text,
     logsecuseerrormessage text,
     logsecusecreationdate timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    logsecuseusercreation character varying(30)
+    logsecuseusercreation character varying(50)
 );
 
 

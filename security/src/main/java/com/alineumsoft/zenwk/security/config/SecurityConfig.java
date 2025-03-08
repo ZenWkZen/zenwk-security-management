@@ -71,7 +71,5 @@ public class SecurityConfig {
 		authProvider.setPasswordEncoder(password);
 		return authProvider;
 	}
-	
-	
 
 }
