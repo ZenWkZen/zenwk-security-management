@@ -71,14 +71,20 @@ public class VerificationService extends ApiRestSecurityHelper {
 		String username = userDetails == null ? dto.getEmail() : userDetails.getUsername();
 		LogSecurity logSecurity = initializeLog(request, username, getJson(dto), notBody,
 				SecurityActionEnum.VERIFICATION_SEND_TOKEN.getCode());
+		String email = dto.getEmail();
 		try {
-
-			// Veridicar si el usuario ya tiene tokens si es el caso elimnarlos
 			String code = CodeGenerator.generateCode(Constants.TOKEN_CODE_ZISE);
-			Token token = new Token(code, dto.getEmail(), username);
+			Token token = tokenRepository.findByEmail(email).orElse(null);
+			
+			if (token == null) {
+				token = new Token(code, dto.getEmail(), username);
+			} else {
+				token.setCode(code);
+			}
+			
 			token.setExpirationDate(LocalDateTime.now().plusMinutes(Constants.TOKEN_CODE_MINUTES));
 			tokenRepository.save(token);
-			EmailRequestDTO emailDTO = generateEmailToToken(dto.getEmail(), code, username);
+			EmailRequestDTO emailDTO = generateEmailToToken(email, code, username);
 			rabbitTemplate.convertAndSend(Constants.RABBITH_EMAIL_QUEUE, emailDTO);
 			saveSuccessLog(HttpStatus.OK.value(), logSecurity, logSecurityUserRespository);
 		} catch (RuntimeException e) {
@@ -96,20 +102,20 @@ public class VerificationService extends ApiRestSecurityHelper {
 	 * 
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @param email
-	 * @param token
+	 * @param code
 	 * @param username
 	 * @return
 	 */
-	private EmailRequestDTO generateEmailToToken(String email, String token, String username) {
+	private EmailRequestDTO generateEmailToToken(String email, String code, String username) {
 		EmailRequestDTO dto = new EmailRequestDTO();
 		Map<String, Object> metadata = new HashMap<>();
 		// Metadatos para la plantilla.
-		metadata.put(Constants.TOKEN_TEMPLATE_EMAIL_NAME_CODE, token);
+		metadata.put(Constants.TOKEN_TEMPLATE_EMAIL_NAME_CODE, code);
 		metadata.put(Constants.TOKEN_TEMPLATE_EMAIL_NAME_USERNAME, username != null ? username : email);
 		metadata.put(Constants.TOKEN_EMPLATE_EMAIL_NAME_CORPORATION, Constants.ZENWK);
 		// Dto para enviar a cola de rabbithMq.
 		dto.setTo(email);
-		dto.setSubject(MessagesVerification.TOKEN_EMAIL_SUBJECT.getDescription());
+		dto.setSubject(MessagesVerification.TOKEN_EMAIL_SUBJECT.getMessage(code));
 		dto.setVariables(metadata);
 		dto.setTemplateName(Constants.TOKEN_EMAIL_TEMPLATE);
 		return dto;
@@ -138,9 +144,10 @@ public class VerificationService extends ApiRestSecurityHelper {
 							SecurityExceptionEnum.FUNC_VERIFICATION_TOKEN_NOT_FOUND.getCodeMessage()));
 			// Validacion expiracion del token.
 			if (token.getExpirationDate().isBefore(LocalDateTime.now())) {
+				// No se elimina por defecto ya esta deshabilitado.
 				throw new DateTimeException(SecurityExceptionEnum.FUNC_VERIFICATION_TOKEN_EXPIRATION.getCodeMessage());
 			}
-
+			tokenRepository.delete(token);
 			saveSuccessLog(HttpStatus.OK.value(), logSecurity, logSecurityUserRespository);
 			return true;
 		} catch (RuntimeException e) {

@@ -41,7 +41,7 @@ services:
       #DB_USER: calegria
       #DB_PASSWORD: calegria
       #JWT_SECRET: U3VwM1I1Y1IzdFA0czVXMHJEIFw=
-      #JAVA_OPTS: "--add-opens java.base/jdk.internal.platform=ALL-UNNAMED"
+      JAVA_OPTS: "--add-opens java.base/jdk.internal.platform=ALL-UNNAMED -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     networks:
       - zenwk-net
 # Servicio para la base de datos

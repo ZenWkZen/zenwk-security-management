@@ -1,5 +1,6 @@
 package com.alineumsoft.zenwk.security.verification.util;
 
+import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
 
 import lombok.Getter;
@@ -28,8 +29,25 @@ public enum MessagesVerification {
 	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
 	 * @return
 	 */
-	public String getDescription() {
-		return MessageSourceAccessorComponent.getMessage(messageKey);
+	public String getMessage() {
+		try {
+			return MessageSourceAccessorComponent.getMessage(messageKey);
+		} catch (Exception e) {
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeMessage(messageKey));
+		}
+
+	}
+
+	/**
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @return
+	 */
+	public String getMessage(String... params) {
+		try {
+			return MessageSourceAccessorComponent.getMessage(messageKey, params);
+		} catch (Exception e) {
+			throw new RuntimeException(CoreExceptionEnum.TECH_COMMON_MESSAGE_NOT_FOUND.getCodeMessage(messageKey));
+		}
 	}
 
 }

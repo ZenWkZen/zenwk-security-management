@@ -27,4 +27,17 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
 	 * @return
 	 */
 	public Optional<Token> findByEmailAndCode(String email, String code);
+
+	/**
+	 * 
+	 * <p>
+	 * <b> CU003_Gestionar token de verificación. </b> Buscar un token por email.
+	 * </p>
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+	 * @param email
+	 * @return
+	 */
+	public Optional<Token> findByEmail(String email);
+
 }
