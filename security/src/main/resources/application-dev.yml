@@ -1,5 +1,11 @@
 server:
-  port: 8089
+  port: 8089 
+  ssl:
+    enabled: true
+    key-store: classpath:myserver.keystore
+    key-store-password: 123456  # Contraseña del keystore
+    key-password: 123456       # Contraseña de la clave privada
+    key-alias: myserver
 
 app:
   datasource:

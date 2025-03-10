@@ -5,13 +5,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+/**
+ * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+ * @project security-zenwk
+ * @class SecurityApplication
+ */
 @SpringBootApplication
 @Configuration
 @EnableAsync
-public class SecurityUserApplication {
+public class SecurityApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SecurityUserApplication.class, args);
+		SpringApplication.run(SecurityApplication.class, args);
 	}
 
 }
