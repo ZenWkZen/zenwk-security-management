@@ -1,80 +1,33 @@
-# Niveles de log
+# Configuración de servidor (puerto):
 server:
-  port: ${SEVER_PORT:8088}
-logging:
-  level:
-    org.springframework.security: INFO #DEBUG
-    org.springframework.security.web.FilterChainProxy: INFO
-# Log de datasource-hikari
-    #com.zaxxer.hikari: INFO #DEBUG
-    #org.springframework.jdbc.datasource: INFO #DEBUG
-# Log de aplicacion
-    root: INFO  #TRACEINFO
-    com.alineumsoft: INFO
-  file:
-    name: logs/application.log
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 5
+  port: ${SEVER_PORT:8087}
 
-# Congiguracion general aplicacion
-# En ambiente de pruebas habilitar la propiedad profile.active: test
+# Configuración general de springboot: 
 spring:
-  #profiles:
-    #active: test
   application:
     name: security-zenwk
-  messages:
-    basename: i18n/
-    fallback-to-system-locale: false
-  jpa:
-    #hibernate.ddl-auto: "create-drop"
-    hibernate:
-      ddl-auto: none
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non-contextual-creation: true
-            dialect: org.hibernate.dialect.PostgreSQLDialect
-            format_sql: true
-            show_sql: true
-  security:
-    user:
-      name: user
-      password: Userñ193@
-  # Configuración rabbitmq
-  rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
-  # Configuración para el envio del correo
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: alineumsoft@gmail.com
-    password: bldaupihvowyzhek
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-# Congiguracion aplicacion personalizada
+  config:
+    import: ${SPRING_CONFIG_COMMON_APPLICATION:optional:configserver:http://localhost:8086}
+
+# Configuración de seguridad (autorización, autenticación, jwt):
+security:
+  # Deshablitar prod / hablitar autenticación perfil de pruebas
+  test-config:
+    config.enabled: test
+  jwt:
+    secret: ${JWT_SECRET:U3VwM1I1Y1IzdFA0czVXMHJEIFwU3VwM1I1Y1IzdFA0czVXMHJEIFw=}
+    # Tiempo en milisegundos que dura la validez del token JWT (24 horas)
+    expiration-time: ${JWT_EXPIRATION:86400000}
+    token-prefix: Bearer
+    header-string: Authorization
+    enabled: true 
+
+# Configuración app custom (data source, hikari - poool de conexiones):
 app:
-# Internacionalizacionspring.mail.properties.mail.smtp.auth=true
-  default:
-    locale: es
-# Data source
   datasource:
     hikari:
-      jdbc-url: ${DB_URL:jdbc:postgresql://localhost:5432/zenwk}
-      username: ${DB_USER:calegria}
+      jdbc-url: ${DB_JDBC_URL:jdbc:postgresql://localhost:5432/zenwk}
+      username: ${DB_USERNAME:calegria}
       password: ${DB_PASSWORD:calegria}
       driver-class-name: org.postgresql.Driver
       maximum-pool-size: 10
@@ -82,36 +35,3 @@ app:
       idle-timeout: 30000
       max-lifetime: 1800000
       connection-timeout: 30000
-# Actuator configuration
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, metrics, info, loggers
-  endpoint:
-    health:
-      show-details: never
-  health:
-    db:
-      enabled: true
-    diskspace:
-      enabled: true
-  metrics:
-    enabled: true
-# Deshablitar / hablitar autienciación perfil de pruebas
-security:
-  test-config:
-    config.enabled: test
-  # Configuración seguridad jwt
-  jwt:
-    # Clave secreta para la generación de tokens JWT
-    secret: ${JWT_SECRET:U3VwM1I1Y1IzdFA0czVXMHJEIFwU3VwM1I1Y1IzdFA0czVXMHJEIFw=}
-    # Tiempo en milisegundos que dura la validez del token JWT (24 horas)
-    expiration-time: ${JWT_EXPIRATION:86400000}
-    # Prefijo del token JWT 
-    token-prefix: Bearer
-    # Nombre del encabezado HTTP que contiene el token JWT
-    header-string: Authorization
-    # Activa el uso de tokens JWT para la seguridad 
-    enabled: true 
-

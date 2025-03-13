@@ -1,7 +1,5 @@
 package com.alineumsoft.zenwk.security.auth.Service;
 
-import com.alineumsoft.zenwk.security.auth.definitions.AuthConfig;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,10 +20,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.alineumsoft.zenwk.security.auth.dto.PagePermissionDTO;
+import com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.enums.PermissionOperationEnum;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
+import com.alineumsoft.zenwk.security.common.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.common.util.ObjectUpdaterUtil;
 import com.alineumsoft.zenwk.security.dto.PaginatorDTO;
 import com.alineumsoft.zenwk.security.dto.PermissionDTO;
@@ -35,7 +35,6 @@ import com.alineumsoft.zenwk.security.entity.RoleUser;
 import com.alineumsoft.zenwk.security.enums.RoleEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
-import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.person.repository.PermissionRepository;
 import com.alineumsoft.zenwk.security.person.repository.RolePermissionRepository;
 import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
@@ -140,7 +139,7 @@ public class PermissionService extends ApiRestSecurityHelper {
 
 		if (namesRole.contains(RoleEnum.USER.name()) || namesRole.contains(RoleEnum.NEW_USER.name())) {
 			permissionResources = permissionResources.stream().map(url -> {
-				if (url.contains(AuthConfig.ID)) {
+				if (url.contains(AuthConfigConstants.ID)) {
 					url = generatedUrlFromId(user, url);
 				}
 				return url;
@@ -163,12 +162,12 @@ public class PermissionService extends ApiRestSecurityHelper {
 	 */
 	private String generatedUrlFromId(User user, String url) {
 		String updateUrl = null;
-		if (url.contains(AuthConfig.URL_USER) && user.getId() != null) {
-			updateUrl = url.replace(AuthConfig.ID, user.getId().toString());
+		if (url.contains(AuthConfigConstants.URL_USER) && user.getId() != null) {
+			updateUrl = url.replace(AuthConfigConstants.ID, user.getId().toString());
 		}
-		if (url.contains(AuthConfig.URL_PERSON) && url.contains(AuthConfig.ID) && user.getPerson() != null
+		if (url.contains(AuthConfigConstants.URL_PERSON) && url.contains(AuthConfigConstants.ID) && user.getPerson() != null
 				&& user.getPerson().getId() != null) {
-			updateUrl = url.replace(AuthConfig.ID, user.getPerson().getId().toString());
+			updateUrl = url.replace(AuthConfigConstants.ID, user.getPerson().getId().toString());
 		}
 		return updateUrl;
 	}

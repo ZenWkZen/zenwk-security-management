@@ -1,6 +1,6 @@
 package com.alineumsoft.zenwk.security.auth.jwt;
 
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.WEB_DETAILS;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.WEB_DETAILS;
 
 import java.io.IOException;
 import java.util.List;

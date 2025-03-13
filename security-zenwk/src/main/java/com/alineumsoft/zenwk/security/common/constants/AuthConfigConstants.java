@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.auth.definitions;
+package com.alineumsoft.zenwk.security.common.constants;
 
 /**
  * <p>
@@ -9,7 +9,7 @@ package com.alineumsoft.zenwk.security.auth.definitions;
  * @project security-zenwk
  * @class AuthConfig
  */
-public final class AuthConfig {
+public final class AuthConfigConstants {
 	/**
 	 * class: JwtProvider
 	 */

@@ -33,7 +33,7 @@ public class Person {
 	@Column(name = "secperlastname")
 	private String lastName;
 
-	@Column(name = "secpermiddleLastname")
+	@Column(name = "secpermiddlelastname")
 	private String middleLastName;
 
 	@Column(name = "secperdateofbirth")

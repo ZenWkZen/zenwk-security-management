@@ -1,14 +1,14 @@
 package com.alineumsoft.zenwk.security.auth.jwt;
 
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.AUTHORIZATION_BEARER;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.HEADER_AUTHORIZATION;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.INDEX_TOKEN;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_EXPIRATION_TIME;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_ID_USER;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_ROLES;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_SECRET_KEY;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_URLS_ALLOWED_ROL_USER;
-import static com.alineumsoft.zenwk.security.auth.definitions.AuthConfig.JWT_USER_STATE;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.AUTHORIZATION_BEARER;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.HEADER_AUTHORIZATION;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.INDEX_TOKEN;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.JWT_EXPIRATION_TIME;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.JWT_ID_USER;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.JWT_ROLES;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.JWT_SECRET_KEY;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.JWT_URLS_ALLOWED_ROL_USER;
+import static com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants.JWT_USER_STATE;
 
 import java.io.IOException;
 import java.security.Key;
@@ -35,11 +35,11 @@ import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.common.exception.dto.ErrorResponseDTO;
 import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
+import com.alineumsoft.zenwk.security.common.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.common.util.LocalDateTimeUtil;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
 import com.alineumsoft.zenwk.security.enums.UserStateEnum;
-import com.alineumsoft.zenwk.security.helper.ApiRestSecurityHelper;
 import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
 
 import io.jsonwebtoken.Claims;

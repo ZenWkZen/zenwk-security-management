@@ -1,4 +1,4 @@
-package com.alineumsoft.zenwk.security.helper;
+package com.alineumsoft.zenwk.security.common.helper;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -7,11 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
-import com.alineumsoft.zenwk.security.auth.definitions.AuthConfig;
+import com.alineumsoft.zenwk.security.common.constants.AuthConfigConstants;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
-import com.alineumsoft.zenwk.security.common.helper.ApiRestHelper;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.enums.HttpMethodResourceEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
@@ -121,10 +120,10 @@ public class ApiRestSecurityHelper extends ApiRestHelper {
 	public String getSecurityActionCodeFromRequest(HttpServletRequest request) {
 		HttpMethod method = HttpMethod.valueOf(request.getMethod());
 		String uri = request.getRequestURI();
-		String param = Optional.ofNullable(request.getParameter(AuthConfig.ID)).orElse("");
+		String param = Optional.ofNullable(request.getParameter(AuthConfigConstants.ID)).orElse("");
 		for (HttpMethodResourceEnum resourceEnum : HttpMethodResourceEnum.values()) {
 			if (resourceEnum.getMethod().equals(method)
-					&& uri.matches(resourceEnum.getResource().replace(AuthConfig.ID, param))) {
+					&& uri.matches(resourceEnum.getResource().replace(AuthConfigConstants.ID, param))) {
 				String actionName = resourceEnum.name();
 				SecurityActionEnum securityActionEnum = SecurityActionEnum.valueOf(actionName);
 				return securityActionEnum.getCode();
