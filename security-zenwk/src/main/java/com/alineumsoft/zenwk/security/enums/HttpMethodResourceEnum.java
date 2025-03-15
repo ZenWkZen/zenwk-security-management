@@ -56,7 +56,11 @@ public enum HttpMethodResourceEnum {
 	/**
 	 * Verification
 	 */
-	VERIFICATION_TOKEN(HttpMethod.POST, "/api/verification/**");
+	VERIFICATION_TOKEN(HttpMethod.POST, "/api/verification/**"),
+	/**
+	 * actuator
+	 */
+	ACTUATOR(null, "/actuator/**");
 
 	/**
 	 * Metodo http

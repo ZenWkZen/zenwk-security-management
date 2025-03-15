@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
@@ -100,13 +99,13 @@ public class SecurityFilterChainConfiguration {
 			request.requestMatchers(HttpMethodResourceEnum.USER_CREATE.getMethod(),
 					HttpMethodResourceEnum.USER_CREATE.getResource()).permitAll()
 					.requestMatchers(HttpMethodResourceEnum.AUTH_LOGIN.getResource()).permitAll()
-					.requestMatchers(HttpMethodResourceEnum.VERIFICATION_TOKEN.getMethod(),
-							HttpMethodResourceEnum.VERIFICATION_TOKEN.getResource())
-					.permitAll();
+					.requestMatchers(HttpMethodResourceEnum.VERIFICATION_TOKEN.getResource()).permitAll()
+					.requestMatchers(HttpMethodResourceEnum.ACTUATOR.getResource()).permitAll();
 			// Se agregan los filtros restantes
 			addAuthorizationForOperation(request, maRolPermissions);
 			request.anyRequest().authenticated();
-		}).csrf(csrf -> csrf.disable()).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+		}).csrf(csrf -> csrf
+				.disable()).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider)
 				// Configuración con el handler personalizado

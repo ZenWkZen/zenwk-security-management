@@ -1,15 +1,12 @@
-# Configuración de servidor (puerto):
 server:
   port: ${SEVER_PORT:8087}
 
-# Configuración general de springboot: 
 spring:
   application:
     name: security-zenwk
   config:
     import: ${SPRING_CONFIG_COMMON_APPLICATION:optional:configserver:http://localhost:8086}
 
-# Configuración de seguridad (autorización, autenticación, jwt):
 security:
   # Deshablitar prod / hablitar autenticación perfil de pruebas
   test-config:
@@ -22,7 +19,6 @@ security:
     header-string: Authorization
     enabled: true 
 
-# Configuración app custom (data source, hikari - poool de conexiones):
 app:
   datasource:
     hikari:
