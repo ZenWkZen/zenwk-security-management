@@ -33,4 +33,5 @@ public final class AuthConfigConstants {
 	 */
 	public static final String PERMISSION = "permissions";
 	public static final String WEB_DETAILS = "webDetails";
+	
 }

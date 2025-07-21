@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +18,9 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.alineumsoft.zenwk.security.auth.Service.PermissionService;
 import com.alineumsoft.zenwk.security.auth.jwt.JwtAuthenticationFilter;
@@ -40,6 +45,8 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @Slf4j
 public class SecurityFilterChainConfiguration {
+	public static final String CORS_AUTH_ALLOWED_ORIGINS = "${cors.allowed-origins}";
+	
 	/**
 	 * Componenete para jwt
 	 */
@@ -56,6 +63,31 @@ public class SecurityFilterChainConfiguration {
 	 * Manejador para los errores de acceso denegado
 	 */
 	private final AccessDeniedHandler customAccessDeniedHandler;
+	/**
+	 * Configuracion CORS
+	 */
+	@Value(CORS_AUTH_ALLOWED_ORIGINS)
+	private String allowedOrigins;
+	
+	
+	/**
+	 * <p> Configuración CORS para el consumo dese del front </p> 
+	 * 
+	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a> 
+	 * @return
+	 */
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+	    CorsConfiguration configuration = new CorsConfiguration();
+	    configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+	    configuration.setAllowedMethods(List.of("POST","GET", "PUT", "DELETE", "OPTIONS"));
+	    configuration.setAllowedHeaders(List.of("Authorization", "content-type"));
+	    configuration.setAllowCredentials(true);
+
+	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	    source.registerCorsConfiguration("/**", configuration);
+	    return source;
+	}
 
 	/**
 	 * <p>
@@ -94,9 +126,10 @@ public class SecurityFilterChainConfiguration {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		final Map<PermissionOperationEnum, List<PermissionDTO>> maRolPermissions = permService.getOperationPermission();
-
-		http.authorizeHttpRequests(request -> {
-			request.requestMatchers(HttpMethodResourceEnum.USER_CREATE.getMethod(),
+		// Usa la configuraciópn por defecto: @Bean corsConfigurationSource()
+		http.cors(Customizer.withDefaults())
+			.authorizeHttpRequests(request -> {
+				request.requestMatchers(HttpMethodResourceEnum.USER_CREATE.getMethod(),
 					HttpMethodResourceEnum.USER_CREATE.getResource()).permitAll()
 					.requestMatchers(HttpMethodResourceEnum.AUTH_LOGIN.getResource()).permitAll()
 					.requestMatchers(HttpMethodResourceEnum.VERIFICATION_TOKEN.getResource()).permitAll()
@@ -104,7 +137,7 @@ public class SecurityFilterChainConfiguration {
 			// Se agregan los filtros restantes
 			addAuthorizationForOperation(request, maRolPermissions);
 			request.anyRequest().authenticated();
-		}).csrf(csrf -> csrf
+			}).csrf(csrf -> csrf
 				.disable()).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider)

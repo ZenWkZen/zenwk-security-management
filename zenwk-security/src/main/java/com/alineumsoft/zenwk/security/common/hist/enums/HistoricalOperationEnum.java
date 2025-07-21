@@ -10,5 +10,5 @@ package com.alineumsoft.zenwk.security.common.hist.enums;
  * @class HistoricalEnum
  */
 public enum HistoricalOperationEnum {
-	INSERT, UPDATE, DELETE;
+  INSERT, UPDATE, DELETE;
 }

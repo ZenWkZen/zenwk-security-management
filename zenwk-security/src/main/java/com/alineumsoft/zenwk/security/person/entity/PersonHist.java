@@ -1,9 +1,7 @@
 package com.alineumsoft.zenwk.security.person.entity;
 
 import java.time.LocalDateTime;
-
 import com.alineumsoft.zenwk.security.common.hist.enums.HistoricalOperationEnum;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,51 +18,51 @@ import lombok.NoArgsConstructor;
 @Table(name = "sec_person_hist")
 @NoArgsConstructor
 public class PersonHist {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "hsecperid")
-	private Long id;
-	
-	@Column(name = "hsecperidperson")
-	private Long idPerson;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "hsecperid")
+  private Long id;
 
-	@Column(name = "hsecperfirstname")
-	private String firstName;
+  @Column(name = "hsecperidperson")
+  private Long idPerson;
 
-	@Column(name = "hsecpermiddlename")
-	private String middleName;
+  @Column(name = "hsecperfirstname")
+  private String firstName;
 
-	@Column(name = "hsecperlastname")
-	private String lastName;
+  @Column(name = "hsecpermiddlename")
+  private String middleName;
 
-	@Column(name = "hsecpermiddleLastname")
-	private String middleLastName;
+  @Column(name = "hsecperlastname")
+  private String lastName;
 
-	@Column(name = "hsecperdateofbirth")
-	private LocalDateTime dateOfBirth;
+  @Column(name = "hsecpermiddleLastname")
+  private String middleLastName;
 
-	@Column(name = "hsecperaddress")
-	private String address;
+  @Column(name = "hsecperdateofbirth")
+  private LocalDateTime dateOfBirth;
 
-	@Column(name = "hsecpercreationdate")
-	private LocalDateTime creationDate;
+  @Column(name = "hsecperaddress")
+  private String address;
 
-	@Column(name = "hsecpermodificationdate")
-	private LocalDateTime modificationDate;
+  @Column(name = "hsecpercreationdate")
+  private LocalDateTime creationDate;
 
-	@Column(name = "hsecperusercreation")
-	private String userCreation;
+  @Column(name = "hsecpermodificationdate")
+  private LocalDateTime modificationDate;
 
-	@Column(name = "hsecperusermodification")
-	private String userModification;
+  @Column(name = "hsecperusercreation")
+  private String userCreation;
 
-	// Campo de auditoria propio de la entidad historica
-	@Column(name = "hsecperhistcreationdate")
-	private LocalDateTime histCreationDate;
+  @Column(name = "hsecperusermodification")
+  private String userModification;
 
-	// Campo de auditoria propio de la entidad historica
-	@Column(name = "hsecperoperation")
-	@Enumerated(EnumType.STRING)
-	private HistoricalOperationEnum operation;
+  // Campo de auditoria propio de la entidad historica
+  @Column(name = "hsecperhistcreationdate")
+  private LocalDateTime histCreationDate;
+
+  // Campo de auditoria propio de la entidad historica
+  @Column(name = "hsecperoperation")
+  @Enumerated(EnumType.STRING)
+  private HistoricalOperationEnum operation;
 
 }

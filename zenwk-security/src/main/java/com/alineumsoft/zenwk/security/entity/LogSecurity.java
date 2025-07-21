@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.entity;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,45 +16,45 @@ import lombok.Data;
 @Entity(name = "log_sec")
 @Data
 public class LogSecurity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "logsecuseid")
-	private Long idLogUser;
-	
-	@Column(name="logsecusemethod")
-	private String method;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "logsecuseid")
+  private Long idLogUser;
 
-	@Column(name = "logsecusestatuscode")
-	private Integer statusCode;
+  @Column(name = "logsecusemethod")
+  private String method;
 
-	@Column(name = "logsecuseurl")
-	private String url;
+  @Column(name = "logsecusestatuscode")
+  private Integer statusCode;
 
-	@Column(name = "logsecuserequest")
-	private String request;
+  @Column(name = "logsecuseurl")
+  private String url;
 
-	@Column(name = "logsecuseresponse")
-	private String response;
+  @Column(name = "logsecuserequest")
+  private String request;
 
-	@Column(columnDefinition = "TEXT", name = "logsecuseerrormessage")
-	private String errorMessage;
+  @Column(name = "logsecuseresponse")
+  private String response;
 
-	@Column(name = "logsecusecreationdate")
-	private LocalDateTime creationDate;
+  @Column(columnDefinition = "TEXT", name = "logsecuseerrormessage")
+  private String errorMessage;
 
-	@Column(name = "logsecuseusercreation")
-	private String userCreation;
-	
+  @Column(name = "logsecusecreationdate")
+  private LocalDateTime creationDate;
 
-    @Column(name = "logsecuseipaddress")
-    private String ipAddress;
+  @Column(name = "logsecuseusercreation")
+  private String userCreation;
 
-    @Column(name = "logsecuseuseragent")
-    private String userAgent;
 
-    @Column(name = "logsecuseexecutiontime")
-    private String executionTime;
+  @Column(name = "logsecuseipaddress")
+  private String ipAddress;
 
-    @Column(name = "logsecuseservicename")
-    private String serviceName;
+  @Column(name = "logsecuseuseragent")
+  private String userAgent;
+
+  @Column(name = "logsecuseexecutiontime")
+  private String executionTime;
+
+  @Column(name = "logsecuseservicename")
+  private String serviceName;
 }

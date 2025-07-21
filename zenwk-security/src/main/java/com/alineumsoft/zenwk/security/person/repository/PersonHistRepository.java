@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.person.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.alineumsoft.zenwk.security.person.entity.PersonHist;
 
 /**

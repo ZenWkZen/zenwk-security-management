@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.person.entity;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,38 +18,38 @@ import lombok.Data;
 @Table(name = "sec_person")
 @Data
 public class Person {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "secperid")
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "secperid")
+  private Long id;
 
-	@Column(name = "secperfirstname")
-	private String firstName;
+  @Column(name = "secperfirstname")
+  private String firstName;
 
-	@Column(name = "secpermiddlename")
-	private String middleName;
+  @Column(name = "secpermiddlename")
+  private String middleName;
 
-	@Column(name = "secperlastname")
-	private String lastName;
+  @Column(name = "secperlastname")
+  private String lastName;
 
-	@Column(name = "secpermiddlelastname")
-	private String middleLastName;
+  @Column(name = "secpermiddlelastname")
+  private String middleLastName;
 
-	@Column(name = "secperdateofbirth")
-	private LocalDateTime dateOfBirth;
+  @Column(name = "secperdateofbirth")
+  private LocalDateTime dateOfBirth;
 
-	@Column(name = "secperaddress")
-	private String address;
+  @Column(name = "secperaddress")
+  private String address;
 
-	@Column(name = "secpercreationdate")
-	private LocalDateTime creationDate;
+  @Column(name = "secpercreationdate")
+  private LocalDateTime creationDate;
 
-	@Column(name = "secpermodificationdate")
-	private LocalDateTime modificationDate;
+  @Column(name = "secpermodificationdate")
+  private LocalDateTime modificationDate;
 
-	@Column(name = "secperusercreation")
-	private String userCreation;
+  @Column(name = "secperusercreation")
+  private String userCreation;
 
-	@Column(name = "secperusermodification")
-	private String userModification;
+  @Column(name = "secperusermodification")
+  private String userModification;
 }

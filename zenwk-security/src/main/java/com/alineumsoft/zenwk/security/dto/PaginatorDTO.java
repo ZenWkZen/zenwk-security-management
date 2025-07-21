@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.dto;
 
 import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,20 +18,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class PaginatorDTO implements Serializable {
-	private static final long serialVersionUID = 1L;
-	/**
-	 * totalElements
-	 */
+  private static final long serialVersionUID = 1L;
+  /**
+   * totalElements
+   */
 
-	private long totalElements;
-	/**
-	 * totalPages
-	 */
+  private long totalElements;
+  /**
+   * totalPages
+   */
 
-	private int totalPages;
-	/**
-	 * currentPage
-	 */
+  private int totalPages;
+  /**
+   * currentPage
+   */
 
-	private int currentPage;
+  private int currentPage;
 }

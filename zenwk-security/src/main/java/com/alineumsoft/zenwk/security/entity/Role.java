@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.entity;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,58 +17,58 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Role {
-	/**
-	 * id (Pk)
-	 */
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "secrolidrole")
-	private Long id;
+  /**
+   * id (Pk)
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "secrolidrole")
+  private Long id;
 
-	/**
-	 * name
-	 */
-	@Column(name = "secrolname")
-	private String name;
+  /**
+   * name
+   */
+  @Column(name = "secrolname")
+  private String name;
 
-	/**
-	 * description
-	 */
-	@Column(name = "secroldescription")
-	private String description;
+  /**
+   * description
+   */
+  @Column(name = "secroldescription")
+  private String description;
 
-	/**
-	 * creationDate
-	 */
-	@Column(name = "secrolcreationdate")
-	private LocalDateTime creationDate;
+  /**
+   * creationDate
+   */
+  @Column(name = "secrolcreationdate")
+  private LocalDateTime creationDate;
 
-	/**
-	 * creationUser
-	 */
-	@Column(name = "secrolmodificationdate")
-	private LocalDateTime modificationDate;
+  /**
+   * creationUser
+   */
+  @Column(name = "secrolmodificationdate")
+  private LocalDateTime modificationDate;
 
-	@Column(name = "secrolcreationuser")
-	private String creationUser;
+  @Column(name = "secrolcreationuser")
+  private String creationUser;
 
-	/**
-	 * modificationUser
-	 */
-	@Column(name = "secrolmodificationuser")
-	private String modificationUser;
+  /**
+   * modificationUser
+   */
+  @Column(name = "secrolmodificationuser")
+  private String modificationUser;
 
-	/**
-	 * <p>
-	 * Constructor
-	 * </p>
-	 * 
-	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
-	 * @param name
-	 * @param description
-	 */
-	public Role(String name, String description) {
-		this.name = name;
-		this.description = description;
-	}
+  /**
+   * <p>
+   * Constructor
+   * </p>
+   * 
+   * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+   * @param name
+   * @param description
+   */
+  public Role(String name, String description) {
+    this.name = name;
+    this.description = description;
+  }
 }

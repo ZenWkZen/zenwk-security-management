@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.enums;
 
 import com.alineumsoft.zenwk.security.common.message.component.MessageSourceAccessorComponent;
-
 import lombok.Getter;
 
 /**
@@ -15,33 +14,32 @@ import lombok.Getter;
  */
 @Getter
 public enum UserStateEnum {
-	INCOMPLETE_PERFIL("user.state.icompleteperfil"),
-	ACTIVE("user.state.active"), 
-	DISABLED("user.state.disabled");
+  INCOMPLETE_PERFIL("user.state.icompleteperfil"), ACTIVE("user.state.active"), DISABLED(
+      "user.state.disabled");
 
-	/**
-	 * messageKey
-	 */
-	private final String messageKey;
+  /**
+   * messageKey
+   */
+  private final String messageKey;
 
-	/**
-	 * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
-	 * @param messageKey
-	 */
-	UserStateEnum(String messageKey) {
-		this.messageKey = messageKey;
-	}
+  /**
+   * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+   * @param messageKey
+   */
+  UserStateEnum(String messageKey) {
+    this.messageKey = messageKey;
+  }
 
-	/**
-	 * <p>
-	 * Obtiene la descripción del mensaje usando la clave desde messages.properties.
-	 * </p>
-	 * 
-	 * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
-	 * @param messageSource
-	 * @return
-	 */
-	 public String getDescription() {
-	        return MessageSourceAccessorComponent.getMessage(messageKey);
-	    }
+  /**
+   * <p>
+   * Obtiene la descripción del mensaje usando la clave desde messages.properties.
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param messageSource
+   * @return
+   */
+  public String getDescription() {
+    return MessageSourceAccessorComponent.getMessage(messageKey);
+  }
 }

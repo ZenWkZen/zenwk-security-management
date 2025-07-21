@@ -7,6 +7,9 @@ spring:
   config:
     import: ${SPRING_CONFIG_COMMON_APPLICATION:optional:configserver:http://localhost:8086}
 
+cors:
+  allowed-origins: ${CORS_AUTH_ALLOWED_ORIGINS:http://localhost:3000}
+
 security:
   # Deshablitar prod / hablitar autenticación perfil de pruebas
   test-config:

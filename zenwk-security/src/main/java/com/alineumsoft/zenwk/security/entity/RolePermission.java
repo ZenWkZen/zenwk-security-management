@@ -1,7 +1,6 @@
 package com.alineumsoft.zenwk.security.entity;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,34 +29,34 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class RolePermission {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "secrolperid")
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "secrolperid")
+  private Long id;
 
-	/**
-	 * Id que relaciona con la tabla sec_role
-	 */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "secrolperidrole")
-	private Role role;
-	/**
-	 * Id que referencia la tabla sec_permission
-	 */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "secrolperidpermission")
-	private Permission permission;
+  /**
+   * Id que relaciona con la tabla sec_role
+   */
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "secrolperidrole")
+  private Role role;
+  /**
+   * Id que referencia la tabla sec_permission
+   */
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "secrolperidpermission")
+  private Permission permission;
 
-	/**
-	 * Fecha de creacion
-	 */
-	@Column(name = "secrolpercreationdate")
-	private LocalDateTime creationDate;
+  /**
+   * Fecha de creacion
+   */
+  @Column(name = "secrolpercreationdate")
+  private LocalDateTime creationDate;
 
-	/**
-	 * Usario de creacion
-	 */
-	@Column(name = "secrolpercreationuser")
-	private String creationUser;
+  /**
+   * Usario de creacion
+   */
+  @Column(name = "secrolpercreationuser")
+  private String creationUser;
 
 }

@@ -1,9 +1,7 @@
 package com.alineumsoft.zenwk.security.auth.dto;
 
 import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,27 +18,27 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleUserDTO  implements Serializable{
-	private static final long serialVersionUID = 1L;
-	/**
-	 * idRole
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Long idRole;
+public class RoleUserDTO implements Serializable {
+  private static final long serialVersionUID = 1L;
+  /**
+   * idRole
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Long idRole;
 
-	/**
-	 * nameRole
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String nameRole;
-	/**
-	 * idUser
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Long idUser;
-	/**
-	 * username
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String username;
+  /**
+   * nameRole
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String nameRole;
+  /**
+   * idUser
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Long idUser;
+  /**
+   * username
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String username;
 }
