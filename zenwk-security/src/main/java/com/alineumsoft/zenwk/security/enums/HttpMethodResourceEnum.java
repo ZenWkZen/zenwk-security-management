@@ -19,8 +19,9 @@ public enum HttpMethodResourceEnum {
    * Recursos par ala entidad usuarios
    */
   USER_CREATE(HttpMethod.POST, "/api/users"), USER_UPDATE(HttpMethod.PUT,
-      "/api/users/{id}"), USER_DELETE(HttpMethod.DELETE, "/api/users/{id}"), USER_LIST(
-          HttpMethod.GET, "/api/users"), USER_GET(HttpMethod.GET, "/api/users/{id}"),
+      "/api/users/{id}"), USER_DELETE(HttpMethod.DELETE,
+          "/api/users/{id}"), USER_LIST(HttpMethod.GET, "/api/users"), USER_GET(HttpMethod.GET,
+              "/api/users/{id}"), USER_GET_EMAIL(HttpMethod.GET, "/api/users/email/{email}"),
   /**
    * Recursos para la entidad persona
    */

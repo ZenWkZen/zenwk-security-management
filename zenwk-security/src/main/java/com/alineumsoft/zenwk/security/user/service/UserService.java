@@ -1,5 +1,6 @@
 package com.alineumsoft.zenwk.security.user.service;
 
+import java.awt.FontFormatException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +18,7 @@ import com.alineumsoft.zenwk.security.auth.Service.RoleAssignmentService;
 import com.alineumsoft.zenwk.security.auth.dto.RoleUserDTO;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.constants.GeneralConstants;
+import com.alineumsoft.zenwk.security.common.constants.RegexConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.common.exception.enums.CoreExceptionEnum;
@@ -641,6 +643,46 @@ public class UserService extends ApiRestSecurityHelper {
         SecurityExceptionEnum.FUNC_USER_NOT_FOUND_USERNAME.getCodeMessage()));
   }
 
+
+
+  /**
+   * <p>
+   * <b> CU001_Seguridad_Creacion_Usuario </b> Busca un usuario por email, si existe retorna genera
+   * una excepcíon en caso contrario false.
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param email
+   * @param request
+   * @return
+   * @throws FontFormatException
+   */
+  public boolean findByEmail(String email, HttpServletRequest request) {
+    LogSecurity logSecurity =
+        initializeLog(request, email, notBody, notBody, SecurityActionEnum.USER_GET.getCode());
+
+    try {
+      if (!email.matches(RegexConstants.EMAIL)) {
+        throw new RuntimeException(SecurityExceptionEnum.FUNC_USER_EMAIL_INVALID.getCodeMessage());
+      }
+      if (findByEmail(email) != null) {
+        throw new RuntimeException(
+            SecurityExceptionEnum.FUNC_USER_CREATE_EMAIL_UNIQUE.getCodeMessage());
+      }
+    } catch (EntityNotFoundException e) {
+      e.printStackTrace();
+    } catch (RuntimeException e) {
+      setLogSecurityError(e, logSecurity);
+      throw new FunctionalException(e.getMessage(), e.getCause(), logSecurityUserRespository,
+          logSecurity);
+    }
+
+    // Pesistencia de log
+    saveSuccessLog(HttpStatus.OK.value(), logSecurity, logSecurityUserRespository);
+    return false;
+  }
+
+
   /**
    * <p>
    * <b> CU001_Seguridad_Creacion_Usuario </b> Recupera la entidad user con el email si tiene un rol
@@ -651,8 +693,8 @@ public class UserService extends ApiRestSecurityHelper {
    * @param username
    * @return
    */
-  public User findByEmail(String username) {
-    return userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException(
+  public User findByEmail(String email) {
+    return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(
         SecurityExceptionEnum.FUNC_USER_NOT_FOUND_USERNAME.getCodeMessage()));
   }
 

@@ -20,50 +20,53 @@ public enum SecurityExceptionEnum {
   /**
    * Auth
    */
-  FUNC_AUTH_TOKEN_INVALID("FUNC_SEC_001", "auth.token.invalid"), FUNC_AUTH_URI_FORBIDEN(
-      "FUNC_SEC_002", "auth.uri.forbiden"), FUNC_AUTH_BAD_CREDENTIALS("FUNC_SEC_017",
+  FUNC_AUTH_TOKEN_INVALID("FUNC_SEC_AUTH_0001", "auth.token.invalid"), FUNC_AUTH_URI_FORBIDEN(
+      "FUNC_SEC_AUTH_0002", "auth.uri.forbiden"), FUNC_AUTH_BAD_CREDENTIALS("FUNC_SEC_AUTH_0003",
           "auth.password.bad.credentials"),
+
   /**
-   * Roles
+   * Roles (asociados a usuario)
    */
-  FUNC_ROLE_USER_NOT_EXIST("FUNC_SEC_003", "functional.roleuser.not.exist"),
+  FUNC_ROLE_USER_NOT_EXIST("FUNC_SEC_ROLE_0001", "functional.roleuser.not.exist"),
+
   /**
    * User
    */
-  FUNC_USER_CREATE_EMAIL_UNIQUE("FUNC_SEC_004",
-      "functional.user.create.email.unique"), FUNC_USER_NOT_FOUND_ID("FUNC_SEC_005",
-          "functional.user.id.notfound"), FUNC_USER_NOT_FOUND_USERNAME("FUNC_SEC_006",
-              "functional.user.username.notfound"), FUNC_USER_MAIL_EXISTS("FUNC_SEC_007",
-                  "functional.user.email.exists"), FUNC_USER_EXIST("FUNC_SEC_007",
-                      "functional.user.exist"),
+  FUNC_USER_CREATE_EMAIL_UNIQUE("FUNC_SEC_USER_0001",
+      "functional.user.create.email.unique"), FUNC_USER_NOT_FOUND_ID("FUNC_SEC_USER_0002",
+          "functional.user.id.notfound"), FUNC_USER_NOT_FOUND_USERNAME("FUNC_SEC_USER_0003",
+              "functional.user.username.notfound"), FUNC_USER_MAIL_EXISTS("FUNC_SEC_USER_0004",
+                  "functional.user.email.exists"), FUNC_USER_EXIST("FUNC_SEC_USER_0005",
+                      "functional.user.exist"), FUNC_USER_EMAIL_INVALID("FUNC_SEC_USER_0006",
+                          "validation.user.email.invalid"),
+
   /**
    * Person
    */
-  FUNC_PERSON_NOT_FOUND("FUNC_SEC_008", "functional.person.notfound"), FUNC_PERSON_EXIST(
-      "FUNC_SEC_009", "functional.person.exist"), FUNC_PERSON_ID_USER_NOT_ASSOCIATE("FUNC_SEC_010",
-          "functional.person.iduser.notassociate"), FUNC_PERSON_ID_USER_IS_ASSOCIATE("FUNC_SEC_011",
-              "functional.person.iduser.isassociate"),
+  FUNC_PERSON_NOT_FOUND("FUNC_SEC_PERSON_0001", "functional.person.notfound"), FUNC_PERSON_EXIST(
+      "FUNC_SEC_PERSON_0002",
+      "functional.person.exist"), FUNC_PERSON_ID_USER_NOT_ASSOCIATE("FUNC_SEC_PERSON_0003",
+          "functional.person.iduser.notassociate"), FUNC_PERSON_ID_USER_IS_ASSOCIATE(
+              "FUNC_SEC_PERSON_0004", "functional.person.iduser.isassociate"),
+
   /**
    * Role
    */
-  FUNC_ROLE_EXISTS("FUNC_SEC_012", "functional.role.exist"), FUNC_ROLE_NOT_EXISTS("FUNC_SEC_013",
-      "common.exception.rol.noexists"), TECH_ROLE_NOT_DELETE("TECH_SEC_001",
+  FUNC_ROLE_EXISTS("FUNC_SEC_ROLE_0002", "functional.role.exist"), FUNC_ROLE_NOT_EXISTS(
+      "FUNC_SEC_ROLE_0003",
+      "common.exception.rol.noexists"), TECH_ROLE_NOT_DELETE("TECH_SEC_ROLE_0001",
           "functional.exception.rol.nodelete"), FUNC_ROLE_ASSIGNMENT_PERMISSION_EXISTS(
-              "FUNC_SEC_016",
+              "FUNC_SEC_ROLE_0004",
               "functional.exception.rol.assignment.exists"), FUNC_ROLE_ASSIGNMENT_PERMISSION_NOT_EXISTS(
-                  "FUNC_SEC_017", "functional.exception.rol.assignment.notexists"),
+                  "FUNC_SEC_ROLE_0005", "functional.exception.rol.assignment.notexists"),
+
   /**
    * Permission
    */
-  FUNC_PERMISSION_EXIST("FUNC_SEC_014", "functional.permission.exist"), FUNC_PERMISSION_NOT_EXISTS(
-      "FUNC_SEC_015", "functional.permission.noexists"), TECH_PERMISSION_NOT_DELETE("TECH_SEC_002",
-          "functional.permission.notdelete"),
-  /**
-   * Verificación
-   */
-  FUNC_VERIFICATION_TOKEN_EXPIRATION("FUNC_SEC_016",
-      "functional.verification.token.expiration"), FUNC_VERIFICATION_TOKEN_NOT_FOUND(
-          "FUNC_SEC_0117", "functional.verification.token.notfound");
+  FUNC_PERMISSION_EXIST("FUNC_SEC_PERMISSION_0001",
+      "functional.permission.exist"), FUNC_PERMISSION_NOT_EXISTS("FUNC_SEC_PERMISSION_0002",
+          "functional.permission.noexists"), TECH_PERMISSION_NOT_DELETE("TECH_SEC_PERMISSION_0001",
+              "functional.permission.notdelete");
 
   /**
    * code

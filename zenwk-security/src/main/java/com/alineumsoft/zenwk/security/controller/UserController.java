@@ -134,4 +134,23 @@ public class UserController {
       @AuthenticationPrincipal UserDetails userDetails) {
     return ResponseEntity.ok(userService.getAllUsers(pageable, request, userDetails));
   }
+
+
+  /**
+   * <p>
+   * <b> CU001_Seguridad_Creacion_Usuario </b> Valida si un email ya esta en uso previo el registro.
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param email
+   * @param request
+   * @param uriCB
+   * @return
+   */
+  @GetMapping("/email/{email}")
+  public ResponseEntity<Boolean> findUserByEmail(@PathVariable String email,
+      HttpServletRequest request, UriComponentsBuilder uriCB,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    return ResponseEntity.ok(userService.findByEmail(email, request));
+  }
 }
