@@ -136,6 +136,9 @@ public class SecurityFilterChainConfiguration {
           .requestMatchers(HttpMethodResourceEnum.VERIFICATION_TOKEN.getResource()).permitAll()
           .requestMatchers(HttpMethodResourceEnum.USER_GET_EMAIL.getMethod(),
               HttpMethodResourceEnum.USER_GET_EMAIL.getResource())
+          .permitAll()
+          .requestMatchers(HttpMethodResourceEnum.AUTH_RESET_PASSWORD.getMethod(),
+              HttpMethodResourceEnum.AUTH_RESET_PASSWORD.getResource())
           .permitAll().requestMatchers(HttpMethodResourceEnum.ACTUATOR.getResource()).permitAll();
       // Se agregan los filtros restantes
       addAuthorizationForOperation(request, maRolPermissions);

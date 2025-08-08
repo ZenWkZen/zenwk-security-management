@@ -46,9 +46,9 @@ public enum HttpMethodResourceEnum {
    * Auth
    */
   AUTH_LOGIN(HttpMethod.POST, "/api/auth/login"), AUTH_LOGOUT(HttpMethod.DELETE,
-      "/api/auth/logout"),
+      "/api/auth/logout"), AUTH_RESET_PASSWORD(HttpMethod.POST, "/api/auth/reset-password/{email}"),
   /**
-   * Verification
+   * Verification (publicas)
    */
   VERIFICATION_TOKEN(HttpMethod.POST, "/api/verification/**"),
   /**

@@ -75,4 +75,12 @@ public final class DtoValidationKeys {
   public static final String PERMISSION_OPERATION_NOT_NULL =
       "validation.permission.operation.notnull";
 
+  /**
+   * ResetPasswordDTO
+   */
+  public static final String RESET_PASSWORD_CODE_TOKEN_NOT_NULL =
+      "validation.resetpassword.codetoken.notnull";
+  public static final String RESET_PASSWORD_CODE_UUID_NOT_NULL =
+      "validation.resetpassword.codeuuid.notnull";
+
 }

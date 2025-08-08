@@ -77,11 +77,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UserDetails userDetails = jwtProvider.extractUserDetails(token).orElse(null);
         if (userDetails == null || !jwtProvider.validateToken(token, username)) {
           jwtProvider.sendErrorResponse(username, request, response,
-              HttpServletResponse.SC_UNAUTHORIZED, SecurityExceptionEnum.FUNC_AUTH_TOKEN_INVALID);
+              HttpServletResponse.SC_UNAUTHORIZED, SecurityExceptionEnum.FUNC_AUTH_TOKEN_JWT_INVALID);
           return;
         } else if (!validateRolUser(token, request)) {
           jwtProvider.sendErrorResponse(username, request, response,
-              HttpServletResponse.SC_FORBIDDEN, SecurityExceptionEnum.FUNC_AUTH_URI_FORBIDEN);
+              HttpServletResponse.SC_FORBIDDEN, SecurityExceptionEnum.FUNC_AUTH_URI_FORBIDDEN);
           return;
         } else {
           authenticateUser(userDetails, request);

@@ -23,5 +23,9 @@ public class AuthResponseDTO implements Serializable {
    * token
    */
   private String token;
+  /**
+   * UserDTO
+   */
+  private Long UserId;
 
 }

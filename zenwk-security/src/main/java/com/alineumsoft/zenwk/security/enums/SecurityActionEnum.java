@@ -17,7 +17,8 @@ public enum SecurityActionEnum {
    * User
    */
   USER_CREATE("USER.CREATE"), USER_UPDATE("USER.UPDATE"), USER_DELETE("USER.DELETE"), USER_GET(
-      "USER.GET"), USER_LIST("USER.LIST"), USER_LIST_ROLES("USER.LIST_ROLES"),
+      "USER.GET"), USER_LIST(
+          "USER.LIST"), USER_LIST_ROLES("USER.LIST_ROLES"), USER_GET_EMAIL("USER.GET_EMAIL"),
   /**
    * Person
    */
@@ -26,7 +27,7 @@ public enum SecurityActionEnum {
   /**
    * Auth
    */
-  AUTH_LOGIN("AUTH.LOGIN"), AUTH_LOGOUT("AUTH.LOGOUT"),
+  AUTH_LOGIN("AUTH.LOGIN"), AUTH_LOGOUT("AUTH.LOGOUT"), AUTH_RESET_PASSWORD("AUTH.RESET_PASSWORD"),
   /**
    * Role
    */

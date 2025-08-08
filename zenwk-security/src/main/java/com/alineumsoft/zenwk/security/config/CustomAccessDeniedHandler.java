@@ -62,6 +62,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     String token = jwtProvider.extractToken(request).orElse(null);
     String username = jwtProvider.extractAllClaims(token).getSubject();
     jwtProvider.sendErrorResponse(username, request, response, HttpServletResponse.SC_FORBIDDEN,
-        SecurityExceptionEnum.FUNC_AUTH_URI_FORBIDEN);
+        SecurityExceptionEnum.FUNC_AUTH_URI_FORBIDDEN);
   }
 }

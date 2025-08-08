@@ -124,9 +124,10 @@ public class UserService extends ApiRestSecurityHelper {
    */
   public boolean updateUser(HttpServletRequest request, Long idUser, UserDTO dto,
       UserDetails userDetails, Person person) {
+    String username = userDetails != null ? userDetails.getUsername() : dto.getUsername();
     // Inicializacion log transaccional
-    LogSecurity logSecurity = initializeLog(request, userDetails.getUsername(), getJson(dto),
-        notBody, SecurityActionEnum.USER_UPDATE.getCode());
+    LogSecurity logSecurity = initializeLog(request, username, getJson(dto), notBody,
+        SecurityActionEnum.USER_UPDATE.getCode());
     try {
       return updateUserTx(idUser, dto, person, logSecurity);
     } catch (RuntimeException e) {
@@ -658,8 +659,8 @@ public class UserService extends ApiRestSecurityHelper {
    * @throws FontFormatException
    */
   public boolean findByEmail(String email, HttpServletRequest request) {
-    LogSecurity logSecurity =
-        initializeLog(request, email, notBody, notBody, SecurityActionEnum.USER_GET.getCode());
+    LogSecurity logSecurity = initializeLog(request, email, notBody, notBody,
+        SecurityActionEnum.USER_GET_EMAIL.getCode());
 
     try {
       if (!email.matches(RegexConstants.EMAIL)) {

@@ -20,10 +20,18 @@ public enum SecurityExceptionEnum {
   /**
    * Auth
    */
-  FUNC_AUTH_TOKEN_INVALID("FUNC_SEC_AUTH_0001", "auth.token.invalid"), FUNC_AUTH_URI_FORBIDEN(
-      "FUNC_SEC_AUTH_0002", "auth.uri.forbiden"), FUNC_AUTH_BAD_CREDENTIALS("FUNC_SEC_AUTH_0003",
-          "auth.password.bad.credentials"),
-
+  FUNC_AUTH_TOKEN_JWT_INVALID("FUNC_SEC_AUTH_0001",
+      "functional.auth.token.invalid"), FUNC_AUTH_URI_FORBIDDEN("FUNC_SEC_AUTH_0002",
+          "functional.auth.uri.forbidden"), FUNC_AUTH_BAD_CREDENTIALS("FUNC_SEC_AUTH_0003",
+              "functional.auth.password.bad.credentials"), FUNC_AUTH_TOKEN_EXPIRED(
+                  "FUNC_SEC_AUTH_0004",
+                  "functional.auth.token.expired"), FUNC_AUTH_TOKEN_NOT_FOUND("FUNC_SEC_AUTH_0005",
+                      "functional.auth.token.notfound"), FUNC_AUTH_EMAIL_NOT_MATCH(
+                          "FUNC_SEC_AUTH_0006",
+                          "functional.auth.token.email.notmatch"), FUNC_AUTH_UUID_NOT_MATCH(
+                              "FUNC_SEC_AUTH_0007",
+                              "functional.auth.token.uuid.notmatch"), FUNC_AUTH_CODE_NOT_MATCH(
+                                  "FUNC_SEC_AUTH_0008", "functional.auth.token.code.notmatch"),
   /**
    * Roles (asociados a usuario)
    */
@@ -38,7 +46,8 @@ public enum SecurityExceptionEnum {
               "functional.user.username.notfound"), FUNC_USER_MAIL_EXISTS("FUNC_SEC_USER_0004",
                   "functional.user.email.exists"), FUNC_USER_EXIST("FUNC_SEC_USER_0005",
                       "functional.user.exist"), FUNC_USER_EMAIL_INVALID("FUNC_SEC_USER_0006",
-                          "validation.user.email.invalid"),
+                          "validation.user.email.invalid"), FUNC_ERROR_PASSWORD_REUSE(
+                              "FUNC_SEC_USER_007", "functional.user.errorpassword.reused"),
 
   /**
    * Person

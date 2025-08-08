@@ -1,7 +1,9 @@
 package com.alineumsoft.zenwk.security.auth.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,18 +13,27 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import com.alineumsoft.zenwk.security.auth.dto.AuthRequestDTO;
 import com.alineumsoft.zenwk.security.auth.dto.AuthResponseDTO;
+import com.alineumsoft.zenwk.security.auth.dto.ResetPasswordDTO;
+import com.alineumsoft.zenwk.security.auth.entity.Token;
 import com.alineumsoft.zenwk.security.auth.jwt.JwtProvider;
+import com.alineumsoft.zenwk.security.auth.repository.TokenRepository;
 import com.alineumsoft.zenwk.security.common.constants.CommonMessageConstants;
 import com.alineumsoft.zenwk.security.common.exception.FunctionalException;
 import com.alineumsoft.zenwk.security.common.exception.TechnicalException;
 import com.alineumsoft.zenwk.security.common.helper.ApiRestSecurityHelper;
+import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
 import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
+import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.entity.User;
+import com.alineumsoft.zenwk.security.user.entity.UserHist;
+import com.alineumsoft.zenwk.security.user.repository.UserHistRepository;
 import com.alineumsoft.zenwk.security.user.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthService extends ApiRestSecurityHelper {
   /**
    * Repositorio para log persistible de modulo
@@ -60,27 +72,14 @@ public class AuthService extends ApiRestSecurityHelper {
    * Servicio para la gestion de user
    */
   private final UserService userService;
-
   /**
-   * 
-   * <p>
-   * <b> Constructor </b>
-   * </p>
-   * 
-   * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
-   * @param logSecRepo
-   * @param authManager
-   * @param jwtProvider
-   * @param userService
+   * Tabla historica de usuarios.
    */
-  public AuthService(LogSecurityRepository logSecRepo, AuthenticationManager authManager,
-      JwtProvider jwtProvider, PermissionService permissionService, UserService userService) {
-    this.logSecRepo = logSecRepo;
-    this.authManager = authManager;
-    this.jwtProvider = jwtProvider;
-    this.permissionService = permissionService;
-    this.userService = userService;
-  }
+  private final UserHistRepository userHistRepository;
+  /**
+   * Servicio para gestión del token
+   */
+  private final TokenRepository tokenRepository;
 
   /**
    * 
@@ -112,6 +111,7 @@ public class AuthService extends ApiRestSecurityHelper {
       List<String> roles = permissionService.listAllowedUrlsForUserRole(username);
       // Se genera el token con los permisos
       outDTO.setToken(jwtProvider.generateToken(userDetails, roles, user.getId(), user.getState()));
+      outDTO.setUserId(user.getId());
 
       setLogSecuritySuccesfull(HttpStatus.OK.value(), logSec);
       logSecRepo.save(logSec);
@@ -161,6 +161,120 @@ public class AuthService extends ApiRestSecurityHelper {
       return SecurityExceptionEnum.FUNC_AUTH_BAD_CREDENTIALS.getCodeMessage();
     }
     return e.getMessage();
+  }
+
+
+  /**
+   * <p>
+   * <b> CU004_Reestablecer contraseña </b> Reestablece la contraseña
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param request
+   * @param dto
+   * @param email
+   * @return
+   */
+  public Boolean ResetPassword(HttpServletRequest request, ResetPasswordDTO dto, String email) {
+    LogSecurity logSecurity = initializeLog(request, email, getJson(dto), Boolean.class.getName(),
+        SecurityActionEnum.AUTH_RESET_PASSWORD.getCode());
+    try {
+      String password = dto.getPassword();
+      Token token = getToken(email);
+
+      String messageError = validateToken(email, dto, token);
+      // Validacion del token
+      if (!messageError.isEmpty()) {
+        throw new IllegalArgumentException(messageError);
+      }
+
+      // Se crea la nueva contraseña.
+      User user = userService.findByEmail(email);
+      UserDTO userDTO = new UserDTO(user);
+      userDTO.setPassword(password);
+
+      // Si el password coincide con uno anterior excepciona.
+      validatePassword(password, user.getId());
+
+      // Se invoca el api que actualiza el usuario
+      boolean isUpdateUser = userService.updateUser(request, user.getId(), userDTO, null, null);
+
+      setLogSecuritySuccesfull(HttpStatus.OK.value(), logSecurity);
+      logSecRepo.save(logSecurity);
+
+      return isUpdateUser;
+    } catch (RuntimeException e) {
+      log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e);
+      setLogSecurityError(e, logSecurity);
+      throw new TechnicalException(e.getMessage(), e.getCause(), logSecRepo, logSecurity);
+    }
+  }
+
+
+
+  /**
+   * 
+   * <p>
+   * <b> CU004_Reestablecer contraseña. </b> Validacion del token
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param email
+   * @param dto
+   * @param token
+   * @return
+   */
+  private String validateToken(String email, ResetPasswordDTO dto, Token token) {
+    String messageError = "";
+    if (!token.getEmail().equals(token.getEmail())) {
+      messageError = SecurityExceptionEnum.FUNC_AUTH_EMAIL_NOT_MATCH.getCodeMessage();
+    } else if (!CryptoUtil.matchesPassword(dto.getUuid(), token.getUuid())) {
+      messageError = SecurityExceptionEnum.FUNC_AUTH_UUID_NOT_MATCH.getCodeMessage();
+    } else if (!CryptoUtil.matchesPassword(dto.getCodeToken(), token.getCode())) {
+      messageError = SecurityExceptionEnum.FUNC_AUTH_CODE_NOT_MATCH.getCodeMessage();
+    } else if (token.getExpirationDate().isBefore(LocalDateTime.now())) {
+      messageError = SecurityExceptionEnum.FUNC_AUTH_TOKEN_EXPIRED.getCodeMessage();
+    }
+    return messageError;
+  }
+
+  /**
+   * <p>
+   * <b> U003_Gestionar token de verificación. </b> Recupera el token con todos sus datos
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param email
+   * @return
+   */
+  private Token getToken(String email) {
+    return tokenRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(
+        SecurityExceptionEnum.FUNC_AUTH_TOKEN_NOT_FOUND.getCodeMessage()));
+  }
+
+  /**
+   * 
+   * <p>
+   * <b> CU004_Reestablecer contraseña </b> Valida que la nueva contraseña no hayas sido usada
+   * recientemente.
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param password
+   * @param userId
+   */
+  private void validatePassword(String password, Long userId) {
+    // Validar que el password no sea el anterior ingresado
+    Optional<UserHist> listUserHist = userHistRepository.findLast20ByIdUser(userId);
+    if (!listUserHist.isEmpty()) {
+      listUserHist = listUserHist.stream()
+          .filter(hist -> CryptoUtil.matchesPassword(password, hist.getPassword())).findFirst();
+      // Si la constraseña se encuentra presente
+      if (listUserHist.isPresent()) {
+        throw new IllegalArgumentException(
+            SecurityExceptionEnum.FUNC_ERROR_PASSWORD_REUSE.getCodeMessage());
+      }
+    }
   }
 
 }

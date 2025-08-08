@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import com.alineumsoft.zenwk.security.auth.definitions.AuthEnums;
 import com.alineumsoft.zenwk.security.auth.dto.AuthRequestDTO;
 import com.alineumsoft.zenwk.security.auth.dto.AuthResponseDTO;
 import com.alineumsoft.zenwk.security.auth.dto.LogoutOutDTO;
+import com.alineumsoft.zenwk.security.auth.dto.ResetPasswordDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Validated
+// @Validated
 public class AuthController {
   /**
    * Servicio para auth
@@ -71,6 +73,25 @@ public class AuthController {
       @AuthenticationPrincipal UserDetails userDetails) {
     authService.logout(request, userDetails);
     return ResponseEntity.ok(new LogoutOutDTO(AuthEnums.AUTH_LOGOUT_SUCCES.getMessage()));
+  }
+
+  /**
+   * 
+   * <p>
+   * <b> CU002_Seguridad_Cierre_Sesion </b> Controller publico para restablecer el password
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param request
+   * @param resetPasswordDTO
+   * @param email
+   * @return
+   */
+  @PostMapping("/reset-password/{email}")
+  public ResponseEntity<Boolean> resetPassword(@PathVariable String email,
+      @RequestBody @Validated ResetPasswordDTO resetPasswordDTO, HttpServletRequest request) {
+    return ResponseEntity.ok(authService.ResetPassword(request, resetPasswordDTO, email));
+
   }
 
 }
