@@ -283,7 +283,7 @@ public class UserService extends ApiRestSecurityHelper {
   /**
    * <p>
    * <b> CU001_Seguridad_Creación_Usuario </b> Realiza la actualizacion de la persona y el usuario
-   * en la BD
+   * en la BD.
    * </p>
    * 
    * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
@@ -295,7 +295,34 @@ public class UserService extends ApiRestSecurityHelper {
    */
   private void updateUserRecord(User userTarget, Long idUser, UserDTO dto, Person person,
       LogSecurity logSecurity) {
-    // actualizacion de la persona, el estado y el rol
+    // actualizacion de la persona, el estado y el rol en entidad usuario por primerva vez.
+    // la persona es dirente de null
+    updateFromPerson(userTarget, idUser, dto, person, logSecurity);
+
+    // Se realiza la validación si updateUser no es invocado desde evento en personController
+    if (person == null
+        && ObjectUpdaterUtil.updateDataEqualObject(getUserSource(dto, userTarget), userTarget)) {
+      updateEntityUser(userTarget, logSecurity);
+    }
+    // Pesistencia de log
+    saveSuccessLog(HttpStatus.NO_CONTENT.value(), logSecurity, logSecurityUserRespository);
+  }
+
+  /**
+   * 
+   * <p>
+   * <b> CU001_Seguridad_Creación_Usuario </b> Actualización de la persona desde create api/person
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param userTarget
+   * @param idUser
+   * @param dto
+   * @param person
+   * @param logSecurity
+   */
+  private void updateFromPerson(User userTarget, Long idUser, UserDTO dto, Person person,
+      LogSecurity logSecurity) {
     if (person != null) {
       RoleUserDTO roleUserDTO =
           new RoleUserDTO(null, RoleEnum.USER.name(), idUser, userTarget.getUsername());
@@ -305,16 +332,29 @@ public class UserService extends ApiRestSecurityHelper {
       roleAsignmentService.createRoleUser(null, roleUserDTO);
       dto.setIdPerson(person.getId());
       dto.setPerson(person);
+      updateEntityUser(userTarget, logSecurity);
     }
-    if (ObjectUpdaterUtil.updateDataEqualObject(getUserSource(dto, userTarget), userTarget)) {
-      userTarget.setUserModification(logSecurity.getUserCreation());
-      userTarget.setModificationDate(LocalDateTime.now());
-      userRepository.save(userTarget);
-      HistoricalUtil.registerHistorical(userTarget, HistoricalOperationEnum.UPDATE,
-          UserHistService.class);
-    }
-    // Pesistencia de log
-    saveSuccessLog(HttpStatus.NO_CONTENT.value(), logSecurity, logSecurityUserRespository);
+  }
+
+
+
+  /**
+   * 
+   * <p>
+   * <b> CU001_Seguridad_Creación_Usuario </b> Método que actualiza la entidad del usuario, compara
+   * a nivel de campos si hay diferencias realiza el update
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param userTarget
+   * @param logSecurity
+   */
+  private void updateEntityUser(User userTarget, LogSecurity logSecurity) {
+    userTarget.setUserModification(logSecurity.getUserCreation());
+    userTarget.setModificationDate(LocalDateTime.now());
+    userRepository.save(userTarget);
+    HistoricalUtil.registerHistorical(userTarget, HistoricalOperationEnum.UPDATE,
+        UserHistService.class);
   }
 
   /**
@@ -697,6 +737,33 @@ public class UserService extends ApiRestSecurityHelper {
   public User findByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(
         SecurityExceptionEnum.FUNC_USER_NOT_FOUND_USERNAME.getCodeMessage()));
+  }
+
+  /**
+   * <p>
+   * <b> CU001_Seguridad_Creacion_Usuario </b> A partir del id valida si un usuario existe
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param id
+   * @return
+   */
+  public boolean existsById(Long id) {
+    return userRepository.existsById(id);
+  }
+
+  /**
+   * <p>
+   * <b> CU001_Seguridad_Creacion_Usuario </b> Búsqueda del usuario a partir del id.
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param id
+   * @return
+   */
+  public User findById(Long userId) {
+    return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
+        SecurityExceptionEnum.FUNC_USER_NOT_FOUND_ID.getCodeMessage()));
   }
 
 }

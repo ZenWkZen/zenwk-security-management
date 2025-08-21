@@ -383,7 +383,9 @@ public class PersonService extends ApiRestSecurityHelper {
     person.setMiddleName(dto.getMiddleName());
     person.setLastName(dto.getLastName());
     person.setMiddleLastName(dto.getMiddleLastName());
-    person.setDateOfBirth(LocalDateTimeUtil.getLocalDateTimeIso8601(dto.getDateOfBirth()));
+    person.setDateOfBirth(person.getDateOfBirth() != null
+        ? LocalDateTimeUtil.getLocalDateTimeIso8601(dto.getDateOfBirth())
+        : null);
     person.setAddress(dto.getAddress());
     return person;
   }

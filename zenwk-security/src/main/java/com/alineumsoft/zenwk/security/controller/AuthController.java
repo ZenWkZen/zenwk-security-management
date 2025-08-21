@@ -94,4 +94,24 @@ public class AuthController {
 
   }
 
+  /**
+   * 
+   * <p>
+   * <b> CU002_Seguridad_Cierre_Sesion </b> Emite un nuevo jwt para que los nuevos roles sean
+   * reconocidos en la sesión front del usuario.
+   * </p>
+   * 
+   * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
+   * @param request
+   * @param userDetails
+   * @return
+   */
+  @PostMapping("/refresh-jwt")
+  public ResponseEntity<AuthResponseDTO> refreshJwt(HttpServletRequest request,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    return ResponseEntity.ok(authService.refreshJwt(request, userDetails));
+  }
+
+
+
 }

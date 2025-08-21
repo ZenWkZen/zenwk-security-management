@@ -66,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String username = null;
     try {
       String token = jwtProvider.extractToken(request).orElse(null);
-      // S el token es invaido continua con el proceso de autorizacion de la
+      // Si el token es invalido no continua con el proceso de autorizacion de la
       // sesion
       if (token == null) {
         filterChain.doFilter(request, response);
@@ -75,14 +75,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       username = jwtProvider.extractAllClaims(token).getSubject();
       if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
         UserDetails userDetails = jwtProvider.extractUserDetails(token).orElse(null);
+
         if (userDetails == null || !jwtProvider.validateToken(token, username)) {
           jwtProvider.sendErrorResponse(username, request, response,
-              HttpServletResponse.SC_UNAUTHORIZED, SecurityExceptionEnum.FUNC_AUTH_TOKEN_JWT_INVALID);
+              HttpServletResponse.SC_UNAUTHORIZED,
+              SecurityExceptionEnum.FUNC_AUTH_TOKEN_JWT_INVALID);
           return;
+
         } else if (!validateRolUser(token, request)) {
           jwtProvider.sendErrorResponse(username, request, response,
               HttpServletResponse.SC_FORBIDDEN, SecurityExceptionEnum.FUNC_AUTH_URI_FORBIDDEN);
           return;
+
         } else {
           authenticateUser(userDetails, request);
         }
@@ -134,7 +138,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if ((roles.contains((RoleEnum.USER.name())) || roles.contains((RoleEnum.NEW_USER.name())))
         && List
             .of(HttpMethodResourceEnum.USER_CREATE.getResource(),
-                HttpMethodResourceEnum.PERSON_CREATE.getResource())
+                HttpMethodResourceEnum.PERSON_CREATE.getResource(),
+                HttpMethodResourceEnum.AUTH_REFRESH_JWT.getResource())
             .stream().anyMatch(uri::contains)) {
       return jwtProvider.extractUrlsAllowedRolUser(token).contains(uri);
     }

@@ -25,6 +25,7 @@ import com.alineumsoft.zenwk.security.common.util.CryptoUtil;
 import com.alineumsoft.zenwk.security.entity.LogSecurity;
 import com.alineumsoft.zenwk.security.enums.SecurityActionEnum;
 import com.alineumsoft.zenwk.security.enums.SecurityExceptionEnum;
+import com.alineumsoft.zenwk.security.enums.UserStateEnum;
 import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
 import com.alineumsoft.zenwk.security.user.entity.User;
@@ -274,6 +275,47 @@ public class AuthService extends ApiRestSecurityHelper {
         throw new IllegalArgumentException(
             SecurityExceptionEnum.FUNC_ERROR_PASSWORD_REUSE.getCodeMessage());
       }
+    }
+  }
+
+
+  /***
+   * <p>
+   * <b> CU001_Seguridad_Creacion_Usuario </b> Emite un nuevo jwt para que los nuevos roles sean
+   * reconocidos en la sesión front del usuario.
+   * </p>
+   * 
+   * @author <a href="alineumsoft@gmail.com">C. Alegria</a>
+   * @param request
+   */
+  public AuthResponseDTO refreshJwt(HttpServletRequest request, UserDetails userDetails) {
+    String username = userDetails.getUsername();
+    LogSecurity logSec = initializeLog(request, username,
+        CommonMessageConstants.NOT_APPLICABLE_BODY, CommonMessageConstants.NOT_APPLICABLE_BODY,
+        SecurityActionEnum.AUTH_REFRESH_JWT.getCode());
+
+
+    try {
+      AuthResponseDTO outDTO = new AuthResponseDTO();
+      String token = jwtProvider.extractToken(request).orElseThrow();
+      Long idUser = jwtProvider.extractIdUser(token);
+      UserStateEnum state = jwtProvider.extractUserState(token);
+      List<String> roles = permissionService.listAllowedUrlsForUserRole(username);
+
+      // Si invalida token jwt actual cuando se emite uno nuevo.
+      jwtProvider.invalidateToken(token);
+
+      outDTO.setToken(jwtProvider.generateToken(userDetails, roles, idUser, state));
+      outDTO.setUserId(idUser);
+
+      setLogSecuritySuccesfull(HttpStatus.OK.value(), logSec);
+      logSecRepo.save(logSec);
+      // Se retorna el nuevo jwt
+      return outDTO;
+    } catch (RuntimeException e) {
+      log.error(CommonMessageConstants.LOG_MSG_EXCEPTION, e);
+      setLogSecurityError(e, logSec);
+      throw new TechnicalException(e.getMessage(), e.getCause(), logSecRepo, logSec);
     }
   }
 

@@ -39,6 +39,7 @@ public class PersonDTO implements Serializable {
   /**
    * Segundo nombre.
    */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @Pattern(regexp = RegexConstants.NAME, message = DtoValidationKeys.PERSON_NAME_INVALID)
   @Size(max = 30, message = DtoValidationKeys.PERSON_NAME_INVALID)
   private String middleName;
@@ -52,17 +53,20 @@ public class PersonDTO implements Serializable {
   /**
    * Segundo apellido.
    */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @Pattern(regexp = RegexConstants.NAME, message = DtoValidationKeys.PERSON_LAST_NAME_INVALID)
   @Size(max = 30, message = DtoValidationKeys.PERSON_LAST_NAME_INVALID)
   private String middleLastName;
   /**
    * Fecha de cumpleanios
    */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @Pattern(regexp = RegexConstants.DATE_ISO_8601, message = DtoValidationKeys.PERSON_DATE_INVALID)
   private String dateOfBirth;
   /**
    * Direccion.
    */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @Pattern(regexp = RegexConstants.COLOMBIA_ADDRESS,
       message = DtoValidationKeys.PERSON_COLOMBIA_ADDRESS)
   private String address;
@@ -79,7 +83,7 @@ public class PersonDTO implements Serializable {
     this.middleName = person.getMiddleName();
     this.lastName = person.getLastName();
     this.middleLastName = person.getMiddleLastName();
-    this.dateOfBirth = person.getDateOfBirth().toString();
+    this.dateOfBirth = person.getDateOfBirth() != null ? person.getDateOfBirth().toString() : null;
     this.address = person.getAddress();
   }
 }
