@@ -75,7 +75,11 @@ public enum SecurityExceptionEnum {
   FUNC_PERMISSION_EXIST("FUNC_SEC_PERMISSION_0001",
       "functional.permission.exist"), FUNC_PERMISSION_NOT_EXISTS("FUNC_SEC_PERMISSION_0002",
           "functional.permission.noexists"), TECH_PERMISSION_NOT_DELETE("TECH_SEC_PERMISSION_0001",
-              "functional.permission.notdelete");
+              "functional.permission.notdelete"),
+  /**
+   * Permission
+   */
+  FUNC_PERSON_SEX_NO_FOUND("FUNC_SEC_PERSON_SEX_0001", "functional.personsex.notfound");
 
   /**
    * code

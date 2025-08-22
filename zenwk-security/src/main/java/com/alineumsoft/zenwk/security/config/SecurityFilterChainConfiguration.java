@@ -137,6 +137,9 @@ public class SecurityFilterChainConfiguration {
           .requestMatchers(HttpMethodResourceEnum.USER_GET_EMAIL.getMethod(),
               HttpMethodResourceEnum.USER_GET_EMAIL.getResource())
           .permitAll()
+          .requestMatchers(HttpMethodResourceEnum.SEX_LIST_OPTIONS.getMethod(),
+              HttpMethodResourceEnum.SEX_LIST_OPTIONS.getResource())
+          .permitAll()
           .requestMatchers(HttpMethodResourceEnum.AUTH_RESET_PASSWORD.getMethod(),
               HttpMethodResourceEnum.AUTH_RESET_PASSWORD.getResource())
           .permitAll().requestMatchers(HttpMethodResourceEnum.ACTUATOR.getResource()).permitAll();

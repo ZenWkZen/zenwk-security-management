@@ -54,9 +54,14 @@ public enum HttpMethodResourceEnum {
    */
   VERIFICATION_TOKEN(HttpMethod.POST, "/api/verification/**"),
   /**
+   * Recursos para la entidad sexo.
+   */
+  SEX_LIST_OPTIONS(HttpMethod.GET, "/api/person-sex"),
+  /**
    * actuator
    */
   ACTUATOR(null, "/actuator/**");
+
 
   /**
    * Metodo http

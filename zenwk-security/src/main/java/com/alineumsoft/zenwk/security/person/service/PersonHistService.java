@@ -52,6 +52,9 @@ public class PersonHistService {
     historical.setUserModification(person.getUserModification());
     historical.setHistCreationDate(LocalDateTime.now());
     historical.setOperation(operationType);
+    historical.setAge(person.getAge());
+    historical.setPersonSex(person.getPersonSex() != null ? person.getPersonSex().getId() : null);
+    historical.setProfilePicture(null);
     personHistRepository.save(historical);
   }
 }

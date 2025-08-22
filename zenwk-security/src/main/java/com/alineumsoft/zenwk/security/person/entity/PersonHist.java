@@ -44,6 +44,15 @@ public class PersonHist {
   @Column(name = "hsecperaddress")
   private String address;
 
+  @Column(name = "hsecperidpersex")
+  private Long personSex;
+
+  @Column(name = "hsecperage")
+  private Long age;
+
+  @Column(name = "hsecperprofilepicture")
+  private byte[] profilePicture;
+
   @Column(name = "hsecpercreationdate")
   private LocalDateTime creationDate;
 

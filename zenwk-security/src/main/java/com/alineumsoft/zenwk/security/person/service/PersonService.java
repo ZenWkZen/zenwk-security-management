@@ -1,5 +1,6 @@
 package com.alineumsoft.zenwk.security.person.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ import com.alineumsoft.zenwk.security.person.dto.CreatePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PagePersonDTO;
 import com.alineumsoft.zenwk.security.person.dto.PersonDTO;
 import com.alineumsoft.zenwk.security.person.entity.Person;
+import com.alineumsoft.zenwk.security.person.entity.PersonSex;
 import com.alineumsoft.zenwk.security.person.repository.PersonRepository;
 import com.alineumsoft.zenwk.security.repository.LogSecurityRepository;
 import com.alineumsoft.zenwk.security.user.dto.UserDTO;
@@ -41,10 +43,12 @@ import com.alineumsoft.zenwk.security.user.event.UpdateUserEvent;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PersonService extends ApiRestSecurityHelper {
   /**
    * Repositorio de la persona
@@ -66,28 +70,10 @@ public class PersonService extends ApiRestSecurityHelper {
    * Manejador de jwt
    */
   private final JwtProvider jwtProvider;
-
-  /**
-   * <p>
-   * <b>Constructor </b>
-   * </p>
-   * 
-   * @author <a href="mailto:alineumsoft@gmail.com">C. Alegria</a>
-   * @param personRepo
-   * @param logSecurityUser
-   * @param templateTx
-   * @param eventPublisher
-   * @param jwtProvider
+  /*
+   * Servicio para el sexo de la persona.
    */
-  public PersonService(PersonRepository personRepo, LogSecurityRepository logSecurityUser,
-      TransactionTemplate templateTx, ApplicationEventPublisher eventPublisher,
-      JwtProvider jwtProvider) {
-    this.personRepo = personRepo;
-    this.logSecUserRespo = logSecurityUser;
-    this.templateTx = templateTx;
-    this.eventPublisher = eventPublisher;
-    this.jwtProvider = jwtProvider;
-  }
+  private final PersonSexService personSexService;
 
   /**
    * <p>
@@ -379,6 +365,21 @@ public class PersonService extends ApiRestSecurityHelper {
    */
   private Person getPersonSource(PersonDTO dto) {
     Person person = new Person();
+
+    // Recuperamos el sexo.
+    if (dto.getIdSex() != null) {
+      PersonSex personSex = personSexService.findPersonSexById(dto.getIdSex());
+      person.setPersonSex(personSex);
+    }
+
+    // procesamos la imagen del perfil del usuario
+    if (dto.getProfilePicture() != null) {
+      try {
+        person.setProfilePicture(dto.getProfilePicture().getBytes());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
     person.setFirstName(dto.getFirstName());
     person.setMiddleName(dto.getMiddleName());
     person.setLastName(dto.getLastName());
@@ -387,6 +388,8 @@ public class PersonService extends ApiRestSecurityHelper {
         ? LocalDateTimeUtil.getLocalDateTimeIso8601(dto.getDateOfBirth())
         : null);
     person.setAddress(dto.getAddress());
+    person.setAge(dto.getAge());
+
     return person;
   }
 

@@ -17,6 +17,8 @@ public final class DtoValidationKeys {
    * PersonDTO
    */
   public static final String PERSON_ID_USER_NOT_NULL = "validation.person.iduser.notnull";
+  public static final String PERSON_ID_SEX_NOT_NULL = "validation.person.idsex.notnull";
+  public static final String PERSON_AGE_NOT_NULL = "validation.person.age.notnull";
   public static final String PERSON_ID_USER_NOT_FOUND = "validation.person.iduser.notfound";
   public static final String PERSON_FIRST_NAME_NOT_NULL = "validation.person.firstname.notnull";
   public static final String PERSON_LAST_NAME_NOT_NULL = "validation.person.lastname.notnull";

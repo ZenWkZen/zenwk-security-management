@@ -1,6 +1,7 @@
 package com.alineumsoft.zenwk.security.person.dto;
 
 import java.io.Serializable;
+import org.springframework.web.multipart.MultipartFile;
 import com.alineumsoft.zenwk.security.common.constants.RegexConstants;
 import com.alineumsoft.zenwk.security.constants.DtoValidationKeys;
 import com.alineumsoft.zenwk.security.person.entity.Person;
@@ -70,6 +71,25 @@ public class PersonDTO implements Serializable {
   @Pattern(regexp = RegexConstants.COLOMBIA_ADDRESS,
       message = DtoValidationKeys.PERSON_COLOMBIA_ADDRESS)
   private String address;
+  /**
+   * Edad
+   */
+  @NotNull(message = DtoValidationKeys.PERSON_AGE_NOT_NULL)
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Long age;
+  /**
+   * Sexo
+   */
+  @NotNull(message = DtoValidationKeys.PERSON_ID_SEX_NOT_NULL)
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Long idSex;
+  /**
+   * Foto de perfil
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private MultipartFile profilePicture;
+
+
 
   /**
    * <b>Constructor </b> Genera una instancia a partir de la entidad JPA Person
@@ -85,5 +105,8 @@ public class PersonDTO implements Serializable {
     this.middleLastName = person.getMiddleLastName();
     this.dateOfBirth = person.getDateOfBirth() != null ? person.getDateOfBirth().toString() : null;
     this.address = person.getAddress();
+    this.age = person.getAge();
+    this.idSex = person.getPersonSex() != null ? person.getPersonSex().getId() : null;
+
   }
 }
